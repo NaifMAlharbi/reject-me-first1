@@ -20,3 +20,6 @@
 - [x] Add frontend state management and tRPC integration for the full review lifecycle
 - [x] Write Vitest coverage for committee formatting and rebuttal comparison logic
 - [x] Run project validation, fix issues, and prepare the final deliverable checkpoint
+- [x] Convert the committee experience from a long single-page layout into a clear multi-page flow
+- [x] Add final report download/export for the user after the judge verdict
+- [x] Verify whether the current live committee setup needs an external OpenAI API key or can continue with the built-in server LLM helper
