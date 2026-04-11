@@ -1,0 +1,22 @@
+# Project TODO
+
+- [x] Replace Competitor Agent with Technical Agent across prompts, schemas, labels, UI copy, and mock/demo data
+- [x] Build bilingual language system with Arabic and English UI copy, RTL/LTR layout switching, and output-language matching
+- [x] Create free-text founder input flow with auto-formatting into a clean structured Project Brief
+- [x] Create structured founder input flow with name, idea, problem, solution, additional info, and dynamic sections merged into the same Project Brief
+- [x] Support voice transcript and pasted PDF text ingestion as founder source material within the Project Brief flow
+- [x] Implement concise structured Project Brief extraction using grounded JSON-only output with unknown fields preserved when input is incomplete
+- [x] Implement three first-round committee evaluators in parallel: Investor Agent, Customer Agent, and Technical Agent
+- [x] Enforce realistic, logical, concise evaluation behavior that avoids invented problems, forced objections, and over-analysis
+- [x] Use short UI-ready JSON responses with decimal scores from 0 to 10 and confidence percentages
+- [x] Implement free-text rebuttal flow that auto-structures responses when needed
+- [x] Implement structured rebuttal flow grouped by Investor, Customer, and Technical objections with linked responses
+- [x] Implement second-round re-evaluation for all three agents with score deltas, stance changes, rebuttal quality, and remaining concerns
+- [x] Implement final Judge verdict summarizing strongest point, biggest risk, improvements after rebuttal, remaining weaknesses, and actionable next steps
+- [x] Build clean editorial committee UI with agent cards, collapse/expand interactions, highlighted key insight, and before-vs-after comparison views
+- [x] Add mock/demo mode with realistic sample brief, committee outputs, rebuttal, and final verdict
+- [x] Keep the MVP simple with no authentication requirement in the user flow and no database dependency for committee results
+- [x] Implement modular backend orchestration with typed schemas and server-side LLM calls
+- [x] Add frontend state management and tRPC integration for the full review lifecycle
+- [x] Write Vitest coverage for committee formatting and rebuttal comparison logic
+- [x] Run project validation, fix issues, and prepare the final deliverable checkpoint
