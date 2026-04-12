@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildFinalReportHtml, committeeStepRoutes, copy, demoInput, downloadFinalReport } from "@/lib/reject-me-first";
-import { getDemoCase, startReview, submitRebuttal } from "./committee";
+import { getDemoCase, getInputQualityIssue, startReview, submitRebuttal } from "./committee";
 
 describe("committeeStepRoutes", () => {
   it("defines the four routed steps in the expected order for both languages", () => {
@@ -241,6 +241,51 @@ describe("committee demo language", () => {
     expect(firstRound.language).toBe("ar");
     expect(firstRound.direction).toBe("rtl");
     expect(firstRound.projectBrief.project_name).toMatch(/[\u0600-\u06FF]/);
+  });
+});
+
+describe("committee input quality safeguards", () => {
+  it("rejects repetitive junk text like ggggg before committee scoring begins", () => {
+    const issue = getInputQualityIssue({
+      useMock: false,
+      freeText: "ggggg",
+      transcriptText: "",
+      pdfText: "",
+      extraFragments: [],
+      structured: {
+        projectName: "",
+        idea: "",
+        targetCustomer: "",
+        businessModel: "",
+        advantage: "",
+        sections: [],
+      },
+    }, "en");
+
+    expect(issue).toBeTruthy();
+    expect(issue?.toLowerCase()).toContain("not detailed enough");
+    expect(issue?.toLowerCase()).toContain("short or random text");
+  });
+
+  it("rejects repetitive Arabic junk text before committee scoring begins", () => {
+    const issue = getInputQualityIssue({
+      useMock: false,
+      freeText: "سسسسس",
+      transcriptText: "",
+      pdfText: "",
+      extraFragments: [],
+      structured: {
+        projectName: "",
+        idea: "",
+        targetCustomer: "",
+        businessModel: "",
+        advantage: "",
+        sections: [],
+      },
+    }, "ar");
+
+    expect(issue).toBeTruthy();
+    expect(issue).toMatch(/[\u0600-\u06FF]/);
   });
 });
 

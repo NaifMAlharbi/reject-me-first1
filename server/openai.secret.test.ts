@@ -1,22 +1,61 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-describe("OpenAI secret validation", () => {
-  it("accepts the configured OPENAI_API_KEY against the models endpoint", async () => {
-    const apiKey = process.env.OPENAI_API_KEY;
+const originalEnv = {
+  BUILT_IN_FORGE_API_KEY: process.env.BUILT_IN_FORGE_API_KEY,
+  BUILT_IN_FORGE_API_URL: process.env.BUILT_IN_FORGE_API_URL,
+};
 
-    expect(apiKey).toBeTruthy();
-    expect(apiKey?.startsWith("sk-")).toBe(true);
+describe("internal LLM helper configuration", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    process.env.BUILT_IN_FORGE_API_KEY = "test-forge-key";
+    process.env.BUILT_IN_FORGE_API_URL = "https://forge.manus.im";
+  });
 
-    const response = await fetch("https://api.openai.com/v1/models", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-      },
+  afterEach(() => {
+    vi.restoreAllMocks();
+    process.env.BUILT_IN_FORGE_API_KEY = originalEnv.BUILT_IN_FORGE_API_KEY;
+    process.env.BUILT_IN_FORGE_API_URL = originalEnv.BUILT_IN_FORGE_API_URL;
+  });
+
+  it("sends chat completions through the built-in forge endpoint instead of OpenAI", async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        id: "resp_1",
+        created: Date.now(),
+        model: "gemini-2.5-flash",
+        choices: [
+          {
+            index: 0,
+            finish_reason: "stop",
+            message: {
+              role: "assistant",
+              content: "{\"ok\":true}",
+            },
+          },
+        ],
+      }),
+    }));
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { invokeLLM } = await import("./_core/llm");
+
+    await invokeLLM({
+      messages: [
+        { role: "system", content: "Return JSON." },
+        { role: "user", content: "Ping" },
+      ],
+      response_format: { type: "json_object" },
     });
 
-    const text = await response.text();
-
-    expect(response.ok, text).toBe(true);
-    expect(text.toLowerCase()).toContain("data");
-  }, 30_000);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(String(url)).toContain("forge.manus.im/v1/chat/completions");
+    expect(String(url)).not.toContain("openai.com");
+    expect(init?.headers).toMatchObject({
+      authorization: "Bearer test-forge-key",
+    });
+  });
 });

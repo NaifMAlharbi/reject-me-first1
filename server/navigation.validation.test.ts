@@ -57,7 +57,7 @@ describe("committee input validation", () => {
       },
     }, "ar");
 
-    expect(issue).toContain("قصير جدًا للتقييم");
+    expect(issue).toContain("غير كافٍ للتقييم الجاد");
   });
 
   it("rejects a one-letter English submission with a clear validation message", () => {
@@ -80,7 +80,8 @@ describe("committee input validation", () => {
       },
     }, "en");
 
-    expect(issue).toContain("too short to evaluate");
+    expect(issue?.toLowerCase()).toContain("not detailed enough");
+    expect(issue?.toLowerCase()).toContain("short or random text");
   });
 });
 

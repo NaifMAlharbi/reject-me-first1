@@ -48,3 +48,5 @@
 - [x] Restore reliable live LLM committee evaluation so the app returns meaningful real analysis instead of empty or missing model output
 - [x] Increase review text area spacing and card content room so committee responses are larger and easier to read
 - [x] Unify the visual style of the investor, customer, and technical agent cards so one card does not use a mismatched yellow treatment by itself
+- [x] Switch committee evaluation to the internal built-in LLM path and remove the active dependency on OpenAI-specific routing for live analysis
+- [x] Tighten low-quality input handling so meaningless entries like 'ggggg' are rejected or clearly marked as insufficient instead of receiving a misleadingly positive evaluation

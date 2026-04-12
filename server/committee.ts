@@ -270,18 +270,29 @@ function summarizeInputStrength(input: StartReviewInput) {
   const normalized = merged.replace(/\s+/g, " ").trim();
   const meaningfulCharacters = normalized.replace(/[^A-Za-z\u0600-\u06FF]+/g, "");
   const wordCount = normalized.split(/\s+/).filter(Boolean).length;
-  const filledStructuredFields = Object.values(structuredFounderInputSchema.parse(input.structured ?? {})).reduce((count, value) => {
+  const wordTokens = normalized.match(/[A-Za-z\u0600-\u06FF]{2,}/g) ?? [];
+  const uniqueWordCount = new Set(wordTokens.map(token => token.toLowerCase())).size;
+  const uniqueCharacterCount = new Set(meaningfulCharacters.toLowerCase().split("")).size;
+  const collapsed = normalized.replace(/\s+/g, "");
+  const repeatedCharacterSpam = /^([A-Za-z\u0600-\u06FF])\1{3,}$/.test(collapsed);
+  const structured = structuredFounderInputSchema.parse(input.structured ?? {});
+  const filledStructuredFields = Object.values(structured).reduce((count, value) => {
     if (typeof value === "string") return count + (value.trim() ? 1 : 0);
     if (Array.isArray(value)) return count + value.filter(item => `${item.title} ${item.content}`.trim()).length;
     return count;
   }, 0);
+  const coreNarrativeFieldCount = [structured.idea, structured.problem, structured.solution].filter(value => value.trim()).length;
 
   return {
     merged,
     normalized,
     meaningfulCharacterCount: meaningfulCharacters.length,
     wordCount,
+    uniqueWordCount,
+    uniqueCharacterCount,
+    repeatedCharacterSpam,
     filledStructuredFields,
+    coreNarrativeFieldCount,
   };
 }
 
@@ -291,46 +302,19 @@ export function getInputQualityIssue(input: StartReviewInput, language?: Languag
   const tooShort = strength.meaningfulCharacterCount < 18;
   const tooFewWords = strength.wordCount < 4;
   const tooFewStructuredFields = strength.filledStructuredFields < 2;
+  const tooFewCoreNarrativeFields = strength.coreNarrativeFieldCount < 2 && strength.wordCount < 18;
+  const repetitiveJunk = strength.repeatedCharacterSpam || (strength.meaningfulCharacterCount < 32 && strength.uniqueCharacterCount < 4) || (strength.wordCount < 8 && strength.uniqueWordCount < 3);
 
-  if ((tooShort && tooFewWords) || (tooShort && tooFewStructuredFields)) {
+  if ((tooShort && tooFewWords) || (tooShort && tooFewStructuredFields) || repetitiveJunk || tooFewCoreNarrativeFields) {
     return detectedLanguage === "ar"
-      ? "المدخل قصير جدًا للتقييم. اكتب وصفًا أوضح يتضمن المشكلة والحل والفئة المستهدفة على الأقل."
-      : "The submission is too short to evaluate. Please add a clearer description with at least the problem, solution, and target user.";
+      ? "المدخل غير كافٍ للتقييم الجاد. اكتب وصفًا واضحًا يتضمن الفكرة، المشكلة، الحل، والفئة المستهدفة بدل الكلمات القصيرة أو العشوائية."
+      : "The submission is not detailed enough for a serious evaluation. Please describe the idea, problem, solution, and target user instead of short or random text.";
   }
 
   return null;
 }
 
 async function requestStructuredContent(system: string, user: string) {
-  if (ENV.openAiApiKey) {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${ENV.openAiApiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4.1-mini",
-        temperature: 0.2,
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: user },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`OpenAI request failed with ${response.status}: ${await response.text()}`);
-    }
-
-    const payload = (await response.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-    };
-
-    return payload.choices?.[0]?.message?.content ?? "";
-  }
-
   const response = await invokeLLM({
     messages: [
       { role: "system", content: system },
@@ -339,7 +323,12 @@ async function requestStructuredContent(system: string, user: string) {
     response_format: { type: "json_object" },
   });
 
-  return response.choices[0]?.message.content;
+  const content = response.choices[0]?.message.content;
+  if (!content) {
+    throw new Error("Internal LLM returned empty content.");
+  }
+
+  return content;
 }
 
 async function callStructuredModel<T>({
