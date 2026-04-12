@@ -102,36 +102,6 @@ function useFlowPage(currentStep: "input" | "review" | "rebuttal" | "verdict") {
   };
 }
 
-function StatusRail() {
-  const { flow } = useFlowPage("input");
-
-  const statuses = [
-    { label: flow.text.briefStatus, active: true },
-    { label: flow.text.reviewStatus, active: flow.hasFirstRound },
-    { label: flow.text.verdictStatus, active: flow.hasVerdict },
-  ];
-
-  return (
-    <div className="grid gap-3 md:grid-cols-3">
-      {statuses.map(item => (
-        <Card key={item.label} className="gap-3 border-border/70 bg-background/70 py-4 shadow-none">
-          <CardContent className="px-4">
-            <div className="flex items-center gap-2">
-              {item.active ? (
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-              ) : (
-                <AlertTriangle className="h-4 w-4 text-amber-500" />
-              )}
-              <span className="text-sm font-medium">{item.label}</span>
-            </div>
-            <p className="mt-2 text-xs leading-6 text-muted-foreground">{flow.text.savedDraft}</p>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-}
-
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block space-y-2">
@@ -385,50 +355,6 @@ export function InputPage() {
         statusSlot={statusSlot}
       >
         <div className="space-y-6">
-          <StatusRail />
-
-          <div className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-            <Card className="gap-3 border-border/70 bg-background/70 py-4 shadow-none">
-              <CardHeader>
-                <CardTitle>{flow.text.language}</CardTitle>
-                <CardDescription>
-                  {flow.preferredLanguage === "ar"
-                    ? "اختر لغة الواجهة والمخرجات التي تناسبك."
-                    : "Choose the interface and output language that fits your workflow."}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex gap-3">
-                <Button variant={flow.preferredLanguage === "en" ? "default" : "outline"} onClick={() => flow.setPreferredLanguage("en")}>
-                  English
-                </Button>
-                <Button variant={flow.preferredLanguage === "ar" ? "default" : "outline"} onClick={() => flow.setPreferredLanguage("ar")}>
-                  العربية
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="gap-3 border-border/70 bg-background/70 py-4 shadow-none">
-              <CardHeader>
-                <CardTitle>{flow.useMock ? flow.text.mockMode : flow.text.liveMode}</CardTitle>
-                <CardDescription>
-                  {flow.useMock ? flow.text.modeHelpMock : flow.text.modeHelpLive}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-wrap gap-3">
-                <Button variant="outline" onClick={() => { flow.resetAll(); goTo("/"); }}>{flow.preferredLanguage === "ar" ? "العودة لاختيار المسار" : "Return to entry choices"}</Button>
-                {flow.useMock ? (
-                  <Button onClick={() => { flow.resetAll(); goTo("/flow/input"); }}>
-                    {flow.text.submitProject}
-                  </Button>
-                ) : (
-                  <Button variant="secondary" onClick={() => void flow.loadDemo().then(() => goTo("/flow/review"))}>
-                    {flow.text.exploreDemo}
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
           {flow.reviewError && (
             <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm leading-7 text-amber-700 dark:text-amber-200">
               {flow.reviewError}
@@ -536,7 +462,6 @@ export function ReviewPage() {
         statusSlot={statusSlot}
       >
         <div className="space-y-6">
-          <StatusRail />
           {!flow.firstRound ? (
             <Card className="border-border/70 bg-background/70 py-6 shadow-none">
               <CardContent className="px-6 text-sm leading-7 text-muted-foreground">{flow.text.reviewMissing}</CardContent>
@@ -634,7 +559,6 @@ export function RebuttalPage() {
         statusSlot={statusSlot}
       >
         <div className="space-y-6">
-          <StatusRail />
           {flow.rebuttalError && (
             <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm leading-7 text-red-700 dark:text-red-200">
               {flow.rebuttalError}
@@ -762,7 +686,6 @@ export function VerdictPage() {
         statusSlot={statusSlot}
       >
         <div className="space-y-6">
-          <StatusRail />
           {!flow.rebuttalResult ? (
             <Card className="border-border/70 bg-background/70 py-6 shadow-none">
               <CardContent className="px-6 text-sm leading-7 text-muted-foreground">{flow.text.rebuttalMissing}</CardContent>

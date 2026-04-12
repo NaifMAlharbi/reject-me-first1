@@ -38,3 +38,4 @@
 - [x] Fix duplicated field restoration so returning to a previously completed section preserves the saved project data without re-inserting repeated content
 - [x] Remove the PDF input section from the founder submission page and related flow copy
 - [x] Remove the project summary page and start committee analysis immediately after the user submits the project input
+- [x] Remove the redundant top status and helper cards from the committee flow screens to keep the interface cleaner and more practical
