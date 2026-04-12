@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useCommitteeFlow } from "@/contexts/CommitteeFlowContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { committeeStepRoutes, scoreDeltaText, scoreText } from "@/lib/reject-me-first";
 import {
   agentLabels,
@@ -30,6 +31,8 @@ import {
   MessageSquareQuote,
   ShieldCheck,
   Sparkles,
+  Sun,
+  Moon,
   Users,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -48,16 +51,36 @@ function useFlowPage(currentStep: "input" | "brief" | "review" | "rebuttal" | "v
   const pageSteps = committeeStepRoutes[flow.preferredLanguage];
 
   const statusSlot = (
-    <>
-      <Badge variant="outline" className="border-border bg-background text-foreground">
-        <Globe2 className="me-2 h-3.5 w-3.5" />
-        {flow.text.language}: {flow.preferredLanguage === "ar" ? "العربية" : "English"}
-      </Badge>
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="inline-flex items-center rounded-full border border-border bg-background/90 p-1 shadow-sm">
+        <button
+          type="button"
+          onClick={() => flow.setPreferredLanguage("ar")}
+          className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+            flow.preferredLanguage === "ar"
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          العربية
+        </button>
+        <button
+          type="button"
+          onClick={() => flow.setPreferredLanguage("en")}
+          className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+            flow.preferredLanguage === "en"
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          English
+        </button>
+      </div>
       <Badge variant="outline" className="border-border bg-background text-foreground">
         {flow.useMock ? <FlaskConical className="me-2 h-3.5 w-3.5" /> : <Sparkles className="me-2 h-3.5 w-3.5" />}
         {flow.useMock ? flow.text.mockMode : flow.text.liveMode}
       </Badge>
-    </>
+    </div>
   );
 
   return {
@@ -177,12 +200,78 @@ function SectionLead({ title, description }: { title: string; description: strin
 
 export function LandingPage() {
   const { flow, navigate } = useFlowPage("input");
+  const { theme, toggleTheme, switchable } = useTheme();
 
   return (
     <div dir={flow.direction} className="min-h-screen bg-background text-foreground">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[24rem] bg-[radial-gradient(circle_at_top_left,rgba(250,204,21,0.18),transparent_34%),radial-gradient(circle_at_top_right,rgba(99,102,241,0.16),transparent_34%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(250,204,21,0.12),transparent_34%),radial-gradient(circle_at_top_right,rgba(99,102,241,0.2),transparent_34%)]" />
-      <div className="container relative py-10 md:py-14">
-        <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr] xl:items-start">
+      <div className="container relative flex min-h-screen flex-col pt-5 pb-10 md:pt-6 md:pb-14">
+        <div className="sticky top-0 z-30 mb-6 rounded-[24px] border border-border/70 bg-background/80 px-4 py-3 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur md:px-5">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="inline-flex items-center gap-3 text-left"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                <BriefcaseBusiness className="h-4 w-4" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">Reject Me First</div>
+                <div className="mt-1 text-sm text-muted-foreground">
+                  {flow.preferredLanguage === "ar" ? "الصفحة الرئيسية" : "Home"}
+                </div>
+              </div>
+            </button>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {switchable && toggleTheme && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleTheme}
+                  className="border-border bg-background/80"
+                >
+                  {theme === "light" ? <Moon className="me-2 h-4 w-4" /> : <Sun className="me-2 h-4 w-4" />}
+                  {flow.preferredLanguage === "ar"
+                    ? theme === "light"
+                      ? "تفعيل الوضع الداكن"
+                      : "تفعيل الوضع الفاتح"
+                    : theme === "light"
+                      ? "Switch to dark"
+                      : "Switch to light"}
+                </Button>
+              )}
+              <div className="inline-flex items-center rounded-full border border-border bg-card/80 p-1">
+                <button
+                  type="button"
+                  onClick={() => flow.setPreferredLanguage("ar")}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                    flow.preferredLanguage === "ar"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  العربية
+                </button>
+                <button
+                  type="button"
+                  onClick={() => flow.setPreferredLanguage("en")}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                    flow.preferredLanguage === "en"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  English
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <section className="grid flex-1 content-center gap-6 xl:grid-cols-[1.2fr_0.8fr] xl:items-center">
           <Card className="rounded-[36px] border-border/70 bg-card/90 py-0 shadow-[0_28px_90px_rgba(15,23,42,0.08)] dark:shadow-[0_32px_100px_rgba(0,0,0,0.28)]">
             <CardContent className="p-8 md:p-10">
               <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary">

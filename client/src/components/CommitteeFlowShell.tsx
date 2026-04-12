@@ -75,24 +75,37 @@ export function CommitteeFlowShell({
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[24rem] bg-[radial-gradient(circle_at_top_left,rgba(250,204,21,0.16),transparent_34%),radial-gradient(circle_at_top_right,rgba(99,102,241,0.18),transparent_34%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(250,204,21,0.14),transparent_34%),radial-gradient(circle_at_top_right,rgba(99,102,241,0.22),transparent_34%)]" />
-      <div className="container relative py-6 md:py-8">
-        <div className="mb-6 rounded-[28px] border border-border/70 bg-card/85 px-5 py-4 shadow-[0_24px_60px_rgba(15,23,42,0.08)] backdrop-blur md:px-6 dark:shadow-[0_28px_80px_rgba(0,0,0,0.28)]">
+      <div className="container relative py-4 md:py-6">
+        <div className="sticky top-4 z-40 mb-6 rounded-[28px] border border-border/70 bg-card/85 px-5 py-4 shadow-[0_24px_60px_rgba(15,23,42,0.08)] backdrop-blur md:px-6 dark:shadow-[0_28px_80px_rgba(0,0,0,0.28)]">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <button
-              type="button"
-              onClick={() => onNavigate("/")}
-              className="inline-flex items-center gap-3 text-left transition-opacity hover:opacity-85"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
-                <Landmark className="h-5 w-5" />
-              </div>
-              <div>
-                <div className="text-[11px] uppercase tracking-[0.3em] text-primary">Reject Me First</div>
-                <div className="mt-1 text-sm text-muted-foreground">
-                  {isArabic ? "مراجعة استثمارية وتقنية بشكل واضح ومنظم" : "A clearer, step-based investment and technical review"}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+              <button
+                type="button"
+                onClick={() => onNavigate("/")}
+                className="inline-flex items-center gap-3 text-left transition-opacity hover:opacity-85"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                  <Landmark className="h-5 w-5" />
                 </div>
-              </div>
-            </button>
+                <div>
+                  <div className="text-[11px] uppercase tracking-[0.3em] text-primary">Reject Me First</div>
+                  <div className="mt-1 text-sm text-muted-foreground">
+                    {isArabic ? "مراجعة استثمارية وتقنية بشكل واضح ومنظم" : "A clearer, step-based investment and technical review"}
+                  </div>
+                </div>
+              </button>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => onNavigate("/")}
+                className="w-fit border-border bg-background/80"
+              >
+                <Landmark className="me-2 h-4 w-4" />
+                {isArabic ? "الصفحة الرئيسية" : "Home"}
+              </Button>
+            </div>
 
             <div className="flex flex-wrap items-center gap-2">
               {switchable && toggleTheme && (
