@@ -257,6 +257,7 @@ export function LandingPage() {
                 <button
                   type="button"
                   onClick={() => {
+                    flow.resetAll();
                     flow.setUseMock(false);
                     navigate("/flow/input");
                   }}
@@ -331,6 +332,7 @@ export function LandingPage() {
 
 export function InputPage() {
   const { flow, goNext, goTo, pageSteps, statusSlot } = useFlowPage("input");
+  const startNewProjectLabel = flow.preferredLanguage === "ar" ? "مشروع جديد" : "Start New Project";
 
   return (
     <div dir={flow.direction}>
@@ -351,7 +353,7 @@ export function InputPage() {
           },
           loading: flow.reviewPending,
         }}
-        tertiaryAction={{ label: flow.text.reset, onClick: flow.resetAll }}
+        tertiaryAction={{ label: startNewProjectLabel, onClick: flow.resetAll }}
         statusSlot={statusSlot}
       >
         <div className="space-y-6">
@@ -471,11 +473,11 @@ export function ReviewPage() {
               <SectionLead
                 title={flow.text.reviewSummary}
                 description={flow.preferredLanguage === "ar"
-                  ? "تم تحسين عرض النتائج بحيث يظهر رأي كل جهة بشكل مستقل وواضح، خصوصًا منظور العميل."
-                  : "Each reviewer is now shown as a clearer decision card, with the customer perspective surfaced more prominently."}
+                  ? "اقرأ رأي كل جهة على حدة قبل تجهيز ردك حتى تعرف أين فعلًا تحتاج إلى توضيح أو دفاع."
+                  : "Read each committee perspective separately before preparing your rebuttal so you know which concerns actually need a response."}
               />
 
-              <div className="grid gap-4 xl:grid-cols-3">
+              <div className="grid gap-6 xl:grid-cols-3">
                 {flow.firstRound.reviews.map(review => {
                   const AgentIcon = agentIcons[review.agent];
                   const isCustomer = review.agent === "customer";
@@ -484,7 +486,7 @@ export function ReviewPage() {
                       key={review.agent}
                       className={isCustomer ? "border-primary/25 bg-primary/[0.05] py-0 shadow-[0_18px_40px_rgba(79,70,229,0.08)]" : "border-border/70 bg-background/80 py-0 shadow-none"}
                     >
-                      <CardHeader>
+                      <CardHeader className="space-y-4 px-6 pt-6">
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex items-center gap-3">
                             <div className={isCustomer ? "flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground" : "flex h-12 w-12 items-center justify-center rounded-2xl bg-muted text-foreground"}>
@@ -492,7 +494,7 @@ export function ReviewPage() {
                             </div>
                             <div>
                               <CardTitle className="text-lg">{review.label}</CardTitle>
-                              <CardDescription className="mt-1">{review.key_insight}</CardDescription>
+                              <CardDescription className="mt-2 max-w-prose text-sm leading-7 text-muted-foreground">{review.key_insight}</CardDescription>
                             </div>
                           </div>
                           <Badge variant="outline" className="border-border bg-background text-foreground">
@@ -500,20 +502,20 @@ export function ReviewPage() {
                           </Badge>
                         </div>
                       </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
+                      <CardContent className="space-y-5 px-6 pb-6">
+                        <div className="grid gap-4 sm:grid-cols-2">
                           <Metric label={flow.text.score} value={scoreText(review.score)} />
                           <Metric label={flow.text.confidence} value={`${review.confidence}%`} />
                         </div>
 
-                        <Card className="gap-3 border-border/70 bg-card py-4 shadow-none">
-                          <CardContent className="px-4">
+                        <Card className="gap-3 border-border/70 bg-card py-5 shadow-none">
+                          <CardContent className="px-5">
                             <p className="text-xs uppercase tracking-[0.22em] text-primary">{flow.text.summary}</p>
                             <p className="mt-2 text-sm leading-7 text-muted-foreground">{review.summary}</p>
                           </CardContent>
                         </Card>
 
-                        <div className="grid gap-4 md:grid-cols-2">
+                        <div className="grid gap-5 md:grid-cols-2">
                           <BulletCard title={flow.text.strengths} items={review.strengths} />
                           <BulletCard title={flow.text.objections} items={review.top_objections} />
                         </div>

@@ -152,3 +152,77 @@ describe("buildFinalReportHtml", () => {
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:report");
   });
 });
+
+import { buildFreshDraft, restoreDraftState } from "../client/src/contexts/CommitteeFlowContext";
+import { initialDraft } from "../client/src/lib/reject-me-first";
+import { agentPrompts, reevaluatePrompts } from "./committee";
+
+describe("committee draft reset", () => {
+  it("builds a true fresh draft while preserving the selected language", () => {
+    const fresh = buildFreshDraft("ar");
+
+    expect(fresh).toMatchObject({
+      ...initialDraft(),
+      preferredLanguage: "ar",
+      freeText: "",
+      transcriptText: "",
+      freeRebuttal: "",
+      firstRound: null,
+      rebuttalResult: null,
+    });
+    expect(fresh.structured.sections).toEqual([]);
+    expect(fresh.structuredRebuttal.investor).toEqual([]);
+    expect(fresh.structuredRebuttal.customer).toEqual([]);
+    expect(fresh.structuredRebuttal.technical).toEqual([]);
+  });
+
+  it("restores malformed persisted drafts safely without reviving stale review state", () => {
+    const restored = restoreDraftState({
+      preferredLanguage: "en",
+      freeText: "old idea",
+      firstRound: null,
+      rebuttalResult: null,
+      structured: {
+        ...initialDraft().structured,
+        company_name: "Legacy Draft",
+        sections: "bad-data" as never,
+      },
+      structuredRebuttal: {
+        investor: "bad-data" as never,
+        customer: [{ objection: "Price", response: "We will test" }],
+        technical: undefined as never,
+      },
+    });
+
+    expect(restored.freeText).toBe("old idea");
+    expect(restored.firstRound).toBeNull();
+    expect(restored.rebuttalResult).toBeNull();
+    expect(restored.structured.company_name).toBe("Legacy Draft");
+    expect(restored.structured.sections).toEqual([]);
+    expect(restored.structuredRebuttal.investor).toEqual([]);
+    expect(restored.structuredRebuttal.customer).toEqual([{ objection: "Price", response: "We will test" }]);
+    expect(restored.structuredRebuttal.technical).toEqual([]);
+  });
+});
+
+describe("committee prompt quality", () => {
+  it("keeps first-round prompts grounded, role-specific, and non-canned", () => {
+    expect(agentPrompts.en.investor).toContain("Top objections must be specific and causal");
+    expect(agentPrompts.en.customer).toContain("genuine adoption blockers");
+    expect(agentPrompts.en.technical).toContain("concrete build or operations risks");
+
+    expect(agentPrompts.ar.investor).toContain("لا عبارات عامة محفوظة");
+    expect(agentPrompts.ar.customer).toContain("عوائق تبنٍ حقيقية");
+    expect(agentPrompts.ar.technical).toContain("مخاطر بناء أو تشغيل ملموسة");
+  });
+
+  it("keeps second-round prompts focused on whether rebuttals actually reduce uncertainty", () => {
+    expect(reevaluatePrompts.en.investor).toContain("Do not rescore the entire startup from scratch");
+    expect(reevaluatePrompts.en.customer).toContain("would actually help a buyer or user say yes");
+    expect(reevaluatePrompts.en.technical).toContain("reduces delivery ambiguity");
+
+    expect(reevaluatePrompts.ar.investor).toContain("لا تعد تقييم المشروع كله من الصفر");
+    expect(reevaluatePrompts.ar.customer).toContain("يساعد مستخدمًا أو مشتريًا على قول نعم");
+    expect(reevaluatePrompts.ar.technical).toContain("خفّض غموض التنفيذ");
+  });
+});

@@ -39,3 +39,7 @@
 - [x] Remove the PDF input section from the founder submission page and related flow copy
 - [x] Remove the project summary page and start committee analysis immediately after the user submits the project input
 - [x] Remove the redundant top status and helper cards from the committee flow screens to keep the interface cleaner and more practical
+- [x] Reset all founder-input fields automatically when the user starts evaluating a different idea so old content does not persist in sections
+- [x] Reduce crowding in the review-result cards so responses have clearer spacing and are easier to read
+- [x] Remove the unnecessary explanatory sentence above the review cards about the display being improved
+- [x] Improve evaluator output quality so each agent gives more specific, analytical, and clearly differentiated assessments instead of repetitive generic phrasing

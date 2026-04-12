@@ -128,6 +128,13 @@ function getPersistedDraft(): DraftState {
   }
 }
 
+export function buildFreshDraft(preferredLanguage: Language): DraftState {
+  return {
+    ...initialDraft(),
+    preferredLanguage,
+  };
+}
+
 function toMessage(error: unknown, fallback: string) {
   if (typeof error === "string") return error;
   if (error && typeof error === "object") {
@@ -369,11 +376,7 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
   }, [demoQuery]);
 
   const resetAll = useCallback(() => {
-    const fresh = {
-      ...initialDraft(),
-      preferredLanguage: draft.preferredLanguage,
-    };
-    setDraft(fresh);
+    setDraft(buildFreshDraft(draft.preferredLanguage));
     setReviewError(null);
     setRebuttalError(null);
     if (typeof window !== "undefined") {
