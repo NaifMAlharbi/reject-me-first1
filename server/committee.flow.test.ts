@@ -3,10 +3,9 @@ import { buildFinalReportHtml, committeeStepRoutes, copy, demoInput, downloadFin
 import { startReview, submitRebuttal } from "./committee";
 
 describe("committeeStepRoutes", () => {
-  it("defines the five routed steps in the expected order for both languages", () => {
+  it("defines the four routed steps in the expected order for both languages", () => {
     expect(committeeStepRoutes.en.map(step => step.key)).toEqual([
       "input",
-      "brief",
       "review",
       "rebuttal",
       "verdict",
@@ -15,12 +14,11 @@ describe("committeeStepRoutes", () => {
 
     expect(committeeStepRoutes.ar.map(step => step.key)).toEqual([
       "input",
-      "brief",
       "review",
       "rebuttal",
       "verdict",
     ]);
-    expect(committeeStepRoutes.ar[4]?.label).toBe("الحكم النهائي");
+    expect(committeeStepRoutes.ar[3]?.label).toBe("الحكم النهائي");
   });
 
   it("keeps the landing copy focused on separate real submission and guided demo entry points", () => {

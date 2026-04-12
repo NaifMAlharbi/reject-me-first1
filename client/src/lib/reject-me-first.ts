@@ -21,14 +21,12 @@ export const STORAGE_KEY = "reject-me-first-flow";
 export const committeeStepRoutes = {
   en: [
     { key: "input", label: "Project input", href: "/flow/input" },
-    { key: "brief", label: "Project brief", href: "/flow/brief" },
     { key: "review", label: "First review", href: "/flow/review" },
     { key: "rebuttal", label: "Rebuttal", href: "/flow/rebuttal" },
     { key: "verdict", label: "Final verdict", href: "/flow/verdict" },
   ],
   ar: [
     { key: "input", label: "إدخال المشروع", href: "/flow/input" },
-    { key: "brief", label: "ملخص المشروع", href: "/flow/brief" },
     { key: "review", label: "المراجعة الأولى", href: "/flow/review" },
     { key: "rebuttal", label: "الرد على الاعتراضات", href: "/flow/rebuttal" },
     { key: "verdict", label: "الحكم النهائي", href: "/flow/verdict" },
@@ -41,9 +39,9 @@ export const copy = {
     eyebrow: "AI committee simulation",
     title: "A realistic investment and technical committee for startup ideas.",
     subtitle:
-      "Move through the review as clear steps: prepare the brief, run the committee, answer objections, and inspect the verdict.",
+      "Move through the review as clear steps: submit the project, run the committee immediately, answer objections, and inspect the verdict.",
     landingDescription:
-      "This is not a chatbot. The system converts founder input into one clean project brief, runs three concise evaluations, and shows what changed after rebuttal.",
+      "This is not a chatbot. The system turns founder input into a clean review package, runs three concise evaluations, and shows what changed after rebuttal.",
     startFlow: "Start review flow",
     continueFlow: "Continue current flow",
     submitProject: "Submit a real project",
@@ -51,7 +49,7 @@ export const copy = {
     submitProjectDesc: "Bring your own startup idea, pitch notes, or deck text and run the committee on your actual project.",
     exploreDemoDesc: "Preview the full experience with a prepared sample so you can inspect the screens before submitting your own idea.",
     projectInput: "Project input",
-    projectBrief: "Project brief",
+    projectBrief: "Project summary",
     firstReview: "First review",
     rebuttal: "Rebuttal",
     finalVerdict: "Final verdict",
@@ -86,7 +84,6 @@ export const copy = {
     solution: "Solution",
     additionalInfo: "Additional info",
     transcript: "Transcript text",
-    pdf: "PDF text or pasted deck notes",
     dynamicSections: "Dynamic sections",
     addSection: "Add section",
     sectionTitle: "Section title",
@@ -96,7 +93,6 @@ export const copy = {
     founderNarrativePlaceholder:
       "Describe the startup clearly. Include what it does, for whom, why it matters, and any evidence or traction.",
     transcriptPlaceholder: "Optional transcript or call notes.",
-    pdfPlaceholder: "Optional pasted text from a proposal, deck, or PDF.",
     reviewSummary: "Committee summary",
     score: "Score",
     confidence: "Confidence",
@@ -120,7 +116,7 @@ export const copy = {
     objection: "Objection",
     response: "Response",
     emptyResponseHint: "Respond only where you want to answer.",
-    pageIntroBrief: "Combine free text, structured fields, transcript, and pasted PDF text into one project brief.",
+    pageIntroBrief: "Describe the project once, then start the first committee review directly without an extra summary page.",
     pageIntroReview: "Three agents review the same brief in parallel: investor, customer, and technical.",
     pageIntroRebuttal: "Answer objections directly. The system links responses to objections before the second round.",
     pageIntroVerdict: "Inspect the score shift, stance changes, and the final committee verdict.",
@@ -128,7 +124,7 @@ export const copy = {
     briefStatus: "Brief prepared",
     reviewStatus: "First review complete",
     verdictStatus: "Final verdict ready",
-    savedDraft: "Draft is preserved locally while you move between pages.",
+    savedDraft: "Your current work is preserved only inside this active flow until you reset or return home.",
     reportFileName: "reject-me-first-report",
   },
   ar: {
@@ -136,9 +132,9 @@ export const copy = {
     eyebrow: "محاكاة لجنة ذكاء اصطناعي",
     title: "لجنة استثمار وتقنية واقعية لتقييم أفكار الشركات الناشئة.",
     subtitle:
-      "تحرّك عبر خطوات واضحة: جهّز الملخص، شغّل اللجنة، أجب على الاعتراضات، ثم راجع الحكم النهائي.",
+      "تحرّك عبر خطوات واضحة: أرسل المشروع، شغّل اللجنة مباشرة، أجب على الاعتراضات، ثم راجع الحكم النهائي.",
     landingDescription:
-      "هذا ليس شات. النظام يحوّل مدخلات المؤسس إلى ملخص مشروع واحد، ثم يشغّل ثلاث مراجعات مختصرة ويعرض ما تغيّر بعد الرد.",
+      "هذا ليس شات. النظام يحوّل مدخلات المؤسس إلى حزمة مراجعة واضحة، ثم يشغّل ثلاث مراجعات مختصرة ويعرض ما تغيّر بعد الرد.",
     startFlow: "ابدأ مسار المراجعة",
     continueFlow: "تابع المسار الحالي",
     submitProject: "أرسل مشروعك الحقيقي",
@@ -181,7 +177,6 @@ export const copy = {
     solution: "الحل",
     additionalInfo: "معلومات إضافية",
     transcript: "نص تفريغ أو ملاحظات",
-    pdf: "نص PDF أو ملاحظات العرض",
     dynamicSections: "أقسام إضافية",
     addSection: "إضافة قسم",
     sectionTitle: "عنوان القسم",
@@ -191,7 +186,6 @@ export const copy = {
     founderNarrativePlaceholder:
       "اشرح المشروع بوضوح: ماذا يفعل، لمن، لماذا هو مهم، وما الدليل أو المؤشرات المتاحة.",
     transcriptPlaceholder: "اختياري: تفريغ مكالمة أو ملاحظات اجتماع.",
-    pdfPlaceholder: "اختياري: نص من عرض أو ملف PDF أو مقترح.",
     reviewSummary: "ملخص اللجنة",
     score: "الدرجة",
     confidence: "الثقة",
@@ -215,7 +209,7 @@ export const copy = {
     objection: "الاعتراض",
     response: "الرد",
     emptyResponseHint: "أجب فقط على النقاط التي تريد الرد عليها.",
-    pageIntroBrief: "ادمج النص الحر والإدخال المنظم والتفريغ والنص المنسوخ من PDF في ملخص مشروع واحد.",
+    pageIntroBrief: "اكتب المشروع مرة واحدة، ثم ابدأ المراجعة الأولى مباشرة بدون صفحة ملخص إضافية.",
     pageIntroReview: "ثلاثة وكلاء يراجعون نفس الملخص بالتوازي: المستثمر والعميل والتقني.",
     pageIntroRebuttal: "أجب على الاعتراضات مباشرة. النظام يربط الردود بالاعتراضات قبل الجولة الثانية.",
     pageIntroVerdict: "راجع تغير الدرجة وتغير الموقف والحكم النهائي للجنة.",
@@ -223,7 +217,7 @@ export const copy = {
     briefStatus: "تم تجهيز الملخص",
     reviewStatus: "اكتملت المراجعة الأولى",
     verdictStatus: "الحكم النهائي جاهز",
-    savedDraft: "يتم حفظ المسودة محليًا أثناء التنقل بين الصفحات.",
+    savedDraft: "يتم حفظ العمل فقط داخل هذا المسار الحالي إلى أن تعيد الضبط أو ترجع للرئيسية.",
     reportFileName: "reject-me-first-report-ar",
   },
 } as const;
@@ -256,7 +250,6 @@ export function getCombinedText(
   freeText: string,
   structured: StructuredFounderInput,
   transcriptText: string,
-  pdfText: string,
 ) {
   return [
     freeText,
@@ -266,7 +259,6 @@ export function getCombinedText(
     structured.solution,
     structured.additionalInfo,
     transcriptText,
-    pdfText,
     ...structured.sections.flatMap(section => [section.title, section.content]),
   ]
     .join(" ")
@@ -584,7 +576,6 @@ export function initialDraft() {
     useMock: false,
     freeText: "",
     transcriptText: "",
-    pdfText: "",
     structured: { ...defaultStructuredInput },
     structuredRebuttal: {
       investor: [...defaultStructuredRebuttal.investor],

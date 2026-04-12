@@ -46,7 +46,6 @@ type DraftState = {
   useMock: boolean;
   freeText: string;
   transcriptText: string;
-  pdfText: string;
   structured: StructuredFounderInput;
   structuredRebuttal: StructuredRebuttalDraft;
   freeRebuttal: string;
@@ -69,7 +68,6 @@ type CommitteeFlowContextValue = DraftState & {
   setUseMock: (value: boolean) => void;
   setFreeText: (value: string) => void;
   setTranscriptText: (value: string) => void;
-  setPdfText: (value: string) => void;
   updateStructured: (field: keyof StructuredFounderInput, value: string) => void;
   addSection: () => void;
   updateSection: (index: number, field: "title" | "content", value: string) => void;
@@ -95,6 +93,27 @@ function normalizeLanguage(input: string, fallback: Language): Language {
   return detectInputLanguage(trimmed);
 }
 
+export function restoreDraftState(parsed?: Partial<DraftState> | null): DraftState {
+  const draft = initialDraft();
+
+  if (!parsed) return draft;
+
+  return {
+    ...draft,
+    ...parsed,
+    structured: {
+      ...defaultStructuredInput,
+      ...(parsed.structured ?? {}),
+      sections: Array.isArray(parsed.structured?.sections) ? parsed.structured.sections : [],
+    },
+    structuredRebuttal: {
+      investor: Array.isArray(parsed.structuredRebuttal?.investor) ? parsed.structuredRebuttal.investor : [],
+      customer: Array.isArray(parsed.structuredRebuttal?.customer) ? parsed.structuredRebuttal.customer : [],
+      technical: Array.isArray(parsed.structuredRebuttal?.technical) ? parsed.structuredRebuttal.technical : [],
+    } as StructuredRebuttalDraft,
+  };
+}
+
 function getPersistedDraft(): DraftState {
   if (typeof window === "undefined") return initialDraft();
 
@@ -103,22 +122,7 @@ function getPersistedDraft(): DraftState {
     if (!raw) return initialDraft();
 
     const parsed = JSON.parse(raw) as Partial<DraftState>;
-    const draft = initialDraft();
-
-    return {
-      ...draft,
-      ...parsed,
-      structured: {
-        ...defaultStructuredInput,
-        ...(parsed.structured ?? {}),
-        sections: Array.isArray(parsed.structured?.sections) ? parsed.structured.sections : [],
-      },
-      structuredRebuttal: {
-        investor: Array.isArray(parsed.structuredRebuttal?.investor) ? parsed.structuredRebuttal.investor : [],
-        customer: Array.isArray(parsed.structuredRebuttal?.customer) ? parsed.structuredRebuttal.customer : [],
-        technical: Array.isArray(parsed.structuredRebuttal?.technical) ? parsed.structuredRebuttal.technical : [],
-      } as StructuredRebuttalDraft,
-    };
+    return restoreDraftState(parsed);
   } catch {
     return initialDraft();
   }
@@ -178,10 +182,6 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
 
   const setTranscriptText = useCallback((value: string) => {
     setDraft(current => ({ ...current, transcriptText: value }));
-  }, []);
-
-  const setPdfText = useCallback((value: string) => {
-    setDraft(current => ({ ...current, pdfText: value }));
   }, []);
 
   const updateStructured = useCallback((field: keyof StructuredFounderInput, value: string) => {
@@ -266,19 +266,13 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const buildStartInput = useCallback(() => {
-    const combinedText = getCombinedText(
-      draft.freeText,
-      draft.structured,
-      draft.transcriptText,
-      draft.pdfText,
-    );
+    const combinedText = getCombinedText(draft.freeText, draft.structured, draft.transcriptText);
 
     return {
       language: normalizeLanguage(combinedText, draft.preferredLanguage),
       freeText: draft.inputMode === "free" ? draft.freeText : "",
       structured: draft.structured,
       transcriptText: draft.transcriptText,
-      pdfText: draft.pdfText,
       extraFragments: [],
       useMock: draft.useMock,
     };
@@ -355,7 +349,6 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
       useMock: true,
       freeText: "",
       transcriptText: "",
-      pdfText: "",
       structured: result.data.input.structured ?? demoInput(),
       structuredRebuttal: (() => {
         const structured =
@@ -376,14 +369,17 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
   }, [demoQuery]);
 
   const resetAll = useCallback(() => {
-    const fresh = initialDraft();
+    const fresh = {
+      ...initialDraft(),
+      preferredLanguage: draft.preferredLanguage,
+    };
     setDraft(fresh);
     setReviewError(null);
     setRebuttalError(null);
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(STORAGE_KEY);
     }
-  }, []);
+  }, [draft.preferredLanguage]);
 
   const downloadReport = useCallback(() => {
     if (!draft.firstRound || !draft.rebuttalResult) return;
@@ -423,7 +419,6 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
     setUseMock,
     setFreeText,
     setTranscriptText,
-    setPdfText,
     updateStructured,
     addSection,
     updateSection,

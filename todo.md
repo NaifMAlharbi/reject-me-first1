@@ -35,3 +35,6 @@
 - [x] Lower the first-page hero layout so it is not visually pushed too high on the screen
 - [x] Add a persistent top bar from the first page onward with language selection and light/dark mode controls
 - [x] Add a clear, always-available way to return to the home page from the flow pages
+- [x] Fix duplicated field restoration so returning to a previously completed section preserves the saved project data without re-inserting repeated content
+- [x] Remove the PDF input section from the founder submission page and related flow copy
+- [x] Remove the project summary page and start committee analysis immediately after the user submits the project input

@@ -45,7 +45,7 @@ const agentIcons = {
   technical: Cpu,
 } as const;
 
-function useFlowPage(currentStep: "input" | "brief" | "review" | "rebuttal" | "verdict") {
+function useFlowPage(currentStep: "input" | "review" | "rebuttal" | "verdict") {
   const flow = useCommitteeFlow();
   const [, navigate] = useLocation();
   const pageSteps = committeeStepRoutes[flow.preferredLanguage];
@@ -373,7 +373,14 @@ export function InputPage() {
         steps={[...pageSteps]}
         currentStep="input"
         onNavigate={goTo}
-        primaryAction={{ label: flow.text.next, onClick: goNext }}
+        primaryAction={{
+          label: flow.text.startCommittee,
+          onClick: async () => {
+            await flow.startCommittee();
+            goTo("/flow/review");
+          },
+          loading: flow.reviewPending,
+        }}
         tertiaryAction={{ label: flow.text.reset, onClick: flow.resetAll }}
         statusSlot={statusSlot}
       >
@@ -408,9 +415,9 @@ export function InputPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-wrap gap-3">
-                <Button variant="outline" onClick={() => goTo("/")}>{flow.preferredLanguage === "ar" ? "العودة لاختيار المسار" : "Return to entry choices"}</Button>
+                <Button variant="outline" onClick={() => { flow.resetAll(); goTo("/"); }}>{flow.preferredLanguage === "ar" ? "العودة لاختيار المسار" : "Return to entry choices"}</Button>
                 {flow.useMock ? (
-                  <Button onClick={() => { flow.setUseMock(false); goTo("/flow/input"); }}>
+                  <Button onClick={() => { flow.resetAll(); goTo("/flow/input"); }}>
                     {flow.text.submitProject}
                   </Button>
                 ) : (
@@ -480,14 +487,9 @@ export function InputPage() {
             </div>
           )}
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <Field label={flow.text.transcript}>
-              <textarea className={inputClassName(true)} value={flow.transcriptText} placeholder={flow.text.transcriptPlaceholder} onChange={event => flow.setTranscriptText(event.target.value)} />
-            </Field>
-            <Field label={flow.text.pdf}>
-              <textarea className={inputClassName(true)} value={flow.pdfText} placeholder={flow.text.pdfPlaceholder} onChange={event => flow.setPdfText(event.target.value)} />
-            </Field>
-          </div>
+          <Field label={flow.text.transcript}>
+            <textarea className={inputClassName(true)} value={flow.transcriptText} placeholder={flow.text.transcriptPlaceholder} onChange={event => flow.setTranscriptText(event.target.value)} />
+          </Field>
 
           <Card className="gap-4 border-border/70 bg-background/70 py-4 shadow-none">
             <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -513,66 +515,6 @@ export function InputPage() {
   );
 }
 
-export function BriefPage() {
-  const { flow, goBack, goNext, goTo, pageSteps, statusSlot } = useFlowPage("brief");
-  const brief = flow.firstRound?.projectBrief;
-
-  return (
-    <div dir={flow.direction}>
-      <CommitteeFlowShell
-        direction={flow.direction}
-        language={flow.preferredLanguage}
-        eyebrow={flow.text.projectBrief}
-        title={flow.text.projectBrief}
-        description={flow.text.briefReady}
-        steps={[...pageSteps]}
-        currentStep="brief"
-        onNavigate={goTo}
-        primaryAction={{
-          label: flow.text.startCommittee,
-          onClick: async () => {
-            await flow.startCommittee();
-            goNext();
-          },
-          loading: flow.reviewPending,
-        }}
-        secondaryAction={{ label: flow.text.back, onClick: goBack }}
-        tertiaryAction={{ label: flow.text.reset, onClick: flow.resetAll }}
-        statusSlot={statusSlot}
-      >
-        <div className="space-y-6">
-          <StatusRail />
-          {flow.reviewError && (
-            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm leading-7 text-red-700 dark:text-red-200">
-              {flow.reviewError}
-            </div>
-          )}
-
-          <SectionLead title={flow.text.projectBrief} description={flow.preferredLanguage === "ar" ? "هذا هو الملخص الذي ستراجعه اللجنة كما هو." : "This is the exact brief the committee will evaluate."} />
-
-          {brief ? (
-            <div className="grid gap-4 md:grid-cols-2">
-              <SummaryBlock label={flow.text.projectName} value={brief.project_name} />
-              <SummaryBlock label={flow.text.idea} value={brief.one_line_summary} />
-              <SummaryBlock label={flow.text.problem} value={brief.problem} />
-              <SummaryBlock label={flow.text.solution} value={brief.solution} />
-              <SummaryBlock label={flow.preferredLanguage === "ar" ? "العميل المستهدف" : "Target customer"} value={brief.target_customer} />
-              <SummaryBlock label={flow.preferredLanguage === "ar" ? "نموذج العمل" : "Business model"} value={brief.business_model} />
-              <SummaryBlock label={flow.preferredLanguage === "ar" ? "نقطة التميز" : "Differentiation"} value={brief.differentiation} />
-              <SummaryBlock label={flow.preferredLanguage === "ar" ? "الإثبات أو المؤشرات" : "Traction"} value={brief.evidence_or_traction} />
-            </div>
-          ) : (
-            <Card className="border-border/70 bg-background/70 py-6 shadow-none">
-              <CardContent className="px-6 text-sm leading-7 text-muted-foreground">
-                {flow.text.briefReady}
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </CommitteeFlowShell>
-    </div>
-  );
-}
 
 export function ReviewPage() {
   const { flow, goBack, goNext, goTo, pageSteps, statusSlot } = useFlowPage("review");

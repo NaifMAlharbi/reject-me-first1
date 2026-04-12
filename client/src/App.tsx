@@ -3,7 +3,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { CommitteeFlowProvider } from "@/contexts/CommitteeFlowContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import {
-  BriefPage,
   InputPage,
   LandingPage,
   RebuttalPage,
@@ -18,7 +17,6 @@ function Router() {
     <Switch>
       <Route path="/" component={LandingPage} />
       <Route path="/flow/input" component={InputPage} />
-      <Route path="/flow/brief" component={BriefPage} />
       <Route path="/flow/review" component={ReviewPage} />
       <Route path="/flow/rebuttal" component={RebuttalPage} />
       <Route path="/flow/verdict" component={VerdictPage} />
