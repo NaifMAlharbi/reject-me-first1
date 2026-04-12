@@ -104,6 +104,11 @@ export function restoreDraftState(parsed?: Partial<DraftState> | null): DraftSta
     structured: {
       ...defaultStructuredInput,
       ...(parsed.structured ?? {}),
+      projectName: sanitizeStructuredFieldValue("projectName", parsed.structured?.projectName ?? ""),
+      idea: sanitizeStructuredFieldValue("idea", parsed.structured?.idea ?? defaultStructuredInput.idea),
+      problem: sanitizeStructuredFieldValue("problem", parsed.structured?.problem ?? defaultStructuredInput.problem),
+      solution: sanitizeStructuredFieldValue("solution", parsed.structured?.solution ?? defaultStructuredInput.solution),
+      additionalInfo: sanitizeStructuredFieldValue("additionalInfo", parsed.structured?.additionalInfo ?? defaultStructuredInput.additionalInfo),
       sections: Array.isArray(parsed.structured?.sections) ? parsed.structured.sections : [],
     },
     structuredRebuttal: {
@@ -135,11 +140,32 @@ export function buildFreshDraft(preferredLanguage: Language): DraftState {
   };
 }
 
-function toMessage(error: unknown, fallback: string) {
+const STRUCTURED_FIELD_LIMITS: Partial<Record<keyof StructuredFounderInput, number>> = {
+  projectName: 120,
+  idea: 2400,
+  problem: 2400,
+  solution: 2400,
+  additionalInfo: 2400,
+};
+
+export function sanitizeStructuredFieldValue(field: keyof StructuredFounderInput, value: string): string {
+  const limit = STRUCTURED_FIELD_LIMITS[field];
+  if (!limit) return value;
+  return value.slice(0, limit);
+}
+
+function toMessage(error: unknown, fallback: string, language: Language = "en") {
   if (typeof error === "string") return error;
   if (error && typeof error === "object") {
     const message = (error as { message?: string }).message;
-    if (typeof message === "string" && message.trim()) return message;
+    if (typeof message === "string" && message.trim()) {
+      if (message.includes('"path":["project_name"]') && message.includes('"maximum":120')) {
+        return language === "ar"
+          ? "اسم المشروع طويل جدًا. اختصره إلى 120 حرفًا أو أقل."
+          : "Project name is too long. Keep it within 120 characters.";
+      }
+      return message;
+    }
   }
   return fallback;
 }
@@ -196,7 +222,7 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
       ...current,
       structured: {
         ...current.structured,
-        [field]: value,
+        [field]: sanitizeStructuredFieldValue(field, value),
       },
     }));
   }, []);
@@ -316,7 +342,7 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
       }));
       return result;
     } catch (error) {
-      const message = toMessage(error, "Failed to run committee review.");
+      const message = toMessage(error, "Failed to run committee review.", draft.preferredLanguage);
       setReviewError(message);
       throw error;
     }

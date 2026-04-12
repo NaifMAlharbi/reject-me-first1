@@ -153,7 +153,7 @@ describe("buildFinalReportHtml", () => {
   });
 });
 
-import { buildFreshDraft, restoreDraftState } from "../client/src/contexts/CommitteeFlowContext";
+import { buildFreshDraft, restoreDraftState, sanitizeStructuredFieldValue } from "../client/src/contexts/CommitteeFlowContext";
 import { initialDraft } from "../client/src/lib/reject-me-first";
 import { agentPrompts, reevaluatePrompts } from "./committee";
 
@@ -184,7 +184,7 @@ describe("committee draft reset", () => {
       rebuttalResult: null,
       structured: {
         ...initialDraft().structured,
-        company_name: "Legacy Draft",
+        projectName: "Legacy Draft",
         sections: "bad-data" as never,
       },
       structuredRebuttal: {
@@ -197,11 +197,30 @@ describe("committee draft reset", () => {
     expect(restored.freeText).toBe("old idea");
     expect(restored.firstRound).toBeNull();
     expect(restored.rebuttalResult).toBeNull();
-    expect(restored.structured.company_name).toBe("Legacy Draft");
+    expect(restored.structured.projectName).toBe("Legacy Draft");
     expect(restored.structured.sections).toEqual([]);
     expect(restored.structuredRebuttal.investor).toEqual([]);
     expect(restored.structuredRebuttal.customer).toEqual([{ objection: "Price", response: "We will test" }]);
     expect(restored.structuredRebuttal.technical).toEqual([]);
+  });
+
+  it("truncates an overlong project name before it can hit the API schema limit", () => {
+    const overlongName = "A".repeat(140);
+
+    expect(sanitizeStructuredFieldValue("projectName", overlongName)).toHaveLength(120);
+    expect(sanitizeStructuredFieldValue("projectName", overlongName)).toBe(overlongName.slice(0, 120));
+  });
+
+  it("sanitizes persisted project names that were saved before the 120-character guardrail existed", () => {
+    const restored = restoreDraftState({
+      preferredLanguage: "en",
+      structured: {
+        ...initialDraft().structured,
+        projectName: "B".repeat(145),
+      },
+    });
+
+    expect(restored.structured.projectName).toHaveLength(120);
   });
 });
 

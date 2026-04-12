@@ -102,10 +102,21 @@ function useFlowPage(currentStep: "input" | "review" | "rebuttal" | "verdict") {
   };
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: ReactNode;
+}) {
   return (
     <label className="block space-y-2">
-      <span className="text-sm font-medium text-foreground">{label}</span>
+      <span className="flex items-center justify-between gap-3 text-sm font-medium text-foreground">
+        <span>{label}</span>
+        {hint ? <span className="text-xs font-normal text-muted-foreground">{hint}</span> : null}
+      </span>
       {children}
     </label>
   );
@@ -395,8 +406,20 @@ export function InputPage() {
             </Field>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label={flow.text.projectName}>
-                <input className={inputClassName()} value={flow.structured.projectName} onChange={event => flow.updateStructured("projectName", event.target.value)} />
+              <Field
+                label={flow.text.projectName}
+                hint={
+                  flow.preferredLanguage === "ar"
+                    ? `${flow.structured.projectName.length}/120 حرفًا`
+                    : `${flow.structured.projectName.length}/120 characters`
+                }
+              >
+                <input
+                  className={inputClassName()}
+                  value={flow.structured.projectName}
+                  maxLength={120}
+                  onChange={event => flow.updateStructured("projectName", event.target.value)}
+                />
               </Field>
               <Field label={flow.text.idea}>
                 <input className={inputClassName()} value={flow.structured.idea} onChange={event => flow.updateStructured("idea", event.target.value)} />

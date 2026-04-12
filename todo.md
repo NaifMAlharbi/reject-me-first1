@@ -43,3 +43,4 @@
 - [x] Reduce crowding in the review-result cards so responses have clearer spacing and are easier to read
 - [x] Remove the unnecessary explanatory sentence above the review cards about the display being improved
 - [x] Improve evaluator output quality so each agent gives more specific, analytical, and clearly differentiated assessments instead of repetitive generic phrasing
+- [x] Fix the /flow/input submission bug where overly long project names trigger a server validation error instead of being constrained or handled clearly in the UI
