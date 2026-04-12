@@ -501,42 +501,43 @@ export function ReviewPage() {
               />
 
               <div className="grid gap-6 xl:grid-cols-3">
-                {flow.firstRound.reviews.map(review => {
-                  const AgentIcon = agentIcons[review.agent];
-                  const isCustomer = review.agent === "customer";
-                  return (
-                    <Card
-                      key={review.agent}
-                      className={isCustomer ? "border-primary/25 bg-primary/[0.05] py-0 shadow-[0_18px_40px_rgba(79,70,229,0.08)]" : "border-border/70 bg-background/80 py-0 shadow-none"}
-                    >
-                      <CardHeader className="space-y-4 px-6 pt-6">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex items-center gap-3">
-                            <div className={isCustomer ? "flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground" : "flex h-12 w-12 items-center justify-center rounded-2xl bg-muted text-foreground"}>
-                              <AgentIcon className="h-5 w-5" />
+                  {flow.firstRound.reviews.map(review => {
+                    const AgentIcon = agentIcons[review.agent];
+                    return (
+                      <Card
+                        key={review.agent}
+                        className="border-border/70 bg-background/80 py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]"
+                      >
+                        <CardHeader className="space-y-5 px-7 pt-7">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start gap-4">
+                              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                                <AgentIcon className="h-5 w-5" />
+                              </div>
+                              <div className="space-y-3">
+                                <CardTitle className="text-xl">{review.label}</CardTitle>
+                                <CardDescription className="max-w-2xl text-base leading-8 text-muted-foreground">{review.key_insight}</CardDescription>
+                              </div>
                             </div>
-                            <div>
-                              <CardTitle className="text-lg">{review.label}</CardTitle>
-                              <CardDescription className="mt-2 max-w-prose text-sm leading-7 text-muted-foreground">{review.key_insight}</CardDescription>
-                            </div>
+                            <Badge variant="outline" className="border-border bg-background text-foreground">
+                              {stanceLabels[flow.preferredLanguage][review.stance]}
+                            </Badge>
                           </div>
-                          <Badge variant="outline" className="border-border bg-background text-foreground">
-                            {stanceLabels[flow.preferredLanguage][review.stance]}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-5 px-6 pb-6">
+                        </CardHeader>
+                        <CardContent className="space-y-6 px-7 pb-7">
+
                         <div className="grid gap-4 sm:grid-cols-2">
                           <Metric label={flow.text.score} value={scoreText(review.score)} />
                           <Metric label={flow.text.confidence} value={`${review.confidence}%`} />
                         </div>
 
-                        <Card className="gap-3 border-border/70 bg-card py-5 shadow-none">
-                          <CardContent className="px-5">
-                            <p className="text-xs uppercase tracking-[0.22em] text-primary">{flow.text.summary}</p>
-                            <p className="mt-2 text-sm leading-7 text-muted-foreground">{review.summary}</p>
-                          </CardContent>
-                        </Card>
+                          <Card className="gap-3 border-border/70 bg-card py-6 shadow-none">
+                            <CardContent className="px-6">
+                              <p className="text-xs uppercase tracking-[0.22em] text-primary">{flow.text.summary}</p>
+                              <p className="mt-3 max-w-3xl text-base leading-8 text-foreground/85">{review.summary}</p>
+                            </CardContent>
+                          </Card>
+
 
                         <div className="grid gap-5 md:grid-cols-2">
                           <BulletCard title={flow.text.strengths} items={review.strengths} />
@@ -643,7 +644,7 @@ export function RebuttalPage() {
                             </Button>
                           </div>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-5 px-7 pb-7">
                           <div className="rounded-2xl border border-border bg-card p-4">
                             <p className="mb-3 text-sm font-medium">{flow.text.objections}</p>
                             <ul className="space-y-2 text-sm leading-7 text-muted-foreground">
@@ -752,33 +753,33 @@ export function VerdictPage() {
                   : "This view shows how each reviewer changed after the rebuttal, including the updated stance and response quality."}
               />
 
-              <div className="grid gap-4 xl:grid-cols-3">
-                {flow.firstRound?.reviews.map(review => {
-                  const updated = secondRoundMap.get(review.agent);
-                  if (!updated) return null;
-                  const AgentIcon = agentIcons[review.agent];
-                  const isCustomer = review.agent === "customer";
+              <div className="grid gap-6 xl:grid-cols-3">
+                {flow.rebuttalResult.second_round.map(updated => {
+                  const previous = flow.firstRound?.reviews.find(item => item.agent === updated.agent);
+                  const AgentIcon = agentIcons[updated.agent];
                   return (
-                    <Card key={review.agent} className={isCustomer ? "border-primary/25 bg-primary/[0.05] py-0 shadow-[0_18px_40px_rgba(79,70,229,0.08)]" : "border-border/70 bg-background/80 py-0 shadow-none"}>
-                      <CardHeader>
-                        <div className="flex items-center gap-3">
-                          <div className={isCustomer ? "flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground" : "flex h-11 w-11 items-center justify-center rounded-2xl bg-muted text-foreground"}>
+                    <Card key={updated.agent} className="border-border/70 bg-background/80 py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+                      <CardHeader className="px-7 pt-7">
+                        <div className="flex items-start gap-4">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                             <AgentIcon className="h-5 w-5" />
                           </div>
-                          <div>
-                            <CardTitle className="text-lg">{agentLabels[flow.preferredLanguage][review.agent]}</CardTitle>
-                            <CardDescription>{rebuttalQualityLabels[flow.preferredLanguage][updated.rebuttal_quality]}</CardDescription>
+                          <div className="space-y-2">
+                            <CardTitle className="text-xl">{agentLabels[flow.preferredLanguage][updated.agent]}</CardTitle>
+                            <CardDescription className="max-w-2xl text-base leading-8 text-muted-foreground">
+                              {rebuttalQualityLabels[flow.preferredLanguage][updated.rebuttal_quality]}
+                            </CardDescription>
                           </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="space-y-4">
+                      <CardContent className="space-y-5 px-7 pb-7">
                         <div className="grid gap-3 sm:grid-cols-2">
-                          <Metric label={flow.text.score} value={`${scoreText(review.score)} → ${scoreText(updated.updated_score)}`} />
+                          <Metric label={flow.text.score} value={`${scoreText(previous?.score ?? updated.updated_score)} → ${scoreText(updated.updated_score)}`} />
                           <Metric label={flow.text.scoreDelta} value={scoreDeltaText(updated.score_delta)} />
-                          <Metric label={flow.text.stance} value={`${stanceLabels[flow.preferredLanguage][review.stance]} → ${stanceLabels[flow.preferredLanguage][updated.updated_stance]}`} />
+                          <Metric label={flow.text.stance} value={`${stanceLabels[flow.preferredLanguage][previous?.stance ?? updated.updated_stance]} → ${stanceLabels[flow.preferredLanguage][updated.updated_stance]}`} />
                           <Metric label={flow.text.response} value={rebuttalQualityLabels[flow.preferredLanguage][updated.rebuttal_quality]} />
                         </div>
-                        <div className="rounded-2xl border border-border bg-card p-4 text-sm leading-7 text-muted-foreground">
+                        <div className="rounded-2xl border border-border bg-card p-5 text-base leading-8 text-muted-foreground">
                           <p><span className="font-medium text-foreground">{flow.text.whatChanged}:</span> {updated.what_changed}</p>
                           <p className="mt-3"><span className="font-medium text-foreground">{flow.text.keyInsight}:</span> {updated.key_insight}</p>
                         </div>

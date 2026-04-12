@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildFinalReportHtml, committeeStepRoutes, copy, demoInput, downloadFinalReport } from "@/lib/reject-me-first";
-import { startReview, submitRebuttal } from "./committee";
+import { getDemoCase, startReview, submitRebuttal } from "./committee";
 
 describe("committeeStepRoutes", () => {
   it("defines the four routed steps in the expected order for both languages", () => {
@@ -221,6 +221,26 @@ describe("committee draft reset", () => {
     });
 
     expect(restored.structured.projectName).toHaveLength(120);
+  });
+});
+
+describe("committee demo language", () => {
+  it("returns a fully Arabic demo case when Arabic is requested", () => {
+    const demo = getDemoCase("ar");
+
+    expect(demo.input.language).toBe("ar");
+    expect(demo.input.structured?.projectName).toMatch(/[\u0600-\u06FF]/);
+    expect(demo.rebuttal.freeText).toMatch(/[\u0600-\u06FF]/);
+    expect(demo.title).toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it("keeps Arabic direction and language when the Arabic demo is evaluated", async () => {
+    const demo = getDemoCase("ar");
+    const firstRound = await startReview(demo.input);
+
+    expect(firstRound.language).toBe("ar");
+    expect(firstRound.direction).toBe("rtl");
+    expect(firstRound.projectBrief.project_name).toMatch(/[\u0600-\u06FF]/);
   });
 });
 

@@ -44,3 +44,7 @@
 - [x] Remove the unnecessary explanatory sentence above the review cards about the display being improved
 - [x] Improve evaluator output quality so each agent gives more specific, analytical, and clearly differentiated assessments instead of repetitive generic phrasing
 - [x] Fix the /flow/input submission bug where overly long project names trigger a server validation error instead of being constrained or handled clearly in the UI
+- [x] Fix demo mode so it preserves the currently selected UI/output language instead of switching to English when the user starts in Arabic
+- [x] Restore reliable live LLM committee evaluation so the app returns meaningful real analysis instead of empty or missing model output
+- [x] Increase review text area spacing and card content room so committee responses are larger and easier to read
+- [x] Unify the visual style of the investor, customer, and technical agent cards so one card does not use a mismatched yellow treatment by itself

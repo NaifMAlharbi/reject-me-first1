@@ -244,8 +244,24 @@ function joinTextContent(content: unknown) {
   return "";
 }
 
+function extractJsonObject(text: string) {
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1]?.trim();
+  if (fenced) return fenced;
+
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start !== -1 && end !== -1 && end > start) {
+    return text.slice(start, end + 1);
+  }
+
+  return text.trim();
+}
+
 function parseJsonContent<T>(content: unknown): T {
-  const text = joinTextContent(content);
+  const text = extractJsonObject(joinTextContent(content));
+  if (!text) {
+    throw new Error("Structured model returned empty content.");
+  }
   return JSON.parse(text) as T;
 }
 
@@ -285,13 +301,7 @@ export function getInputQualityIssue(input: StartReviewInput, language?: Languag
   return null;
 }
 
-async function callStructuredModel<T>({
-  system,
-  user,
-}: {
-  system: string;
-  user: string;
-}): Promise<T> {
+async function requestStructuredContent(system: string, user: string) {
   if (ENV.openAiApiKey) {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -318,7 +328,7 @@ async function callStructuredModel<T>({
       choices?: Array<{ message?: { content?: string } }>;
     };
 
-    return parseJsonContent<T>(payload.choices?.[0]?.message?.content ?? "{}");
+    return payload.choices?.[0]?.message?.content ?? "";
   }
 
   const response = await invokeLLM({
@@ -329,7 +339,33 @@ async function callStructuredModel<T>({
     response_format: { type: "json_object" },
   });
 
-  return parseJsonContent<T>(response.choices[0]?.message.content);
+  return response.choices[0]?.message.content;
+}
+
+async function callStructuredModel<T>({
+  system,
+  user,
+}: {
+  system: string;
+  user: string;
+}): Promise<T> {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const rawContent = await requestStructuredContent(
+        system,
+        attempt === 0
+          ? user
+          : `${user}\n\nReturn valid JSON only. Do not add markdown fences, commentary, or extra prose outside the JSON object.`,
+      );
+      return parseJsonContent<T>(rawContent);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("Structured model request failed.");
 }
 
 function formatStructuredInput(structured?: StructuredFounderInput) {
@@ -978,34 +1014,69 @@ export async function submitRebuttal(input: ReevaluateInput): Promise<Reevaluate
   });
 }
 
-export const demoCase = {
-  title: "AI meeting assistant for SMEs",
-  input: {
-    language: "en",
-    freeText: "",
-    transcriptText: "",
-    pdfText: "",
-    extraFragments: [],
-    useMock: true,
-    structured: {
-      projectName: "BriefBridge",
-      idea: "An AI assistant that turns messy meeting notes into tasks, summaries, and follow-up drafts for small teams.",
-      problem: "Small teams lose decisions and action items after meetings, especially when no one owns documentation.",
-      solution: "Capture meeting input, extract decisions, assign tasks, and send follow-up summaries in one workflow.",
-      additionalInfo: "Initial focus is agencies and small remote teams using Zoom and Google Workspace.",
-      sections: [
-        { title: "Business model", content: "Monthly SaaS subscription priced per workspace." },
-        { title: "Differentiation", content: "Cleaner action-item extraction for mixed Arabic and English meetings." },
-        { title: "Distribution", content: "Founder-led sales plus content and partner channels." },
-        { title: "Evidence", content: "Early pilots with five teams and repeated weekly usage." },
-      ],
-    },
-  },
-  rebuttal: {
-    freeText: "We already have five pilot teams using the workflow weekly, and the first buyers are agencies that run many client meetings. The MVP only covers summaries, action items, and workspace sync, so technical scope is intentionally narrow.",
-  },
-} satisfies {
+const demoCases: Record<Language, {
   title: string;
   input: StartReviewInput;
   rebuttal: RebuttalInput;
+}> = {
+  en: {
+    title: "AI meeting assistant for SMEs",
+    input: {
+      language: "en",
+      freeText: "",
+      transcriptText: "",
+      pdfText: "",
+      extraFragments: [],
+      useMock: true,
+      structured: {
+        projectName: "BriefBridge",
+        idea: "An AI assistant that turns messy meeting notes into tasks, summaries, and follow-up drafts for small teams.",
+        problem: "Small teams lose decisions and action items after meetings, especially when no one owns documentation.",
+        solution: "Capture meeting input, extract decisions, assign tasks, and send follow-up summaries in one workflow.",
+        additionalInfo: "Initial focus is agencies and small remote teams using Zoom and Google Workspace.",
+        sections: [
+          { title: "Business model", content: "Monthly SaaS subscription priced per workspace." },
+          { title: "Differentiation", content: "Cleaner action-item extraction for mixed Arabic and English meetings." },
+          { title: "Distribution", content: "Founder-led sales plus content and partner channels." },
+          { title: "Evidence", content: "Early pilots with five teams and repeated weekly usage." },
+        ],
+      },
+    },
+    rebuttal: {
+      freeText: "We already have five pilot teams using the workflow weekly, and the first buyers are agencies that run many client meetings. The MVP only covers summaries, action items, and workspace sync, so technical scope is intentionally narrow.",
+    },
+  },
+  ar: {
+    title: "مساعد اجتماعات بالذكاء الاصطناعي للشركات الصغيرة",
+    input: {
+      language: "ar",
+      freeText: "",
+      transcriptText: "",
+      pdfText: "",
+      extraFragments: [],
+      useMock: true,
+      structured: {
+        projectName: "بريف بريدج",
+        idea: "مساعد ذكاء اصطناعي يحول ملاحظات الاجتماعات غير المرتبة إلى مهام وملخصات ورسائل متابعة للفرق الصغيرة.",
+        problem: "الفرق الصغيرة تضيع منها القرارات والمهام بعد الاجتماعات خصوصًا عندما لا توجد جهة واضحة توثق ما تم الاتفاق عليه.",
+        solution: "يلتقط مدخلات الاجتماع ويستخرج القرارات ويحولها إلى مهام ويرسل ملخص متابعة في مسار عمل واحد.",
+        additionalInfo: "التركيز الأولي على الوكالات والفرق الصغيرة عن بعد التي تستخدم Zoom وGoogle Workspace.",
+        sections: [
+          { title: "نموذج العمل", content: "اشتراك SaaS شهري يُسعر لكل مساحة عمل." },
+          { title: "التميّز", content: "استخراج أوضح لعناصر التنفيذ في الاجتماعات المختلطة بين العربية والإنجليزية." },
+          { title: "التوزيع", content: "مبيعات يقودها المؤسس مع محتوى تسويقي وقنوات شركاء." },
+          { title: "الدليل", content: "تجارب مبكرة مع خمسة فرق واستخدام أسبوعي متكرر." },
+        ],
+      },
+    },
+    rebuttal: {
+      freeText: "لدينا بالفعل خمسة فرق تجريبية تستخدم المسار أسبوعيًا، وأول المشترين المستهدفين هم الوكالات التي تدير عددًا كبيرًا من اجتماعات العملاء. النسخة الأولى تركز فقط على الملخصات وعناصر التنفيذ وربط مساحة العمل، لذلك النطاق التقني مقصود ومحدود.",
+    },
+  },
 };
+
+export function getDemoCase(language: Language) {
+  return demoCases[language] ?? demoCases.en;
+}
+
+export const demoCase = getDemoCase("en");

@@ -3,8 +3,8 @@ import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
-import { demoCase, startReview, submitRebuttal } from "./committee";
-import { reevaluateInputSchema, startReviewInputSchema } from "../shared/rejectMeFirst";
+import { getDemoCase, startReview, submitRebuttal } from "./committee";
+import { languageSchema, reevaluateInputSchema, startReviewInputSchema } from "../shared/rejectMeFirst";
 
 export const appRouter = router({
   system: systemRouter,
@@ -19,7 +19,8 @@ export const appRouter = router({
     }),
   }),
   committee: router({
-    demo: publicProcedure.query(async () => {
+    demo: publicProcedure.input(languageSchema.optional()).query(async ({ input }) => {
+      const demoCase = getDemoCase(input ?? "en");
       const firstRound = await startReview(demoCase.input);
       const secondRound = await submitRebuttal({
         language: firstRound.language,

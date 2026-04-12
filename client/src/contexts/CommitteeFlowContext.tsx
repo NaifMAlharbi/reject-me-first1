@@ -177,7 +177,7 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
 
   const committeeStart = trpc.committee.startReview.useMutation();
   const committeeRebuttal = trpc.committee.submitRebuttal.useMutation();
-  const demoQuery = trpc.committee.demo.useQuery(undefined, { enabled: false });
+  const demoQuery = trpc.committee.demo.useQuery(draft.preferredLanguage, { enabled: false });
 
   const direction = draft.preferredLanguage === "ar" ? "rtl" : "ltr";
   const text = copy[draft.preferredLanguage];
@@ -376,7 +376,7 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
 
     setDraft(current => ({
       ...current,
-      preferredLanguage: result.data.first_round.language,
+      preferredLanguage: current.preferredLanguage,
       inputMode: "structured",
       rebuttalMode: "structured",
       useMock: true,
