@@ -1,3 +1,4 @@
+import { ENV } from "./_core/env";
 import { invokeLLM } from "./_core/llm";
 import {
   agentKeySchema,
@@ -224,6 +225,89 @@ function parseJsonContent<T>(content: unknown): T {
   return JSON.parse(text) as T;
 }
 
+function summarizeInputStrength(input: StartReviewInput) {
+  const merged = mergeFounderInput(input);
+  const normalized = merged.replace(/\s+/g, " ").trim();
+  const meaningfulCharacters = normalized.replace(/[^A-Za-z\u0600-\u06FF]+/g, "");
+  const wordCount = normalized.split(/\s+/).filter(Boolean).length;
+  const filledStructuredFields = Object.values(structuredFounderInputSchema.parse(input.structured ?? {})).reduce((count, value) => {
+    if (typeof value === "string") return count + (value.trim() ? 1 : 0);
+    if (Array.isArray(value)) return count + value.filter(item => `${item.title} ${item.content}`.trim()).length;
+    return count;
+  }, 0);
+
+  return {
+    merged,
+    normalized,
+    meaningfulCharacterCount: meaningfulCharacters.length,
+    wordCount,
+    filledStructuredFields,
+  };
+}
+
+export function getInputQualityIssue(input: StartReviewInput, language?: Language) {
+  const detectedLanguage = language ?? inferLanguage(input);
+  const strength = summarizeInputStrength(input);
+  const tooShort = strength.meaningfulCharacterCount < 18;
+  const tooFewWords = strength.wordCount < 4;
+  const tooFewStructuredFields = strength.filledStructuredFields < 2;
+
+  if ((tooShort && tooFewWords) || (tooShort && tooFewStructuredFields)) {
+    return detectedLanguage === "ar"
+      ? "المدخل قصير جدًا للتقييم. اكتب وصفًا أوضح يتضمن المشكلة والحل والفئة المستهدفة على الأقل."
+      : "The submission is too short to evaluate. Please add a clearer description with at least the problem, solution, and target user.";
+  }
+
+  return null;
+}
+
+async function callStructuredModel<T>({
+  system,
+  user,
+}: {
+  system: string;
+  user: string;
+}): Promise<T> {
+  if (ENV.openAiApiKey) {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${ENV.openAiApiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4.1-mini",
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI request failed with ${response.status}: ${await response.text()}`);
+    }
+
+    const payload = (await response.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+
+    return parseJsonContent<T>(payload.choices?.[0]?.message?.content ?? "{}");
+  }
+
+  const response = await invokeLLM({
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: user },
+    ],
+    response_format: { type: "json_object" },
+  });
+
+  return parseJsonContent<T>(response.choices[0]?.message.content);
+}
+
 function formatStructuredInput(structured?: StructuredFounderInput) {
   const parsed = structuredFounderInputSchema.parse(structured ?? {});
   const sections = parsed.sections
@@ -373,21 +457,12 @@ function fallbackBrief(input: StartReviewInput, language: Language): ProjectBrie
 
 async function generateBriefWithLLM(input: StartReviewInput, language: Language) {
   const raw = mergeFounderInput(input);
-  const response = await invokeLLM({
-    messages: [
-      { role: "system", content: extractorPrompt[language] },
-      {
-        role: "user",
-        content:
-          language === "ar"
-            ? `المواد الخام:\n${raw}`
-            : `Raw founder material:\n${raw}`,
-      },
-    ],
-    response_format: { type: "json_object" },
+  const parsed = await callStructuredModel<ProjectBrief>({
+    system: extractorPrompt[language],
+    user: language === "ar" ? `المواد الخام:\n${raw}` : `Raw founder material:\n${raw}`,
   });
 
-  return projectBriefSchema.parse(parseJsonContent<ProjectBrief>(response.choices[0]?.message.content));
+  return projectBriefSchema.parse(parsed);
 }
 
 function briefStrengthSignals(brief: ProjectBrief) {
@@ -550,21 +625,14 @@ async function generateAgentReviewWithLLM(
   agent: AgentKey,
   language: Language,
 ): Promise<AgentReview> {
-  const response = await invokeLLM({
-    messages: [
-      { role: "system", content: agentPrompts[language][agent] },
-      {
-        role: "user",
-        content:
-          language === "ar"
-            ? `قيّم هذا الـ Project Brief:\n${JSON.stringify(brief, null, 2)}\nأعد الحقول التالية فقط: agent, label, score, confidence, stance, key_insight, top_objections, strengths, summary`
-            : `Evaluate this project brief:\n${JSON.stringify(brief, null, 2)}\nReturn only these fields: agent, label, score, confidence, stance, key_insight, top_objections, strengths, summary`,
-      },
-    ],
-    response_format: { type: "json_object" },
+  const parsed = await callStructuredModel<AgentReview>({
+    system: agentPrompts[language][agent],
+    user:
+      language === "ar"
+        ? `قيّم هذا الـ Project Brief:\n${JSON.stringify(brief, null, 2)}\nأعد الحقول التالية فقط: agent, label, score, confidence, stance, key_insight, top_objections, strengths, summary`
+        : `Evaluate this project brief:\n${JSON.stringify(brief, null, 2)}\nReturn only these fields: agent, label, score, confidence, stance, key_insight, top_objections, strengths, summary`,
   });
 
-  const parsed = parseJsonContent<AgentReview>(response.choices[0]?.message.content);
   return agentReviewSchema.parse({ ...parsed, agent, label: agentLabels[language][agent] });
 }
 
@@ -575,6 +643,10 @@ function getLiveMode(useMock: boolean) {
 export async function startReview(input: StartReviewInput): Promise<FirstReview> {
   const parsed = startReviewInputSchema.parse(input);
   const language = inferLanguage(parsed);
+  const qualityIssue = getInputQualityIssue(parsed, language);
+  if (qualityIssue) {
+    throw new Error(qualityIssue);
+  }
   const direction = getDirection(language);
   const mode = getLiveMode(parsed.useMock);
 
@@ -655,23 +727,13 @@ async function structureRebuttalWithLLM(
   firstReview: AgentReview[],
   language: Language,
 ) {
-  const response = await invokeLLM({
-    messages: [
-      { role: "system", content: rebuttalPrompt[language] },
-      {
-        role: "user",
-        content:
-          language === "ar"
-            ? `اعتراضات اللجنة:\n${JSON.stringify(firstReview, null, 2)}\nرد المؤسس:\n${JSON.stringify(rebuttal, null, 2)}\nأعد JSON من الحقول: agent, objection, response`
-            : `Committee objections:\n${JSON.stringify(firstReview, null, 2)}\nFounder rebuttal:\n${JSON.stringify(rebuttal, null, 2)}\nReturn JSON items with fields: agent, objection, response`,
-      },
-    ],
-    response_format: { type: "json_object" },
+  const parsed = await callStructuredModel<{ linked_rebuttal?: LinkedRebuttalItem[]; items?: LinkedRebuttalItem[]; data?: LinkedRebuttalItem[] }>({
+    system: rebuttalPrompt[language],
+    user:
+      language === "ar"
+        ? `اعتراضات اللجنة:\n${JSON.stringify(firstReview, null, 2)}\nرد المؤسس:\n${JSON.stringify(rebuttal, null, 2)}\nأعد JSON من الحقول: agent, objection, response`
+        : `Committee objections:\n${JSON.stringify(firstReview, null, 2)}\nFounder rebuttal:\n${JSON.stringify(rebuttal, null, 2)}\nReturn JSON items with fields: agent, objection, response`,
   });
-
-  const parsed = parseJsonContent<{ linked_rebuttal?: LinkedRebuttalItem[]; items?: LinkedRebuttalItem[]; data?: LinkedRebuttalItem[] }>(
-    response.choices[0]?.message.content,
-  );
 
   const items = parsed.linked_rebuttal ?? parsed.items ?? parsed.data ?? [];
   return items.map(item => linkedRebuttalItemSchema.parse(item));
@@ -746,29 +808,22 @@ function mockReevaluationForAgent(
     remaining_concerns: remaining,
   });
 }
-
 async function generateReevaluationWithLLM(
   review: AgentReview,
   linkedItems: LinkedRebuttalItem[],
   brief: ProjectBrief,
   language: Language,
 ) {
-  const response = await invokeLLM({
-    messages: [
-      { role: "system", content: reevaluatePrompts[language][review.agent] },
-      {
-        role: "user",
-        content:
-          language === "ar"
-            ? `الـ Project Brief:\n${JSON.stringify(brief, null, 2)}\nالمراجعة الأولى:\n${JSON.stringify(review, null, 2)}\nالردود المرتبطة:\n${JSON.stringify(linkedItems, null, 2)}\nأعد الحقول فقط: agent, label, updated_score, score_delta, updated_stance, rebuttal_quality, key_insight, what_changed, remaining_concerns`
-            : `Project brief:\n${JSON.stringify(brief, null, 2)}\nFirst review:\n${JSON.stringify(review, null, 2)}\nLinked rebuttal:\n${JSON.stringify(linkedItems, null, 2)}\nReturn only these fields: agent, label, updated_score, score_delta, updated_stance, rebuttal_quality, key_insight, what_changed, remaining_concerns`,
-      },
-    ],
-    response_format: { type: "json_object" },
+  const parsed = await callStructuredModel<Reevaluation>({
+    system: reevaluatePrompts[language][review.agent],
+    user:
+      language === "ar"
+        ? `الـ Project Brief:\n${JSON.stringify(brief, null, 2)}\nالمراجعة الأولى:\n${JSON.stringify(review, null, 2)}\nالردود المرتبطة:\n${JSON.stringify(linkedItems, null, 2)}\nأعد الحقول فقط: agent, label, updated_score, score_delta, updated_stance, rebuttal_quality, key_insight, what_changed, remaining_concerns`
+        : `Project brief:\n${JSON.stringify(brief, null, 2)}\nFirst review:\n${JSON.stringify(review, null, 2)}\nLinked rebuttal:\n${JSON.stringify(linkedItems, null, 2)}\nReturn only these fields: agent, label, updated_score, score_delta, updated_stance, rebuttal_quality, key_insight, what_changed, remaining_concerns`,
   });
 
-  const parsed = parseJsonContent<Reevaluation>(response.choices[0]?.message.content);
-  return reevaluationSchema.parse({ ...parsed, agent: review.agent, label: agentLabels[language][review.agent] });
+  return reevaluationSchema.parse({
+ ...parsed, agent: review.agent, label: agentLabels[language][review.agent] });
 }
 
 export function buildComparisonRows(reviews: AgentReview[], secondRound: Reevaluation[]): ComparisonRow[] {
@@ -809,13 +864,16 @@ function mockFinalVerdict(
         : language === "ar"
           ? "الفكرة واضحة ويمكن فهمها بسرعة."
           : "The idea is clear enough to understand quickly.",
-    what_improved_after_rebuttal: improved.length > 0
-      ? improved.map(item =>
-          language === "ar"
-            ? `${item.label} رفع تقييمه بمقدار ${item.score_delta.toFixed(1)}.`
-            : `${item.label} improved by ${item.score_delta.toFixed(1)}.`,
-        ).slice(0, 3)
-      : [language === "ar" ? "الرد حسّن الوضوح أكثر من تغيير الحكم جذريًا." : "The rebuttal improved clarity more than it changed the overall verdict."] ,
+    what_improved_after_rebuttal:
+      improved.length > 0
+        ? improved
+            .map(item =>
+              language === "ar"
+                ? `${item.label} رفع تقييمه بمقدار ${item.score_delta.toFixed(1)}.`
+                : `${item.label} improved by ${item.score_delta.toFixed(1)}.`,
+            )
+            .slice(0, 3)
+        : [language === "ar" ? "الرد حسّن الوضوح أكثر من تغيير الحكم جذريًا." : "The rebuttal improved clarity more than it changed the overall verdict."],
     what_still_feels_unproven: trimArray(remaining, language === "ar" ? "ما تزال بعض الافتراضات بحاجة لإثبات." : "Some core assumptions still need proof.", 3),
     committee_summary:
       language === "ar"
@@ -842,21 +900,14 @@ async function generateFinalVerdictWithLLM(
   secondRound: Reevaluation[],
   language: Language,
 ) {
-  const response = await invokeLLM({
-    messages: [
-      { role: "system", content: judgePrompts[language] },
-      {
-        role: "user",
-        content:
-          language === "ar"
-            ? `الـ Project Brief:\n${JSON.stringify(brief, null, 2)}\nالجولة الأولى:\n${JSON.stringify(reviews, null, 2)}\nالجولة الثانية:\n${JSON.stringify(secondRound, null, 2)}\nأعد فقط: final_score, confidence, verdict, biggest_risk, biggest_strength, what_improved_after_rebuttal, what_still_feels_unproven, committee_summary, actionable_tips`
-            : `Project brief:\n${JSON.stringify(brief, null, 2)}\nFirst round:\n${JSON.stringify(reviews, null, 2)}\nSecond round:\n${JSON.stringify(secondRound, null, 2)}\nReturn only: final_score, confidence, verdict, biggest_risk, biggest_strength, what_improved_after_rebuttal, what_still_feels_unproven, committee_summary, actionable_tips`,
-      },
-    ],
-    response_format: { type: "json_object" },
+  const parsed = await callStructuredModel<FinalVerdict>({
+    system: judgePrompts[language],
+    user:
+      language === "ar"
+        ? `الـ Project Brief:\n${JSON.stringify(brief, null, 2)}\nالجولة الأولى:\n${JSON.stringify(reviews, null, 2)}\nالجولة الثانية:\n${JSON.stringify(secondRound, null, 2)}\nأعد فقط: final_score, confidence, verdict, biggest_risk, biggest_strength, what_improved_after_rebuttal, what_still_feels_unproven, committee_summary, actionable_tips`
+        : `Project brief:\n${JSON.stringify(brief, null, 2)}\nFirst round:\n${JSON.stringify(reviews, null, 2)}\nSecond round:\n${JSON.stringify(secondRound, null, 2)}\nReturn only: final_score, confidence, verdict, biggest_risk, biggest_strength, what_improved_after_rebuttal, what_still_feels_unproven, committee_summary, actionable_tips`,
   });
 
-  const parsed = parseJsonContent<FinalVerdict>(response.choices[0]?.message.content);
   return finalVerdictSchema.parse(parsed);
 }
 

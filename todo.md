@@ -23,3 +23,12 @@
 - [x] Convert the committee experience from a long single-page layout into a clear multi-page flow
 - [x] Add final report download/export for the user after the judge verdict
 - [x] Verify whether the current live committee setup needs an external OpenAI API key or can continue with the built-in server LLM helper
+- [ ] Explain the app mode clearly in the UI so users understand what it means
+- [x] Change the default theme to light mode while keeping an explicit dark-mode toggle
+- [ ] Improve extremely short-input handling so trivial inputs like a single letter do not produce misleading strong scores
+- [ ] Switch committee evaluation to use GPT via the provided OpenAI API key and validate the integration safely
+- [x] Redesign the interface with clearer colors, stronger visual hierarchy, and more polished interactions across the full flow
+- [x] Make the experience feel like distinct page changes rather than long downward scrolling
+- [x] Ensure both light mode and dark mode are available in the visible UI
+- [x] Improve the presentation style of customer responses so they read more clearly and feel more credible
+- [x] Remove the confusing inline demo toggle from the real submission form and separate demo entry from actual project submission

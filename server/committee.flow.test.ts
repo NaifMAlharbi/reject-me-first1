@@ -22,6 +22,15 @@ describe("committeeStepRoutes", () => {
     ]);
     expect(committeeStepRoutes.ar[4]?.label).toBe("الحكم النهائي");
   });
+
+  it("keeps the landing copy focused on separate real submission and guided demo entry points", () => {
+    expect(copy.en.submitProject.toLowerCase()).toContain("project");
+    expect(copy.en.exploreDemo.toLowerCase()).toContain("demo");
+    expect(copy.ar.submitProject).toContain("مشروع");
+    expect(copy.ar.exploreDemo).toContain("ديمو");
+    expect(copy.en.liveMode).not.toEqual(copy.en.mockMode);
+    expect(copy.ar.liveMode).not.toEqual(copy.ar.mockMode);
+  });
 });
 
 afterEach(() => {

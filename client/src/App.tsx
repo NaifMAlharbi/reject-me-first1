@@ -1,7 +1,7 @@
-import { TooltipProvider } from "@/components/ui/tooltip";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { CommitteeFlowProvider } from "@/contexts/CommitteeFlowContext";
-import NotFound from "@/pages/NotFound";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import {
   BriefPage,
   InputPage,
@@ -10,7 +10,7 @@ import {
   ReviewPage,
   VerdictPage,
 } from "@/pages/CommitteePages";
-import { ThemeProvider } from "@/contexts/ThemeContext";
+import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 
 function Router() {
@@ -28,10 +28,10 @@ function Router() {
   );
 }
 
-function App() {
+export default function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark">
+      <ThemeProvider defaultTheme="light" switchable>
         <TooltipProvider>
           <CommitteeFlowProvider>
             <Router />
@@ -41,5 +41,3 @@ function App() {
     </ErrorBoundary>
   );
 }
-
-export default App;

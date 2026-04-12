@@ -1,12 +1,46 @@
 import { CommitteeFlowShell } from "@/components/CommitteeFlowShell";
-import { useCommitteeFlow } from "@/contexts/CommitteeFlowContext";
-import { agentLabels, rebuttalQualityLabels, stanceLabels, verdictLabels } from "@shared/rejectMeFirst";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useCommitteeFlow } from "@/contexts/CommitteeFlowContext";
 import { committeeStepRoutes, scoreDeltaText, scoreText } from "@/lib/reject-me-first";
-import { AlertTriangle, CheckCircle2, ChevronDown, FileDown, FlaskConical, Globe2, Sparkles } from "lucide-react";
+import {
+  agentLabels,
+  rebuttalQualityLabels,
+  stanceLabels,
+  verdictLabels,
+} from "@shared/rejectMeFirst";
+import {
+  AlertTriangle,
+  ArrowRight,
+  BriefcaseBusiness,
+  CheckCircle2,
+  ChevronDown,
+  Cpu,
+  FileDown,
+  FlaskConical,
+  FolderOpen,
+  Globe2,
+  MessageSquareQuote,
+  ShieldCheck,
+  Sparkles,
+  Users,
+} from "lucide-react";
+import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { useLocation } from "wouter";
+
+const agentIcons = {
+  investor: BriefcaseBusiness,
+  customer: Users,
+  technical: Cpu,
+} as const;
 
 function useFlowPage(currentStep: "input" | "brief" | "review" | "rebuttal" | "verdict") {
   const flow = useCommitteeFlow();
@@ -15,11 +49,11 @@ function useFlowPage(currentStep: "input" | "brief" | "review" | "rebuttal" | "v
 
   const statusSlot = (
     <>
-      <Badge variant="outline" className="border-white/10 bg-white/5 text-foreground">
+      <Badge variant="outline" className="border-border bg-background text-foreground">
         <Globe2 className="me-2 h-3.5 w-3.5" />
         {flow.text.language}: {flow.preferredLanguage === "ar" ? "العربية" : "English"}
       </Badge>
-      <Badge variant="outline" className="border-white/10 bg-white/5 text-foreground">
+      <Badge variant="outline" className="border-border bg-background text-foreground">
         {flow.useMock ? <FlaskConical className="me-2 h-3.5 w-3.5" /> : <Sparkles className="me-2 h-3.5 w-3.5" />}
         {flow.useMock ? flow.text.mockMode : flow.text.liveMode}
       </Badge>
@@ -55,28 +89,27 @@ function StatusRail() {
   ];
 
   return (
-    <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4">
-      <p className="mb-3 text-xs uppercase tracking-[0.22em] text-[var(--accent)]">{flow.text.panelStatus}</p>
-      <div className="grid gap-3 md:grid-cols-3">
-        {statuses.map(item => (
-          <div key={item.label} className="rounded-2xl border border-white/10 bg-black/20 p-4">
-            <div className="mb-2 flex items-center gap-2">
+    <div className="grid gap-3 md:grid-cols-3">
+      {statuses.map(item => (
+        <Card key={item.label} className="gap-3 border-border/70 bg-background/70 py-4 shadow-none">
+          <CardContent className="px-4">
+            <div className="flex items-center gap-2">
               {item.active ? (
-                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
               ) : (
-                <AlertTriangle className="h-4 w-4 text-amber-300" />
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
               )}
               <span className="text-sm font-medium">{item.label}</span>
             </div>
-            <p className="text-xs text-muted-foreground">{flow.text.savedDraft}</p>
-          </div>
-        ))}
-      </div>
+            <p className="mt-2 text-xs leading-6 text-muted-foreground">{flow.text.savedDraft}</p>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block space-y-2">
       <span className="text-sm font-medium text-foreground">{label}</span>
@@ -87,8 +120,59 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function inputClassName(multiline = false) {
   return multiline
-    ? "min-h-28 w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-foreground outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[rgba(216,195,159,0.2)]"
-    : "h-12 w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 text-sm text-foreground outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[rgba(216,195,159,0.2)]";
+    ? "min-h-28 w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
+    : "h-12 w-full rounded-2xl border border-border bg-background px-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15";
+}
+
+function SummaryBlock({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <Card className="gap-3 border-border/70 bg-background/70 py-4 shadow-none">
+      <CardContent className="px-5">
+        <p className="mb-2 text-xs uppercase tracking-[0.22em] text-primary">{label}</p>
+        <p className="text-sm leading-7 text-foreground/90">{value || "—"}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-border bg-background px-4 py-3">
+      <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
+      <p className="mt-2 text-sm font-medium leading-6">{value}</p>
+    </div>
+  );
+}
+
+function BulletCard({ title, items }: { title: string; items: string[] }) {
+  return (
+    <Card className="gap-3 border-border/70 bg-background/70 py-4 shadow-none">
+      <CardHeader className="px-5 pb-0">
+        <CardTitle className="text-base">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="px-5 pt-0">
+        <ul className="space-y-3 text-sm text-muted-foreground">
+          {items.map(item => (
+            <li key={item} className="flex gap-3 leading-7">
+              <span className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SectionLead({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+      <div>
+        <p className="text-xs uppercase tracking-[0.25em] text-primary">{title}</p>
+        <p className="mt-2 text-sm leading-7 text-muted-foreground">{description}</p>
+      </div>
+    </div>
+  );
 }
 
 export function LandingPage() {
@@ -96,51 +180,90 @@ export function LandingPage() {
 
   return (
     <div dir={flow.direction} className="min-h-screen bg-background text-foreground">
-      <div className="container py-10 md:py-14">
-        <section className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-          <div className="space-y-6 rounded-[36px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-8 shadow-[0_30px_90px_rgba(0,0,0,0.28)] md:p-10">
-            <Badge variant="outline" className="border-[rgba(216,195,159,0.24)] bg-[rgba(216,195,159,0.08)] text-[var(--accent)]">
-              {flow.text.eyebrow}
-            </Badge>
-            <div className="space-y-4">
-              <h1 className="max-w-3xl text-4xl font-semibold tracking-tight md:text-6xl">{flow.text.title}</h1>
-              <p className="max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">{flow.text.subtitle}</p>
-              <p className="max-w-2xl text-sm leading-7 text-muted-foreground">{flow.text.landingDescription}</p>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button size="lg" onClick={() => navigate("/flow/input")}>
-                {flow.text.startFlow}
-              </Button>
-              <Button size="lg" variant="outline" onClick={() => flow.loadDemo().then(() => navigate("/flow/review"))}>
-                {flow.text.loadDemo}
-              </Button>
-            </div>
-          </div>
-
-          <div className="space-y-4 rounded-[30px] border border-white/10 bg-[#111111] p-6">
-            <p className="text-xs uppercase tracking-[0.22em] text-[var(--accent)]">{flow.text.comparison}</p>
-            {committeeStepRoutes[flow.preferredLanguage].map((step, index) => (
-              <div key={step.key} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                <div className="mb-2 flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(216,195,159,0.18)] text-sm font-semibold text-[var(--accent)]">
-                    {index + 1}
-                  </div>
-                  <p className="font-medium">{step.label}</p>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {index === 0
-                    ? flow.text.pageIntroBrief
-                    : index === 1
-                      ? flow.text.briefReady
-                      : index === 2
-                        ? flow.text.pageIntroReview
-                        : index === 3
-                          ? flow.text.pageIntroRebuttal
-                          : flow.text.pageIntroVerdict}
-                </p>
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[24rem] bg-[radial-gradient(circle_at_top_left,rgba(250,204,21,0.18),transparent_34%),radial-gradient(circle_at_top_right,rgba(99,102,241,0.16),transparent_34%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(250,204,21,0.12),transparent_34%),radial-gradient(circle_at_top_right,rgba(99,102,241,0.2),transparent_34%)]" />
+      <div className="container relative py-10 md:py-14">
+        <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr] xl:items-start">
+          <Card className="rounded-[36px] border-border/70 bg-card/90 py-0 shadow-[0_28px_90px_rgba(15,23,42,0.08)] dark:shadow-[0_32px_100px_rgba(0,0,0,0.28)]">
+            <CardContent className="p-8 md:p-10">
+              <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary">
+                {flow.text.eyebrow}
+              </Badge>
+              <div className="mt-5 space-y-4">
+                <h1 className="max-w-3xl text-4xl font-semibold tracking-tight md:text-6xl">{flow.text.title}</h1>
+                <p className="max-w-3xl text-base leading-8 text-muted-foreground md:text-lg">{flow.text.subtitle}</p>
+                <p className="max-w-3xl text-sm leading-7 text-muted-foreground">{flow.text.landingDescription}</p>
               </div>
-            ))}
-          </div>
+
+              <div className="mt-8 grid gap-4 md:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    flow.setUseMock(false);
+                    navigate("/flow/input");
+                  }}
+                  className="group rounded-[28px] border border-primary/20 bg-primary/[0.08] p-5 text-left transition hover:-translate-y-1 hover:border-primary/35 hover:bg-primary/[0.11]"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
+                      <FolderOpen className="h-5 w-5" />
+                    </div>
+                    <ArrowRight className="h-5 w-5 text-primary transition group-hover:translate-x-1 rtl:rotate-180" />
+                  </div>
+                  <h2 className="mt-5 text-xl font-semibold">{flow.text.submitProject}</h2>
+                  <p className="mt-2 text-sm leading-7 text-muted-foreground">{flow.text.submitProjectDesc}</p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => void flow.loadDemo().then(() => navigate("/flow/review"))}
+                  className="group rounded-[28px] border border-border bg-background p-5 text-left transition hover:-translate-y-1 hover:border-primary/25 hover:bg-card"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/12 text-emerald-600 dark:text-emerald-300">
+                      <FlaskConical className="h-5 w-5" />
+                    </div>
+                    <ArrowRight className="h-5 w-5 text-muted-foreground transition group-hover:translate-x-1 rtl:rotate-180" />
+                  </div>
+                  <h2 className="mt-5 text-xl font-semibold">{flow.text.exploreDemo}</h2>
+                  <p className="mt-2 text-sm leading-7 text-muted-foreground">{flow.text.exploreDemoDesc}</p>
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-[32px] border-border/70 bg-card/90 py-0 shadow-[0_24px_70px_rgba(15,23,42,0.06)] dark:shadow-[0_28px_90px_rgba(0,0,0,0.24)]">
+            <CardHeader>
+              <CardTitle>{flow.preferredLanguage === "ar" ? "كيف تمشي التجربة؟" : "How the experience moves"}</CardTitle>
+              <CardDescription>
+                {flow.preferredLanguage === "ar"
+                  ? "كل خطوة لها صفحة مستقلة حتى تكون القراءة أوضح وما يصير كل شيء في شاشة واحدة طويلة."
+                  : "Each stage is a separate page, so the flow feels deliberate instead of one long scrolling screen."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {committeeStepRoutes[flow.preferredLanguage].map((step, index) => (
+                <div key={step.key} className="rounded-2xl border border-border bg-background/70 p-4">
+                  <div className="mb-2 flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                      {index + 1}
+                    </div>
+                    <p className="font-medium">{step.label}</p>
+                  </div>
+                  <p className="text-sm leading-7 text-muted-foreground">
+                    {index === 0
+                      ? flow.text.pageIntroBrief
+                      : index === 1
+                        ? flow.text.briefReady
+                        : index === 2
+                          ? flow.text.pageIntroReview
+                          : index === 3
+                            ? flow.text.pageIntroRebuttal
+                            : flow.text.pageIntroVerdict}
+                  </p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         </section>
       </div>
     </div>
@@ -168,32 +291,83 @@ export function InputPage() {
         <div className="space-y-6">
           <StatusRail />
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4">
-              <p className="mb-3 text-sm font-medium">{flow.text.language}</p>
-              <div className="flex gap-3">
-                <Button variant={flow.preferredLanguage === "en" ? "default" : "outline"} onClick={() => flow.setPreferredLanguage("en")}>English</Button>
-                <Button variant={flow.preferredLanguage === "ar" ? "default" : "outline"} onClick={() => flow.setPreferredLanguage("ar")}>العربية</Button>
-              </div>
-            </div>
-            <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4">
-              <p className="mb-3 text-sm font-medium">{flow.text.mode}</p>
-              <div className="flex gap-3">
-                <Button variant={!flow.useMock ? "default" : "outline"} onClick={() => flow.setUseMock(false)}>{flow.text.liveMode}</Button>
-                <Button variant={flow.useMock ? "default" : "outline"} onClick={() => flow.setUseMock(true)}>{flow.text.mockMode}</Button>
-                <Button variant="ghost" onClick={() => void flow.loadDemo()}>{flow.text.loadDemo}</Button>
-              </div>
-            </div>
+          <div className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+            <Card className="gap-3 border-border/70 bg-background/70 py-4 shadow-none">
+              <CardHeader>
+                <CardTitle>{flow.text.language}</CardTitle>
+                <CardDescription>
+                  {flow.preferredLanguage === "ar"
+                    ? "اختر لغة الواجهة والمخرجات التي تناسبك."
+                    : "Choose the interface and output language that fits your workflow."}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex gap-3">
+                <Button variant={flow.preferredLanguage === "en" ? "default" : "outline"} onClick={() => flow.setPreferredLanguage("en")}>
+                  English
+                </Button>
+                <Button variant={flow.preferredLanguage === "ar" ? "default" : "outline"} onClick={() => flow.setPreferredLanguage("ar")}>
+                  العربية
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="gap-3 border-border/70 bg-background/70 py-4 shadow-none">
+              <CardHeader>
+                <CardTitle>{flow.useMock ? flow.text.mockMode : flow.text.liveMode}</CardTitle>
+                <CardDescription>
+                  {flow.useMock ? flow.text.modeHelpMock : flow.text.modeHelpLive}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-3">
+                <Button variant="outline" onClick={() => goTo("/")}>{flow.preferredLanguage === "ar" ? "العودة لاختيار المسار" : "Return to entry choices"}</Button>
+                {flow.useMock ? (
+                  <Button onClick={() => { flow.setUseMock(false); goTo("/flow/input"); }}>
+                    {flow.text.submitProject}
+                  </Button>
+                ) : (
+                  <Button variant="secondary" onClick={() => void flow.loadDemo().then(() => goTo("/flow/review"))}>
+                    {flow.text.exploreDemo}
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <Button variant={flow.inputMode === "free" ? "default" : "outline"} onClick={() => flow.setInputMode("free")}>{flow.text.freeText}</Button>
-            <Button variant={flow.inputMode === "structured" ? "default" : "outline"} onClick={() => flow.setInputMode("structured")}>{flow.text.structured}</Button>
-          </div>
+          {flow.reviewError && (
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm leading-7 text-amber-700 dark:text-amber-200">
+              {flow.reviewError}
+            </div>
+          )}
+
+          <Card className="gap-4 border-border/70 bg-background/70 py-4 shadow-none">
+            <CardHeader>
+              <CardTitle>{flow.preferredLanguage === "ar" ? "طريقة إدخال المشروع" : "How do you want to submit the project?"}</CardTitle>
+              <CardDescription>
+                {flow.preferredLanguage === "ar"
+                  ? "ابدأ بالنص الحر لو عندك وصف سريع، أو استخدم الإدخال المنظم لو تبغى لجنة أوضح من البداية."
+                  : "Start with free text for quick founder notes, or use the structured form for a cleaner first brief."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Button variant={flow.inputMode === "free" ? "default" : "outline"} onClick={() => flow.setInputMode("free")}>
+                  {flow.text.freeText}
+                </Button>
+                <Button variant={flow.inputMode === "structured" ? "default" : "outline"} onClick={() => flow.setInputMode("structured")}>
+                  {flow.text.structured}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
           {flow.inputMode === "free" ? (
             <Field label={flow.text.founderNarrative}>
-              <textarea className={inputClassName(true)} value={flow.freeText} placeholder={flow.text.founderNarrativePlaceholder} onChange={event => flow.setFreeText(event.target.value)} />
+              <textarea
+                className={inputClassName(true)}
+                value={flow.freeText}
+                placeholder={flow.text.founderNarrativePlaceholder}
+                onChange={event => flow.setFreeText(event.target.value)}
+              />
             </Field>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
@@ -226,24 +400,24 @@ export function InputPage() {
             </Field>
           </div>
 
-          <div className="space-y-4 rounded-[24px] border border-white/10 bg-white/[0.03] p-4">
-            <div className="flex items-center justify-between gap-3">
+          <Card className="gap-4 border-border/70 bg-background/70 py-4 shadow-none">
+            <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="font-medium">{flow.text.dynamicSections}</p>
-                <p className="text-sm text-muted-foreground">{flow.text.savedDraft}</p>
+                <CardTitle>{flow.text.dynamicSections}</CardTitle>
+                <CardDescription>{flow.text.savedDraft}</CardDescription>
               </div>
               <Button variant="outline" onClick={() => flow.addSection()}>{flow.text.addSection}</Button>
-            </div>
-            <div className="space-y-3">
+            </CardHeader>
+            <CardContent className="space-y-3">
               {flow.structured.sections.map((section, index) => (
-                <div key={`${section.title}-${index}`} className="grid gap-3 rounded-2xl border border-white/10 bg-black/20 p-4 md:grid-cols-[0.9fr_1.1fr_auto]">
+                <div key={`${section.title}-${index}`} className="grid gap-3 rounded-2xl border border-border bg-background p-4 md:grid-cols-[0.9fr_1.1fr_auto]">
                   <input className={inputClassName()} value={section.title} placeholder={flow.text.sectionTitle} onChange={event => flow.updateSection(index, "title", event.target.value)} />
                   <textarea className={inputClassName(true)} value={section.content} placeholder={flow.text.sectionContent} onChange={event => flow.updateSection(index, "content", event.target.value)} />
                   <Button variant="ghost" onClick={() => flow.removeSection(index)}>{flow.text.remove}</Button>
                 </div>
               ))}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </CommitteeFlowShell>
     </div>
@@ -265,42 +439,48 @@ export function BriefPage() {
         steps={[...pageSteps]}
         currentStep="brief"
         onNavigate={goTo}
-        primaryAction={{ label: flow.text.startCommittee, onClick: async () => { await flow.startCommittee(); goNext(); }, loading: flow.reviewPending }}
+        primaryAction={{
+          label: flow.text.startCommittee,
+          onClick: async () => {
+            await flow.startCommittee();
+            goNext();
+          },
+          loading: flow.reviewPending,
+        }}
         secondaryAction={{ label: flow.text.back, onClick: goBack }}
         tertiaryAction={{ label: flow.text.reset, onClick: flow.resetAll }}
         statusSlot={statusSlot}
       >
         <div className="space-y-6">
           <StatusRail />
-          {flow.reviewError && <div className="rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">{flow.reviewError}</div>}
+          {flow.reviewError && (
+            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm leading-7 text-red-700 dark:text-red-200">
+              {flow.reviewError}
+            </div>
+          )}
+
+          <SectionLead title={flow.text.projectBrief} description={flow.preferredLanguage === "ar" ? "هذا هو الملخص الذي ستراجعه اللجنة كما هو." : "This is the exact brief the committee will evaluate."} />
+
           {brief ? (
             <div className="grid gap-4 md:grid-cols-2">
               <SummaryBlock label={flow.text.projectName} value={brief.project_name} />
               <SummaryBlock label={flow.text.idea} value={brief.one_line_summary} />
               <SummaryBlock label={flow.text.problem} value={brief.problem} />
               <SummaryBlock label={flow.text.solution} value={brief.solution} />
-              <SummaryBlock label="Target customer" value={brief.target_customer} />
-              <SummaryBlock label="Business model" value={brief.business_model} />
-              <SummaryBlock label="Differentiation" value={brief.differentiation} />
-              <SummaryBlock label="Traction" value={brief.evidence_or_traction} />
+              <SummaryBlock label={flow.preferredLanguage === "ar" ? "العميل المستهدف" : "Target customer"} value={brief.target_customer} />
+              <SummaryBlock label={flow.preferredLanguage === "ar" ? "نموذج العمل" : "Business model"} value={brief.business_model} />
+              <SummaryBlock label={flow.preferredLanguage === "ar" ? "نقطة التميز" : "Differentiation"} value={brief.differentiation} />
+              <SummaryBlock label={flow.preferredLanguage === "ar" ? "الإثبات أو المؤشرات" : "Traction"} value={brief.evidence_or_traction} />
             </div>
           ) : (
-            <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-6">
-              <p className="text-sm text-muted-foreground">{flow.text.briefReady}</p>
-              <p className="mt-2 text-sm text-muted-foreground">{flow.text.startCommittee}</p>
-            </div>
+            <Card className="border-border/70 bg-background/70 py-6 shadow-none">
+              <CardContent className="px-6 text-sm leading-7 text-muted-foreground">
+                {flow.text.briefReady}
+              </CardContent>
+            </Card>
           )}
         </div>
       </CommitteeFlowShell>
-    </div>
-  );
-}
-
-function SummaryBlock({ label, value }: { label: string; value?: string | null }) {
-  return (
-    <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-5">
-      <p className="mb-2 text-xs uppercase tracking-[0.22em] text-[var(--accent)]">{label}</p>
-      <p className="text-sm leading-7 text-foreground/90">{value || "—"}</p>
     </div>
   );
 }
@@ -327,54 +507,69 @@ export function ReviewPage() {
         <div className="space-y-6">
           <StatusRail />
           {!flow.firstRound ? (
-            <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-6 text-sm text-muted-foreground">{flow.text.reviewMissing}</div>
+            <Card className="border-border/70 bg-background/70 py-6 shadow-none">
+              <CardContent className="px-6 text-sm leading-7 text-muted-foreground">{flow.text.reviewMissing}</CardContent>
+            </Card>
           ) : (
-            flow.firstRound.reviews.map(review => (
-              <details key={review.agent} open className="group rounded-[26px] border border-white/10 bg-white/[0.03] p-5">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.24em] text-[var(--accent)]">{review.label}</p>
-                    <h3 className="mt-2 text-xl font-semibold">{review.key_insight}</h3>
-                  </div>
-                  <ChevronDown className="h-5 w-5 transition group-open:rotate-180" />
-                </summary>
-                <div className="mt-5 grid gap-3 md:grid-cols-4">
-                  <Metric label={flow.text.score} value={scoreText(review.score)} />
-                  <Metric label={flow.text.confidence} value={`${review.confidence}%`} />
-                  <Metric label={flow.text.stance} value={stanceLabels[flow.preferredLanguage][review.stance]} />
-                  <Metric label={flow.text.keyInsight} value={review.summary} />
-                </div>
-                <div className="mt-5 grid gap-4 md:grid-cols-2">
-                  <BulletCard title={flow.text.strengths} items={review.strengths} />
-                  <BulletCard title={flow.text.objections} items={review.top_objections} />
-                </div>
-              </details>
-            ))
+            <>
+              <SectionLead
+                title={flow.text.reviewSummary}
+                description={flow.preferredLanguage === "ar"
+                  ? "تم تحسين عرض النتائج بحيث يظهر رأي كل جهة بشكل مستقل وواضح، خصوصًا منظور العميل."
+                  : "Each reviewer is now shown as a clearer decision card, with the customer perspective surfaced more prominently."}
+              />
+
+              <div className="grid gap-4 xl:grid-cols-3">
+                {flow.firstRound.reviews.map(review => {
+                  const AgentIcon = agentIcons[review.agent];
+                  const isCustomer = review.agent === "customer";
+                  return (
+                    <Card
+                      key={review.agent}
+                      className={isCustomer ? "border-primary/25 bg-primary/[0.05] py-0 shadow-[0_18px_40px_rgba(79,70,229,0.08)]" : "border-border/70 bg-background/80 py-0 shadow-none"}
+                    >
+                      <CardHeader>
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-center gap-3">
+                            <div className={isCustomer ? "flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground" : "flex h-12 w-12 items-center justify-center rounded-2xl bg-muted text-foreground"}>
+                              <AgentIcon className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <CardTitle className="text-lg">{review.label}</CardTitle>
+                              <CardDescription className="mt-1">{review.key_insight}</CardDescription>
+                            </div>
+                          </div>
+                          <Badge variant="outline" className="border-border bg-background text-foreground">
+                            {stanceLabels[flow.preferredLanguage][review.stance]}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
+                          <Metric label={flow.text.score} value={scoreText(review.score)} />
+                          <Metric label={flow.text.confidence} value={`${review.confidence}%`} />
+                        </div>
+
+                        <Card className="gap-3 border-border/70 bg-card py-4 shadow-none">
+                          <CardContent className="px-4">
+                            <p className="text-xs uppercase tracking-[0.22em] text-primary">{flow.text.summary}</p>
+                            <p className="mt-2 text-sm leading-7 text-muted-foreground">{review.summary}</p>
+                          </CardContent>
+                        </Card>
+
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <BulletCard title={flow.text.strengths} items={review.strengths} />
+                          <BulletCard title={flow.text.objections} items={review.top_objections} />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
       </CommitteeFlowShell>
-    </div>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-      <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
-      <p className="mt-2 text-sm font-medium leading-6">{value}</p>
-    </div>
-  );
-}
-
-function BulletCard({ title, items }: { title: string; items: string[] }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-      <p className="mb-3 font-medium">{title}</p>
-      <ul className="space-y-2 text-sm text-muted-foreground">
-        {items.map(item => (
-          <li key={item} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--accent)]" /> <span>{item}</span></li>
-        ))}
-      </ul>
     </div>
   );
 }
@@ -394,22 +589,52 @@ export function RebuttalPage() {
         steps={[...pageSteps]}
         currentStep="rebuttal"
         onNavigate={goTo}
-        primaryAction={{ label: flow.text.openVerdict, onClick: async () => { await flow.submitCommitteeRebuttal(); goNext(); }, disabled: !flow.hasFirstRound, loading: flow.rebuttalPending }}
+        primaryAction={{
+          label: flow.text.openVerdict,
+          onClick: async () => {
+            await flow.submitCommitteeRebuttal();
+            goNext();
+          },
+          disabled: !flow.hasFirstRound,
+          loading: flow.rebuttalPending,
+        }}
         secondaryAction={{ label: flow.text.back, onClick: goBack }}
         tertiaryAction={{ label: flow.text.reset, onClick: flow.resetAll }}
         statusSlot={statusSlot}
       >
         <div className="space-y-6">
           <StatusRail />
-          {flow.rebuttalError && <div className="rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">{flow.rebuttalError}</div>}
+          {flow.rebuttalError && (
+            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm leading-7 text-red-700 dark:text-red-200">
+              {flow.rebuttalError}
+            </div>
+          )}
           {!flow.firstRound ? (
-            <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-6 text-sm text-muted-foreground">{flow.text.reviewMissing}</div>
+            <Card className="border-border/70 bg-background/70 py-6 shadow-none">
+              <CardContent className="px-6 text-sm leading-7 text-muted-foreground">{flow.text.reviewMissing}</CardContent>
+            </Card>
           ) : (
             <>
-              <div className="grid gap-4 md:grid-cols-2">
-                <Button variant={flow.rebuttalMode === "free" ? "default" : "outline"} onClick={() => flow.setRebuttalMode("free")}>{flow.text.freeRebuttal}</Button>
-                <Button variant={flow.rebuttalMode === "structured" ? "default" : "outline"} onClick={() => flow.setRebuttalMode("structured")}>{flow.text.structuredRebuttal}</Button>
-              </div>
+              <Card className="border-border/70 bg-background/70 py-4 shadow-none">
+                <CardHeader>
+                  <CardTitle>{flow.preferredLanguage === "ar" ? "طريقة الرد" : "Choose the response format"}</CardTitle>
+                  <CardDescription>
+                    {flow.preferredLanguage === "ar"
+                      ? "إذا تبغى ترد بشكل عام استخدم النص الحر، وإذا تبغى ردًا أقوى وواضحًا استخدم الرد المنظم تحت كل اعتراض."
+                      : "Use a free rebuttal for a broad response, or structured rebuttals when you want to address objections one by one."}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Button variant={flow.rebuttalMode === "free" ? "default" : "outline"} onClick={() => flow.setRebuttalMode("free")}>
+                      {flow.text.freeRebuttal}
+                    </Button>
+                    <Button variant={flow.rebuttalMode === "structured" ? "default" : "outline"} onClick={() => flow.setRebuttalMode("structured")}>
+                      {flow.text.structuredRebuttal}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
               {flow.rebuttalMode === "free" ? (
                 <Field label={flow.text.freeRebuttal}>
@@ -419,29 +644,57 @@ export function RebuttalPage() {
                 <div className="space-y-4">
                   {reviews.map(review => {
                     const rows = flow.structuredRebuttal[review.agent];
+                    const AgentIcon = agentIcons[review.agent];
                     return (
-                      <div key={review.agent} className="rounded-[26px] border border-white/10 bg-white/[0.03] p-5">
-                        <div className="mb-4 flex items-center justify-between gap-3">
-                          <div>
-                            <p className="text-xs uppercase tracking-[0.22em] text-[var(--accent)]">{review.label}</p>
-                            <p className="mt-2 text-sm text-muted-foreground">{flow.text.linkedResponses}</p>
-                          </div>
-                          <Button variant="outline" onClick={() => flow.addStructuredRebuttalRow(review.agent)}>{flow.text.addSection}</Button>
-                        </div>
-                        <div className="space-y-3">
-                          {rows.map((row, index) => (
-                            <div key={`${review.agent}-${index}`} className="grid gap-3 rounded-2xl border border-white/10 bg-black/20 p-4 md:grid-cols-2">
-                              <textarea className={inputClassName(true)} value={row.objection} placeholder={flow.text.objection} onChange={event => flow.setStructuredRebuttal(review.agent, index, "objection", event.target.value)} />
-                              <div className="space-y-3">
-                                <textarea className={inputClassName(true)} value={row.response} placeholder={flow.text.response} onChange={event => flow.setStructuredRebuttal(review.agent, index, "response", event.target.value)} />
-                                <div className="flex justify-end">
-                                  <Button variant="ghost" onClick={() => flow.removeStructuredRebuttalRow(review.agent, index)}>{flow.text.remove}</Button>
-                                </div>
+                      <Card key={review.agent} className="border-border/70 bg-background/80 py-0 shadow-none">
+                        <CardHeader>
+                          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                                <AgentIcon className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <CardTitle className="text-lg">{review.label}</CardTitle>
+                                <CardDescription>{flow.text.linkedResponses}</CardDescription>
                               </div>
                             </div>
-                          ))}
-                        </div>
-                      </div>
+                            <Button variant="outline" onClick={() => flow.addStructuredRebuttalRow(review.agent)}>
+                              {flow.text.addSection}
+                            </Button>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="rounded-2xl border border-border bg-card p-4">
+                            <p className="mb-3 text-sm font-medium">{flow.text.objections}</p>
+                            <ul className="space-y-2 text-sm leading-7 text-muted-foreground">
+                              {review.top_objections.map(objection => (
+                                <li key={objection} className="flex gap-3">
+                                  <MessageSquareQuote className="mt-1 h-4 w-4 shrink-0 text-primary" />
+                                  <span>{objection}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          <div className="space-y-3">
+                            {rows.map((row, index) => (
+                              <div key={`${review.agent}-${index}`} className="grid gap-3 rounded-2xl border border-border bg-card p-4 lg:grid-cols-[0.95fr_1.05fr]">
+                                <div className="space-y-2">
+                                  <p className="text-xs uppercase tracking-[0.22em] text-primary">{flow.text.objection}</p>
+                                  <textarea className={inputClassName(true)} value={row.objection} placeholder={flow.text.objection} onChange={event => flow.setStructuredRebuttal(review.agent, index, "objection", event.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between gap-3">
+                                    <p className="text-xs uppercase tracking-[0.22em] text-primary">{flow.text.response}</p>
+                                    <Button variant="ghost" onClick={() => flow.removeStructuredRebuttalRow(review.agent, index)}>{flow.text.remove}</Button>
+                                  </div>
+                                  <textarea className={inputClassName(true)} value={row.response} placeholder={flow.text.response} onChange={event => flow.setStructuredRebuttal(review.agent, index, "response", event.target.value)} />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
                     );
                   })}
                 </div>
@@ -480,40 +733,78 @@ export function VerdictPage() {
         <div className="space-y-6">
           <StatusRail />
           {!flow.rebuttalResult ? (
-            <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-6 text-sm text-muted-foreground">{flow.text.rebuttalMissing}</div>
+            <Card className="border-border/70 bg-background/70 py-6 shadow-none">
+              <CardContent className="px-6 text-sm leading-7 text-muted-foreground">{flow.text.rebuttalMissing}</CardContent>
+            </Card>
           ) : (
             <>
-              <div className="rounded-[28px] border border-[rgba(216,195,159,0.2)] bg-[rgba(216,195,159,0.06)] p-6">
-                <div className="flex flex-wrap items-center gap-3">
-                  <Badge className="bg-[var(--accent)] text-black hover:bg-[var(--accent)]">{verdictLabels[flow.preferredLanguage][flow.rebuttalResult.final_verdict.verdict]}</Badge>
-                  <Badge variant="outline" className="border-white/10 bg-white/[0.03] text-foreground">{flow.text.score}: {scoreText(flow.rebuttalResult.final_verdict.final_score)}</Badge>
-                  <Badge variant="outline" className="border-white/10 bg-white/[0.03] text-foreground">{flow.text.confidence}: {flow.rebuttalResult.final_verdict.confidence}%</Badge>
-                </div>
-                <p className="mt-4 text-lg leading-8">{flow.rebuttalResult.final_verdict.committee_summary}</p>
-                <div className="mt-5 flex items-center gap-3 text-sm text-muted-foreground">
-                  <FileDown className="h-4 w-4 text-[var(--accent)]" />
-                  <span>{flow.text.reportReady}</span>
-                </div>
-              </div>
+              <Card className="rounded-[30px] border-primary/20 bg-primary/[0.07] py-0 shadow-[0_20px_60px_rgba(79,70,229,0.1)]">
+                <CardHeader>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Badge className="bg-primary text-primary-foreground hover:bg-primary">
+                      {verdictLabels[flow.preferredLanguage][flow.rebuttalResult.final_verdict.verdict]}
+                    </Badge>
+                    <Badge variant="outline" className="border-border bg-background text-foreground">
+                      {flow.text.score}: {scoreText(flow.rebuttalResult.final_verdict.final_score)}
+                    </Badge>
+                    <Badge variant="outline" className="border-border bg-background text-foreground">
+                      {flow.text.confidence}: {flow.rebuttalResult.final_verdict.confidence}%
+                    </Badge>
+                  </div>
+                  <CardTitle className="text-2xl">
+                    {flow.preferredLanguage === "ar" ? "قرار اللجنة النهائي" : "Final committee decision"}
+                  </CardTitle>
+                  <CardDescription className="text-base leading-8 text-foreground/80">
+                    {flow.rebuttalResult.final_verdict.committee_summary}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <FileDown className="h-4 w-4 text-primary" />
+                    <span>{flow.text.reportReady}</span>
+                  </div>
+                </CardContent>
+              </Card>
 
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <SectionLead
+                title={flow.text.comparison}
+                description={flow.preferredLanguage === "ar"
+                  ? "هنا يظهر كيف تغيّر موقف كل طرف بعد ردك، مع إبراز جودة الرد والنتيجة الجديدة."
+                  : "This view shows how each reviewer changed after the rebuttal, including the updated stance and response quality."}
+              />
+
+              <div className="grid gap-4 xl:grid-cols-3">
                 {flow.firstRound?.reviews.map(review => {
                   const updated = secondRoundMap.get(review.agent);
                   if (!updated) return null;
+                  const AgentIcon = agentIcons[review.agent];
+                  const isCustomer = review.agent === "customer";
                   return (
-                    <div key={review.agent} className="rounded-[24px] border border-white/10 bg-white/[0.03] p-5">
-                      <p className="text-xs uppercase tracking-[0.22em] text-[var(--accent)]">{agentLabels[flow.preferredLanguage][review.agent]}</p>
-                      <div className="mt-4 grid gap-3">
-                        <Metric label={flow.text.score} value={`${scoreText(review.score)} → ${scoreText(updated.updated_score)}`} />
-                        <Metric label={flow.text.scoreDelta} value={scoreDeltaText(updated.score_delta)} />
-                        <Metric label={flow.text.stance} value={`${stanceLabels[flow.preferredLanguage][review.stance]} → ${stanceLabels[flow.preferredLanguage][updated.updated_stance]}`} />
-                        <Metric label={flow.text.response} value={rebuttalQualityLabels[flow.preferredLanguage][updated.rebuttal_quality]} />
-                      </div>
-                      <div className="mt-4 space-y-3 text-sm leading-7 text-muted-foreground">
-                        <p><span className="font-medium text-foreground">{flow.text.whatChanged}:</span> {updated.what_changed}</p>
-                        <p><span className="font-medium text-foreground">{flow.text.keyInsight}:</span> {updated.key_insight}</p>
-                      </div>
-                    </div>
+                    <Card key={review.agent} className={isCustomer ? "border-primary/25 bg-primary/[0.05] py-0 shadow-[0_18px_40px_rgba(79,70,229,0.08)]" : "border-border/70 bg-background/80 py-0 shadow-none"}>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className={isCustomer ? "flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground" : "flex h-11 w-11 items-center justify-center rounded-2xl bg-muted text-foreground"}>
+                            <AgentIcon className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-lg">{agentLabels[flow.preferredLanguage][review.agent]}</CardTitle>
+                            <CardDescription>{rebuttalQualityLabels[flow.preferredLanguage][updated.rebuttal_quality]}</CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <Metric label={flow.text.score} value={`${scoreText(review.score)} → ${scoreText(updated.updated_score)}`} />
+                          <Metric label={flow.text.scoreDelta} value={scoreDeltaText(updated.score_delta)} />
+                          <Metric label={flow.text.stance} value={`${stanceLabels[flow.preferredLanguage][review.stance]} → ${stanceLabels[flow.preferredLanguage][updated.updated_stance]}`} />
+                          <Metric label={flow.text.response} value={rebuttalQualityLabels[flow.preferredLanguage][updated.rebuttal_quality]} />
+                        </div>
+                        <div className="rounded-2xl border border-border bg-card p-4 text-sm leading-7 text-muted-foreground">
+                          <p><span className="font-medium text-foreground">{flow.text.whatChanged}:</span> {updated.what_changed}</p>
+                          <p className="mt-3"><span className="font-medium text-foreground">{flow.text.keyInsight}:</span> {updated.key_insight}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
                   );
                 })}
               </div>
@@ -522,7 +813,32 @@ export function VerdictPage() {
                 <BulletCard title={flow.text.improvedAfterRebuttal} items={flow.rebuttalResult.final_verdict.what_improved_after_rebuttal} />
                 <BulletCard title={flow.text.stillUnproven} items={flow.rebuttalResult.final_verdict.what_still_feels_unproven} />
               </div>
-              <BulletCard title={flow.text.nextSteps} items={flow.rebuttalResult.final_verdict.actionable_tips} />
+
+              <Card className="border-border/70 bg-background/70 py-0 shadow-none">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500/12 text-emerald-600 dark:text-emerald-300">
+                      <ShieldCheck className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <CardTitle>{flow.text.nextSteps}</CardTitle>
+                      <CardDescription>
+                        {flow.preferredLanguage === "ar" ? "خطوات عملية لتقوية المشروع قبل عرضه مرة ثانية." : "Concrete next steps to strengthen the project before the next committee round."}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3 text-sm leading-7 text-muted-foreground">
+                    {flow.rebuttalResult.final_verdict.actionable_tips.map(item => (
+                      <li key={item} className="flex gap-3">
+                        <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-500" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
             </>
           )}
         </div>
