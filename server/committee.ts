@@ -68,6 +68,8 @@ Judge the investment case through five lenses: seriousness of the problem, evide
 Scoring guidance: 8-10 means unusually convincing for this stage, 6-7.9 means interesting but still missing proof, 4-5.9 means weakly investable today, below 4 means the case is not credible yet.
 Use only facts from the brief. If data is missing, lower confidence instead of inventing details.
 Top objections must be specific and causal, not generic startup slogans.
+Every objection must name the exact weak point from the brief and explain why that weak point changes the investment case.
+Avoid filler like "needs more validation" unless you immediately state what needs validation.
 Strengths should explain what is actually working and why it matters.
 If the case is genuinely clear, say so directly without adding fake negativity.
 Return concise UI-ready JSON only.`,
@@ -77,6 +79,8 @@ Judge the offer through five lenses: clarity of the pain, importance of the pain
 Scoring guidance: 8-10 means the value feels compelling and believable, 6-7.9 means relevant but not yet urgent or proven, 4-5.9 means weak demand or fuzzy fit, below 4 means the customer case is not persuasive.
 Use only facts from the brief. If evidence is thin, say the demand case is still unproven rather than making up personas or complaints.
 Top objections must sound like genuine adoption blockers, not consultant language.
+Every objection must point to the exact moment where a user or buyer would hesitate, ignore the product, or refuse to switch.
+Avoid vague filler like "unclear" or "not validated" unless you immediately specify what is unclear.
 Strengths should describe what would make a customer lean in.
 If the offer is obviously understandable, say so directly.
 Return concise UI-ready JSON only.`,
@@ -86,6 +90,8 @@ Judge the plan through five lenses: implementation feasibility, scope discipline
 Scoring guidance: 8-10 means technically coherent for an MVP, 6-7.9 means feasible with execution risks, 4-5.9 means major delivery ambiguity, below 4 means the technical case is not credible yet.
 Use only facts from the brief. If architecture details are missing, call out the uncertainty instead of inventing stack choices.
 Top objections must point to concrete build or operations risks.
+Every objection must identify the exact delivery risk, hidden dependency, or scope leap in the brief and explain why it could slow or break the MVP.
+Avoid generic filler like "implementation needs clarity" unless you say which part of implementation is risky.
 Strengths should state what makes the first version realistically shippable.
 If the scope is straightforward, say so plainly.
 Return concise UI-ready JSON only.`,
@@ -97,6 +103,8 @@ Return concise UI-ready JSON only.`,
 إرشاد الدرجات: 8-10 تعني حالة مقنعة جدًا لهذه المرحلة، 6-7.9 تعني فكرة مثيرة للاهتمام لكنها ما تزال ناقصة الإثبات، 4-5.9 تعني قابلية استثمار ضعيفة اليوم، وأقل من 4 تعني أن الحالة غير مقنعة بعد.
 التزم فقط بما في الملخص. إذا كانت البيانات ناقصة فاخفض الثقة بدل اختراع تفاصيل.
 الاعتراضات يجب أن تكون محددة ومرتبطة بسبب واضح، لا عبارات عامة محفوظة.
+كل اعتراض يجب أن يذكر نقطة الضعف المحددة في الملخص ثم يشرح لماذا تغيّر هذه النقطة قرار الاستثمار.
+تجنّب العبارات الفضفاضة مثل "يحتاج مزيدًا من التحقق" إلا إذا أوضحت ما الذي يحتاج التحقق تحديدًا.
 نقاط القوة يجب أن توضح ما الذي يعمل فعلًا ولماذا يهم.
 إذا كانت الحالة واضحة فعلًا فقل ذلك مباشرة من دون سلبية مصطنعة.
 أعد JSON مختصرًا وجاهزًا للواجهة فقط.`,
@@ -106,6 +114,8 @@ Return concise UI-ready JSON only.`,
 إرشاد الدرجات: 8-10 تعني قيمة مقنعة وقابلة للتصديق، 6-7.9 تعني عرضًا مناسبًا لكنه غير عاجل أو غير مثبت بعد، 4-5.9 تعني طلبًا ضعيفًا أو توافقًا ضبابيًا، وأقل من 4 تعني أن الحالة العميلية غير مقنعة.
 التزم فقط بما في الملخص. إذا كان الدليل ضعيفًا فقل إن الطلب غير مثبت بدل اختراع شخصيات أو شكاوى.
 الاعتراضات يجب أن تبدو كعوائق تبنٍ حقيقية لا لغة استشارية محفوظة.
+كل اعتراض يجب أن يوضح اللحظة المحددة التي قد يتردد فيها العميل أو يتجاهل المنتج أو يرفض تغيير سلوكه.
+تجنّب الكلمات العامة مثل "غير واضح" أو "غير مثبت" ما لم توضح ماذا تقصد تحديدًا.
 نقاط القوة يجب أن تشرح ما الذي يجعل العميل يميل للتجربة أو الشراء.
 إذا كانت القيمة واضحة ومفهومة فقل ذلك مباشرة.
 أعد JSON مختصرًا وجاهزًا للواجهة فقط.`,
@@ -115,6 +125,8 @@ Return concise UI-ready JSON only.`,
 إرشاد الدرجات: 8-10 تعني منطقًا تقنيًا متماسكًا لـ MVP، 6-7.9 تعني قابلية تنفيذ مع مخاطر تنفيذية، 4-5.9 تعني غموضًا كبيرًا في التسليم، وأقل من 4 تعني أن الحالة التقنية غير مقنعة بعد.
 التزم فقط بما في الملخص. إذا غابت التفاصيل التقنية فاذكر عدم اليقين بدل اختراع stack أو بنية.
 الاعتراضات يجب أن تشير إلى مخاطر بناء أو تشغيل ملموسة.
+كل اعتراض يجب أن يحدد خطر التنفيذ أو الاعتماد أو القفزة التقنية الموجودة في الملخص ثم يشرح لماذا قد تعطل الـ MVP.
+تجنّب العبارات العامة مثل "التنفيذ يحتاج وضوحًا" إلا إذا حددت الجزء المقصود من التنفيذ.
 نقاط القوة يجب أن توضح لماذا تبدو النسخة الأولى قابلة للشحن فعلًا.
 إذا كان النطاق مباشرًا فقل ذلك بوضوح.
 أعد JSON مختصرًا وجاهزًا للواجهة فقط.`,
@@ -530,6 +542,281 @@ function briefStrengthSignals(brief: ProjectBrief) {
   };
 }
 
+const reviewGenericFragments: Record<Language, string[]> = {
+  en: [
+    "needs clearer",
+    "needs more validation",
+    "not fully explicit",
+    "easy to understand",
+    "relevant if",
+    "feasible for an mvp",
+    "described at a high level",
+  ],
+  ar: [
+    "يحتاج تحديدًا أوضح",
+    "يحتاج إثباتًا أوضح",
+    "مفهومة",
+    "مبدئي",
+    "قابلة للتنفيذ",
+    "عالي المستوى",
+    "غير مثبت",
+  ],
+};
+
+const commonKeywordStopWords = new Set([
+  "the",
+  "and",
+  "for",
+  "with",
+  "that",
+  "this",
+  "from",
+  "into",
+  "your",
+  "their",
+  "they",
+  "have",
+  "will",
+  "need",
+  "needs",
+  "more",
+  "than",
+  "about",
+  "because",
+  "على",
+  "من",
+  "الى",
+  "إلى",
+  "في",
+  "عن",
+  "مع",
+  "هذا",
+  "هذه",
+  "ذلك",
+  "لكن",
+  "لأن",
+  "التي",
+  "الذي",
+  "هناك",
+  "عند",
+  "بعد",
+  "قبل",
+  "ضمن",
+  "فقط",
+]);
+
+function getBriefKeywords(brief: ProjectBrief) {
+  const source = [
+    brief.project_name,
+    brief.one_line_summary,
+    brief.problem,
+    brief.solution,
+    brief.target_customer,
+    brief.customer_pain,
+    brief.business_model,
+    brief.industry,
+    brief.differentiation,
+    brief.distribution_strategy,
+    brief.evidence_or_traction,
+    ...brief.key_assumptions,
+    ...brief.known_risks,
+    ...brief.unknowns,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  const tokens = source.match(/[a-z\u0600-\u06ff]{3,}/g) ?? [];
+  return Array.from(new Set(tokens.filter(token => token.length >= 4 && !commonKeywordStopWords.has(token)))).slice(0, 48);
+}
+
+function lineTouchesBrief(line: string, keywords: string[]) {
+  const normalized = line.toLowerCase();
+  return keywords.some(keyword => normalized.includes(keyword));
+}
+
+function reviewNeedsSpecificity(review: AgentReview, brief: ProjectBrief, language: Language) {
+  const keywords = getBriefKeywords(brief);
+  const objectionAnchors = review.top_objections.filter(objection => lineTouchesBrief(objection, keywords)).length;
+  const strengthAnchors = review.strengths.filter(strength => lineTouchesBrief(strength, keywords)).length;
+  const allLines = [...review.top_objections, ...review.strengths, review.key_insight, review.summary].map(line => line.toLowerCase());
+  const genericHits = allLines.filter(line => reviewGenericFragments[language].some(fragment => line.includes(fragment))).length;
+  const unknownHits = allLines.filter(line => line.includes(language === "ar" ? "غير معروف" : "unknown")).length;
+  const shortObjections = review.top_objections.filter(objection => objection.trim().length < 36).length;
+
+  return (
+    objectionAnchors < Math.min(2, review.top_objections.length) ||
+    strengthAnchors < Math.min(1, review.strengths.length) ||
+    genericHits >= 3 ||
+    unknownHits >= 2 ||
+    shortObjections >= 2
+  );
+}
+
+function factBoundReview(review: AgentReview, brief: ProjectBrief, agent: AgentKey, language: Language): AgentReview {
+  const projectName = safeText(brief.project_name, language === "ar" ? "المشروع" : "the product");
+  const problem = snippet(safeText(brief.problem, unknown(language)), 90);
+  const solution = snippet(safeText(brief.solution, unknown(language)), 90);
+  const customer = snippet(safeText(brief.target_customer, unknown(language)), 72);
+  const pain = snippet(safeText(brief.customer_pain, unknown(language)), 88);
+  const distribution = snippet(safeText(brief.distribution_strategy, unknown(language)), 84);
+  const traction = snippet(safeText(brief.evidence_or_traction, unknown(language)), 84);
+  const businessModel = snippet(safeText(brief.business_model, unknown(language)), 72);
+  const differentiation = snippet(safeText(brief.differentiation, unknown(language)), 80);
+  const firstUnknown = snippet(brief.unknowns.find(Boolean) ?? unknown(language), 72);
+  const firstRisk = snippet(brief.known_risks.find(Boolean) ?? unknown(language), 72);
+
+  const objectionTemplates: Record<Language, Record<AgentKey, string[]>> = {
+    en: {
+      investor: [
+        `Proof still leans on ${traction}, so the investment case depends on whether that signal can convert into repeatable demand.`,
+        `Distribution still centers on ${distribution}, which leaves scale risk high if founder-led motion does not compound.`,
+        `${businessModel} is directionally useful, but the case still hinges on whether ${customer} will pay before the wedge broadens.`,
+      ],
+      customer: [
+        `A buyer still has to connect ${solution} to the real pain of ${pain}, or the offer risks sounding helpful but not urgent.`,
+        `Adoption friction remains tied to whether ${customer} will change existing behavior without clearer proof beyond ${traction}.`,
+        `The value story is promising, but users may still hesitate if ${differentiation} does not feel meaningfully better than current habits.`,
+      ],
+      technical: [
+        `The MVP promise still depends on shipping ${solution} without hidden scope around ${firstUnknown}, which raises delivery risk.`,
+        `Operational complexity is still unclear because ${firstRisk}, so a small team may struggle to keep the first release reliable.`,
+        `The technical wedge is plausible, but the path from ${problem} to a shippable product still needs disciplined sequencing for a small team.`,
+      ],
+    },
+    ar: {
+      investor: [
+        `ما يزال الإثبات معتمدًا على ${traction}، لذلك تبقى الحالة الاستثمارية مرتبطة بقدرة هذا المؤشر على التحول إلى طلب متكرر.`,
+        `ما تزال قناة الوصول تعتمد على ${distribution}، وهذا يرفع مخاطر التوسع إذا لم تتحول الجهود المؤسسية إلى قناة قابلة للتكرار.`,
+        `يبدو ${businessModel} منطقيًا مبدئيًا، لكن الحالة ما تزال مرتبطة بإثبات أن ${customer} سيدفع قبل اتساع الوتد الأولي.`,
+      ],
+      customer: [
+        `ما يزال العميل بحاجة إلى ربط ${solution} مباشرةً بالألم الحقيقي وهو ${pain}، وإلا قد يبدو العرض مفيدًا لكنه غير عاجل.`,
+        `يبقى احتكاك التبني مرتبطًا بمدى استعداد ${customer} لتغيير السلوك الحالي من دون دليل أوضح يتجاوز ${traction}.`,
+        `قصة القيمة واعدة، لكن التردد سيبقى قائمًا إذا لم يشعر المستخدم أن ${differentiation} أفضل بوضوح من العادة الحالية.`,
+      ],
+      technical: [
+        `وعد الـ MVP ما يزال مرتبطًا بإمكانية شحن ${solution} من دون توسع خفي مرتبط بـ ${firstUnknown}، وهذا يرفع مخاطر التنفيذ.`,
+        `ما يزال التعقيد التشغيلي غير محسوم بسبب ${firstRisk}، وقد يضغط ذلك على فريق صغير عند تشغيل النسخة الأولى.`,
+        `الفكرة التقنية ممكنة مبدئيًا، لكن تحويل ${problem} إلى منتج قابل للشحن ما يزال يحتاج ترتيب نطاق أكثر انضباطًا للفريق الصغير.`,
+      ],
+    },
+  };
+
+  const strengthTemplates: Record<Language, Record<AgentKey, string[]>> = {
+    en: {
+      investor: [
+        `${projectName} is not abstract: it targets ${customer} and ties the pitch to ${problem}.`,
+        `There is at least some signal in ${traction}, which gives the team a starting point beyond pure idea-stage claims.`,
+      ],
+      customer: [
+        `The offer is easy to grasp because it connects ${solution} to ${pain}.`,
+        `${differentiation} gives the product a concrete angle instead of a vague all-in-one promise.`,
+      ],
+      technical: [
+        `The first version has a defined wedge around ${solution}, which is more buildable than a broad platform claim.`,
+        `The brief surfaces risks like ${firstRisk}, which is more honest and usable than pretending delivery is trivial.`,
+      ],
+    },
+    ar: {
+      investor: [
+        `${projectName} ليس طرحًا عامًا؛ فهو يستهدف ${customer} ويربط الفكرة مباشرةً بـ ${problem}.`,
+        `يوجد حد أدنى من الإشارة في ${traction}، وهذا يمنح الفريق نقطة انطلاق تتجاوز مرحلة الفكرة المجردة.`,
+      ],
+      customer: [
+        `العرض سهل الفهم لأنه يربط ${solution} مباشرةً بـ ${pain}.`,
+        `يمنح ${differentiation} المنتج زاوية واضحة بدل وعد واسع وغير محدد.`,
+      ],
+      technical: [
+        `النسخة الأولى تبدو محددة حول ${solution}، وهذا أسهل بناءً من وعد منصّة واسعة منذ البداية.`,
+        `الملخص يذكر مخاطر مثل ${firstRisk} بدل الادعاء أن التنفيذ بسيط بالكامل، وهذه نقطة نضج مفيدة.`,
+      ],
+    },
+  };
+
+  const summaryTemplates: Record<Language, Record<AgentKey, string>> = {
+    en: {
+      investor: `${projectName} has a credible wedge, but the case still turns on whether ${traction} and ${distribution} can become repeatable growth rather than one-off signal.`,
+      customer: `${projectName} addresses a real pain, but adoption still depends on whether ${customer} feel the urgency in ${pain} strongly enough to switch behavior.`,
+      technical: `${projectName} looks feasible as an MVP, but execution discipline still matters because ${firstUnknown} and ${firstRisk} could expand the build unexpectedly.`,
+    },
+    ar: {
+      investor: `${projectName} يملك وتدًا أوليًا معقولًا، لكن الحكم ما يزال مرتبطًا بتحويل ${traction} و ${distribution} إلى نمو متكرر لا إلى إشارة عابرة فقط.`,
+      customer: `${projectName} يعالج ألمًا حقيقيًا، لكن التبني ما يزال مرهونًا بشعور ${customer} بأن ${pain} مؤلم بما يكفي لتغيير السلوك.`,
+      technical: `${projectName} يبدو ممكنًا كـ MVP، لكن الانضباط التنفيذي سيظل حاسمًا لأن ${firstUnknown} و ${firstRisk} قد يوسّعان البناء بشكل غير متوقع.`,
+    },
+  };
+
+  return agentReviewSchema.parse({
+    ...review,
+    agent,
+    label: agentLabels[language][agent],
+    key_insight: lineTouchesBrief(review.key_insight, getBriefKeywords(brief))
+      ? review.key_insight
+      : strengthTemplates[language][agent][0],
+    top_objections: objectionTemplates[language][agent].map(item => snippet(item, 176)).slice(0, 3),
+    strengths: strengthTemplates[language][agent].map(item => snippet(item, 136)).slice(0, 2),
+    summary: snippet(summaryTemplates[language][agent], 216),
+  });
+}
+
+function buildAgentReviewPrompt(
+  brief: ProjectBrief,
+  agent: AgentKey,
+  language: Language,
+  previousDraft?: AgentReview,
+) {
+  const evidenceLines = [
+    language === "ar" ? `اسم المشروع: ${brief.project_name}` : `Project name: ${brief.project_name}`,
+    language === "ar" ? `الملخص: ${brief.one_line_summary}` : `One-line summary: ${brief.one_line_summary}`,
+    language === "ar" ? `المشكلة: ${brief.problem}` : `Problem: ${brief.problem}`,
+    language === "ar" ? `الحل: ${brief.solution}` : `Solution: ${brief.solution}`,
+    language === "ar" ? `العميل المستهدف: ${brief.target_customer}` : `Target customer: ${brief.target_customer}`,
+    language === "ar" ? `الألم: ${brief.customer_pain}` : `Customer pain: ${brief.customer_pain}`,
+    language === "ar" ? `نموذج العمل: ${brief.business_model}` : `Business model: ${brief.business_model}`,
+    language === "ar" ? `التميّز: ${brief.differentiation}` : `Differentiation: ${brief.differentiation}`,
+    language === "ar" ? `قناة الوصول: ${brief.distribution_strategy}` : `Distribution strategy: ${brief.distribution_strategy}`,
+    language === "ar" ? `الإثبات أو التراكم: ${brief.evidence_or_traction}` : `Evidence or traction: ${brief.evidence_or_traction}`,
+    language === "ar"
+      ? `افتراضات رئيسية: ${brief.key_assumptions.join(" | ")}`
+      : `Key assumptions: ${brief.key_assumptions.join(" | ")}`,
+    language === "ar"
+      ? `مخاطر معروفة: ${brief.known_risks.join(" | ")}`
+      : `Known risks: ${brief.known_risks.join(" | ")}`,
+    language === "ar" ? `أمور غير معروفة: ${brief.unknowns.join(" | ")}` : `Unknowns: ${brief.unknowns.join(" | ")}`,
+  ].join("\n");
+
+  if (language === "ar") {
+    return `${previousDraft ? "المسودة السابقة كانت عامة أكثر من اللازم. أعد كتابتها لتصبح أكثر ارتباطًا بالمشروع نفسه.\n" : ""}قيّم هذا الـ Project Brief بصرامة عادلة، والتزم تمامًا بشخصية وكيل ${agentLabels.ar[agent]}.
+
+حقائق المشروع:
+${evidenceLines}
+
+قواعد إلزامية:
+- كل اعتراض في top_objections يجب أن يذكر عنصرًا محددًا من الحقائق أعلاه ثم يشرح أثره السببي.
+- امنع الصياغات العامة مثل: يحتاج مزيدًا من التوضيح، غير مثبت، يحتاج تحققًا أكبر، إلا إذا ذكرت ماذا تقصد بالضبط.
+- اجعل الاعتراضات قصيرة لكن ملموسة، وكأنها ملاحظة من لجنة استثمار حقيقية.
+- اكتب strengths على أساس ما هو موجود فعلًا، وليس مجاملة عامة.
+- إذا كانت الفكرة قوية في نقطة معينة فاذكرها مباشرة من دون افتعال سلبية.
+- اجعل summary حكمًا نهائيًا موجزًا من سطر أو سطرين.
+- أعد الحقول التالية فقط: agent, label, score, confidence, stance, key_insight, top_objections, strengths, summary.`;
+  }
+
+  return `${previousDraft ? "The previous draft was too generic. Rewrite it so the reasoning is tied to this startup rather than generic startup advice.\n" : ""}Evaluate this project brief rigorously and stay fully in the role of the ${agentLabels.en[agent]}.
+
+Project facts:
+${evidenceLines}
+
+Hard rules:
+- Every item in top_objections must mention a specific weak point from the facts above and explain why it matters.
+- Each objection must explicitly reuse at least one concrete noun or phrase from the facts above such as the customer, channel, traction, workflow, or risk.
+- Do not write filler like: needs more clarity, needs more validation, unclear demand, technically risky, or unknown unless you immediately name the exact thing that is weak.
+- Keep objections short but concrete, like a real investment committee note.
+- Make strengths factual and earned, not polite filler.
+- If one area is genuinely strong, say it directly without invented negativity.
+- Make summary a crisp one- or two-sentence verdict.
+- Return only these fields: agent, label, score, confidence, stance, key_insight, top_objections, strengths, summary.`;
+}
+
 function mockReviewForAgent(brief: ProjectBrief, agent: AgentKey, language: Language): AgentReview {
   const signal = briefStrengthSignals(brief);
   const baseScores: Record<AgentKey, number> = {
@@ -674,15 +961,27 @@ async function generateAgentReviewWithLLM(
   agent: AgentKey,
   language: Language,
 ): Promise<AgentReview> {
-  const parsed = await callStructuredModel<AgentReview>({
+  const initial = await callStructuredModel<AgentReview>({
     system: agentPrompts[language][agent],
-    user:
-      language === "ar"
-        ? `قيّم هذا الـ Project Brief:\n${JSON.stringify(brief, null, 2)}\nطبّق شخصية الوكيل بدقة. اربط كل ملاحظة ببيانات موجودة في الملخص. اجعل top_objections قصيرة ومحددة، وstrengths حقيقية لا مجاملة، وsummary حكمًا نهائيًا من سطر أو سطرين. أعد الحقول التالية فقط: agent, label, score, confidence, stance, key_insight, top_objections, strengths, summary`
-        : `Evaluate this project brief:\n${JSON.stringify(brief, null, 2)}\nApply the agent role exactly. Tie every point to facts in the brief. Make top_objections short and specific, make strengths genuine rather than polite filler, and make summary a one- or two-sentence verdict. Return only these fields: agent, label, score, confidence, stance, key_insight, top_objections, strengths, summary`,
+    user: buildAgentReviewPrompt(brief, agent, language),
   });
 
-  return agentReviewSchema.parse({ ...parsed, agent, label: agentLabels[language][agent] });
+  let review = agentReviewSchema.parse({ ...initial, agent, label: agentLabels[language][agent] });
+
+  if (reviewNeedsSpecificity(review, brief, language)) {
+    const refined = await callStructuredModel<AgentReview>({
+      system: agentPrompts[language][agent],
+      user: `${buildAgentReviewPrompt(brief, agent, language, review)}\n\n${language === "ar" ? "المسودة السابقة:" : "Previous draft:"}\n${JSON.stringify(review, null, 2)}`,
+    });
+
+    review = agentReviewSchema.parse({ ...refined, agent, label: agentLabels[language][agent] });
+  }
+
+  if (reviewNeedsSpecificity(review, brief, language)) {
+    review = factBoundReview(review, brief, agent, language);
+  }
+
+  return review;
 }
 
 function getLiveMode(useMock: boolean) {

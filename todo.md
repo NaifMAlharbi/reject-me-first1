@@ -50,3 +50,5 @@
 - [x] Unify the visual style of the investor, customer, and technical agent cards so one card does not use a mismatched yellow treatment by itself
 - [x] Switch committee evaluation to the internal built-in LLM path and remove the active dependency on OpenAI-specific routing for live analysis
 - [x] Tighten low-quality input handling so meaningless entries like 'ggggg' are rejected or clearly marked as insufficient instead of receiving a misleadingly positive evaluation
+- [x] Widen and rebalance the committee review card layout so strengths and objections are readable and no longer appear cramped in narrow columns
+- [x] Improve live objection generation so committee feedback is specific to the founder input and does not read like weak placeholder text or fallback output

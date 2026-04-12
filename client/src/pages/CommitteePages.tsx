@@ -151,14 +151,14 @@ function Metric({ label, value }: { label: string; value: string }) {
 function BulletCard({ title, items }: { title: string; items: string[] }) {
   return (
     <Card className="gap-3 border-border/70 bg-background/70 py-4 shadow-none">
-      <CardHeader className="px-5 pb-0">
-        <CardTitle className="text-base">{title}</CardTitle>
+      <CardHeader className="px-6 pb-1 pt-1">
+        <CardTitle className="text-base font-semibold tracking-tight">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="px-5 pt-0">
-        <ul className="space-y-3 text-sm text-muted-foreground">
+      <CardContent className="px-6 pt-0">
+        <ul className="space-y-4 text-[15px] leading-8 text-muted-foreground md:text-base">
           {items.map(item => (
-            <li key={item} className="flex gap-3 leading-7">
-              <span className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+            <li key={item} className="flex items-start gap-3">
+              <span className="mt-3 h-2 w-2 shrink-0 rounded-full bg-primary" />
               <span>{item}</span>
             </li>
           ))}
@@ -500,7 +500,7 @@ export function ReviewPage() {
                   : "Read each committee perspective separately before preparing your rebuttal so you know which concerns actually need a response."}
               />
 
-              <div className="grid gap-6 xl:grid-cols-3">
+              <div className="grid gap-6 2xl:grid-cols-2">
                   {flow.firstRound.reviews.map(review => {
                     const AgentIcon = agentIcons[review.agent];
                     return (
@@ -508,7 +508,7 @@ export function ReviewPage() {
                         key={review.agent}
                         className="border-border/70 bg-background/80 py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]"
                       >
-                        <CardHeader className="space-y-5 px-7 pt-7">
+                        <CardHeader className="space-y-5 px-7 pt-7 md:px-8">
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex items-start gap-4">
                               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -516,7 +516,7 @@ export function ReviewPage() {
                               </div>
                               <div className="space-y-3">
                                 <CardTitle className="text-xl">{review.label}</CardTitle>
-                                <CardDescription className="max-w-2xl text-base leading-8 text-muted-foreground">{review.key_insight}</CardDescription>
+                                <CardDescription className="max-w-2xl text-[15px] leading-8 text-muted-foreground md:text-base">{review.key_insight}</CardDescription>
                               </div>
                             </div>
                             <Badge variant="outline" className="border-border bg-background text-foreground">
@@ -524,25 +524,23 @@ export function ReviewPage() {
                             </Badge>
                           </div>
                         </CardHeader>
-                        <CardContent className="space-y-6 px-7 pb-7">
-
-                        <div className="grid gap-4 sm:grid-cols-2">
-                          <Metric label={flow.text.score} value={scoreText(review.score)} />
-                          <Metric label={flow.text.confidence} value={`${review.confidence}%`} />
-                        </div>
+                        <CardContent className="space-y-7 px-7 pb-8 md:px-8">
+                          <div className="grid gap-5 sm:grid-cols-2">
+                            <Metric label={flow.text.score} value={scoreText(review.score)} />
+                            <Metric label={flow.text.confidence} value={`${review.confidence}%`} />
+                          </div>
 
                           <Card className="gap-3 border-border/70 bg-card py-6 shadow-none">
                             <CardContent className="px-6">
                               <p className="text-xs uppercase tracking-[0.22em] text-primary">{flow.text.summary}</p>
-                              <p className="mt-3 max-w-3xl text-base leading-8 text-foreground/85">{review.summary}</p>
+                              <p className="mt-3 max-w-3xl text-[15px] leading-8 text-foreground/85 md:text-base">{review.summary}</p>
                             </CardContent>
                           </Card>
 
-
-                        <div className="grid gap-5 md:grid-cols-2">
-                          <BulletCard title={flow.text.strengths} items={review.strengths} />
-                          <BulletCard title={flow.text.objections} items={review.top_objections} />
-                        </div>
+                          <div className="grid gap-5 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.25fr)] xl:items-start">
+                            <BulletCard title={flow.text.strengths} items={review.strengths} />
+                            <BulletCard title={flow.text.objections} items={review.top_objections} />
+                          </div>
                       </CardContent>
                     </Card>
                   );

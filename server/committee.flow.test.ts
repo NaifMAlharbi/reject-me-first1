@@ -292,12 +292,18 @@ describe("committee input quality safeguards", () => {
 describe("committee prompt quality", () => {
   it("keeps first-round prompts grounded, role-specific, and non-canned", () => {
     expect(agentPrompts.en.investor).toContain("Top objections must be specific and causal");
+    expect(agentPrompts.en.investor).toContain("exact weak point from the brief");
     expect(agentPrompts.en.customer).toContain("genuine adoption blockers");
+    expect(agentPrompts.en.customer).toContain("exact moment where a user or buyer would hesitate");
     expect(agentPrompts.en.technical).toContain("concrete build or operations risks");
+    expect(agentPrompts.en.technical).toContain("exact delivery risk, hidden dependency, or scope leap");
 
     expect(agentPrompts.ar.investor).toContain("لا عبارات عامة محفوظة");
+    expect(agentPrompts.ar.investor).toContain("نقطة الضعف المحددة في الملخص");
     expect(agentPrompts.ar.customer).toContain("عوائق تبنٍ حقيقية");
+    expect(agentPrompts.ar.customer).toContain("اللحظة المحددة التي قد يتردد فيها العميل");
     expect(agentPrompts.ar.technical).toContain("مخاطر بناء أو تشغيل ملموسة");
+    expect(agentPrompts.ar.technical).toContain("خطر التنفيذ أو الاعتماد أو القفزة التقنية");
   });
 
   it("keeps second-round prompts focused on whether rebuttals actually reduce uncertainty", () => {
