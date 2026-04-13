@@ -16,6 +16,7 @@ import {
   rebuttalQualityLabels,
   stanceLabels,
   verdictLabels,
+  type AgentKey,
 } from "@shared/rejectMeFirst";
 import {
   AlertTriangle,
@@ -27,23 +28,29 @@ import {
   FileDown,
   FlaskConical,
   FolderOpen,
+  Gavel,
   Globe2,
   MessageSquareQuote,
   ShieldCheck,
   Sparkles,
   Sun,
   Moon,
+  Target,
   Users,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { useLocation } from "wouter";
 
-const agentIcons = {
+const agentIcons: Record<AgentKey, typeof BriefcaseBusiness> = {
   investor: BriefcaseBusiness,
   customer: Users,
+  financial: BriefcaseBusiness,
+  legal: Gavel,
   technical: Cpu,
-} as const;
+  operator: Target,
+  marketing: Sparkles,
+};
 
 function useFlowPage(currentStep: "input" | "review" | "rebuttal" | "verdict") {
   const flow = useCommitteeFlow();
@@ -622,7 +629,7 @@ export function RebuttalPage() {
               ) : (
                 <div className="space-y-4">
                   {reviews.map(review => {
-                    const rows = flow.structuredRebuttal[review.agent];
+                    const rows = flow.structuredRebuttal[review.agent] as { objection: string; response: string }[];
                     const AgentIcon = agentIcons[review.agent];
                     return (
                       <Card key={review.agent} className="border-border/70 bg-background/80 py-0 shadow-none">
@@ -656,7 +663,7 @@ export function RebuttalPage() {
                           </div>
 
                           <div className="space-y-3">
-                            {rows.map((row, index) => (
+                            {rows.map((row: { objection: string; response: string }, index: number) => (
                               <div key={`${review.agent}-${index}`} className="grid gap-3 rounded-2xl border border-border bg-card p-4 lg:grid-cols-[0.95fr_1.05fr]">
                                 <div className="space-y-2">
                                   <p className="text-xs uppercase tracking-[0.22em] text-primary">{flow.text.objection}</p>

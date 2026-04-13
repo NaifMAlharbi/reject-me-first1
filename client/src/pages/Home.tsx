@@ -105,9 +105,15 @@ type UiCopy = {
   customer: string;
   technical: string;
 };
+const committeeAgents = Object.keys(agentLabels.en) as AgentKey[];
 
-const copy: Record<Language, UiCopy> = {
-  en: {
+const createEmptyStructuredRebuttal = (): Record<AgentKey, { objection: string; response: string }[]> =>
+  Object.fromEntries(committeeAgents.map(agent => [agent, []])) as unknown as Record<
+    AgentKey,
+    { objection: string; response: string }[]
+  >;
+
+const copy: Record<Language, UiCopy> = { en: {
     eyebrow: "Reject Me First",
     title: "A realistic investment and technical committee simulation",
     subtitle:
@@ -256,7 +262,11 @@ const copy: Record<Language, UiCopy> = {
 const agentIcons: Record<AgentKey, typeof BriefcaseBusiness> = {
   investor: BriefcaseBusiness,
   customer: Users,
+  financial: BriefcaseBusiness,
+  legal: Gavel,
   technical: Cpu,
+  operator: Target,
+  marketing: Sparkles,
 };
 
 const initialStructured = (): StructuredFounderInput => ({
@@ -473,11 +483,9 @@ export default function Home() {
   const [transcriptText, setTranscriptText] = useState("");
   const [pdfText, setPdfText] = useState("");
   const [structured, setStructured] = useState<StructuredFounderInput>(initialStructured());
-  const [structuredRebuttal, setStructuredRebuttal] = useState<Record<AgentKey, { objection: string; response: string }[]>>({
-    investor: [],
-    customer: [],
-    technical: [],
-  });
+  const [structuredRebuttal, setStructuredRebuttal] = useState<Record<AgentKey, { objection: string; response: string }[]>>(
+    createEmptyStructuredRebuttal(),
+  );
   const [freeRebuttal, setFreeRebuttal] = useState("");
   const [firstRound, setFirstRound] = useState<FirstReview | null>(null);
   const [rebuttalResult, setRebuttalResult] = useState<ReevaluateResult | null>(null);
@@ -501,11 +509,16 @@ export default function Home() {
 
   useEffect(() => {
     if (!firstRound) return;
-    setStructuredRebuttal({
-      investor: firstRound.reviews.find(review => review.agent === "investor")?.top_objections.map(objection => ({ objection, response: "" })) ?? [],
-      customer: firstRound.reviews.find(review => review.agent === "customer")?.top_objections.map(objection => ({ objection, response: "" })) ?? [],
-      technical: firstRound.reviews.find(review => review.agent === "technical")?.top_objections.map(objection => ({ objection, response: "" })) ?? [],
-    });
+    setStructuredRebuttal(
+      Object.fromEntries(
+        committeeAgents.map(agent => [
+          agent,
+          firstRound.reviews
+            .find(review => review.agent === agent)
+            ?.top_objections.map(objection => ({ objection, response: "" })) ?? [],
+        ]),
+      ) as Record<AgentKey, { objection: string; response: string }[]>,
+    );
   }, [firstRound]);
 
   function resetAll() {
@@ -516,7 +529,7 @@ export default function Home() {
     setTranscriptText("");
     setPdfText("");
     setStructured(initialStructured());
-    setStructuredRebuttal({ investor: [], customer: [], technical: [] });
+    setStructuredRebuttal(createEmptyStructuredRebuttal());
     setFreeRebuttal("");
     setFirstRound(null);
     setRebuttalResult(null);
@@ -586,11 +599,9 @@ export default function Home() {
         ? { freeText: freeRebuttal }
         : {
             freeText: "",
-            structured: {
-              investor: structuredRebuttal.investor.filter(item => item.response.trim()),
-              customer: structuredRebuttal.customer.filter(item => item.response.trim()),
-              technical: structuredRebuttal.technical.filter(item => item.response.trim()),
-            },
+            structured: Object.fromEntries(
+              committeeAgents.map(agent => [agent, structuredRebuttal[agent].filter(item => item.response.trim())]),
+            ) as Record<AgentKey, { objection: string; response: string }[]>,
           };
 
     const result = await rebuttalMutation.mutateAsync({
@@ -839,7 +850,7 @@ export default function Home() {
                 <Textarea value={freeRebuttal} onChange={event => setFreeRebuttal(event.target.value)} placeholder={activeCopy.rebuttalFreePlaceholder} className="min-h-[220px] rounded-[26px] border-white/10 bg-black/20 px-5 py-4 leading-7 text-stone-100 placeholder:text-stone-500" />
               ) : (
                 <div className="space-y-5">
-                  {(["investor", "customer", "technical"] as AgentKey[]).map(agent => (
+                  {committeeAgents.map(agent => (
                     <div key={agent} className="space-y-3 rounded-[26px] border border-white/10 bg-black/20 p-4">
                       <div className="flex items-center justify-between gap-3">
                         <p className="text-sm font-semibold text-stone-100">{agentLabels[activeLanguage][agent]}</p>

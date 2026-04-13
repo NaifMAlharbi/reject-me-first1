@@ -33,11 +33,20 @@ import {
   type StructuredFounderInput,
 } from "@shared/rejectMeFirst";
 
-type StructuredRebuttalDraft = {
-  investor: { objection: string; response: string }[];
-  customer: { objection: string; response: string }[];
-  technical: { objection: string; response: string }[];
-};
+type StructuredRebuttalDraft = Record<AgentKey, { objection: string; response: string }[]>;
+
+const rebuttalAgents = Object.keys(defaultStructuredRebuttal) as AgentKey[];
+
+function createStructuredRebuttalDraft(
+  source?: Partial<Record<AgentKey, unknown>> | null,
+): StructuredRebuttalDraft {
+  return Object.fromEntries(
+    rebuttalAgents.map(agent => [
+      agent,
+      Array.isArray(source?.[agent]) ? (source?.[agent] as { objection: string; response: string }[]) : [],
+    ]),
+  ) as StructuredRebuttalDraft;
+}
 
 type DraftState = {
   inputMode: InputMode;
@@ -111,11 +120,7 @@ export function restoreDraftState(parsed?: Partial<DraftState> | null): DraftSta
       additionalInfo: sanitizeStructuredFieldValue("additionalInfo", parsed.structured?.additionalInfo ?? defaultStructuredInput.additionalInfo),
       sections: Array.isArray(parsed.structured?.sections) ? parsed.structured.sections : [],
     },
-    structuredRebuttal: {
-      investor: Array.isArray(parsed.structuredRebuttal?.investor) ? parsed.structuredRebuttal.investor : [],
-      customer: Array.isArray(parsed.structuredRebuttal?.customer) ? parsed.structuredRebuttal.customer : [],
-      technical: Array.isArray(parsed.structuredRebuttal?.technical) ? parsed.structuredRebuttal.technical : [],
-    } as StructuredRebuttalDraft,
+    structuredRebuttal: createStructuredRebuttalDraft(parsed.structuredRebuttal as Partial<Record<AgentKey, unknown>> | null),
   };
 }
 
@@ -386,14 +391,9 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
       structuredRebuttal: (() => {
         const structured =
           result.data.rebuttal && "structured" in result.data.rebuttal
-            ? (result.data.rebuttal.structured as Record<string, { objection: string; response: string }[]> | undefined)
+            ? result.data.rebuttal.structured
             : undefined;
-
-        return {
-          investor: structured?.investor ?? [],
-          customer: structured?.customer ?? [],
-          technical: structured?.technical ?? [],
-        } satisfies StructuredRebuttalDraft;
+        return createStructuredRebuttalDraft(structured as Partial<Record<AgentKey, unknown>> | null);
       })(),
       freeRebuttal: result.data.rebuttal.freeText ?? "",
       firstRound: result.data.first_round,

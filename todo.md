@@ -52,3 +52,5 @@
 - [x] Tighten low-quality input handling so meaningless entries like 'ggggg' are rejected or clearly marked as insufficient instead of receiving a misleadingly positive evaluation
 - [x] Widen and rebalance the committee review card layout so strengths and objections are readable and no longer appear cramped in narrow columns
 - [x] Improve live objection generation so committee feedback is specific to the founder input and does not read like weak placeholder text or fallback output
+- [x] Update the existing committee agent prompts to match the user-provided role definitions and tone more closely
+- [x] Integrate any newly requested committee agents from the provided prompt file without breaking the current flow, schema compatibility, or UI

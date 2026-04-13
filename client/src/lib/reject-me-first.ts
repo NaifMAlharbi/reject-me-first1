@@ -577,11 +577,9 @@ export function initialDraft() {
     freeText: "",
     transcriptText: "",
     structured: { ...defaultStructuredInput },
-    structuredRebuttal: {
-      investor: [...defaultStructuredRebuttal.investor],
-      customer: [...defaultStructuredRebuttal.customer],
-      technical: [...defaultStructuredRebuttal.technical],
-    },
+    structuredRebuttal: Object.fromEntries(
+      agentOrder.map(agent => [agent, [...defaultStructuredRebuttal[agent]]]),
+    ) as Record<AgentKey, { objection: string; response: string }[]>,
     freeRebuttal: "",
     firstRound: null as FirstReview | null,
     rebuttalResult: null as ReevaluateResult | null,

@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { agentOrder } from "@shared/rejectMeFirst";
 
 function llmJson(content: unknown) {
   return {
@@ -118,6 +119,22 @@ describe("committee live mode", () => {
         "The first version looks buildable, but transcript reliability and integration edge cases are the main reasons execution could drift wider than planned.",
     });
 
+    const genericRoleResponse = (agent: string, label: string, objection: string) =>
+      llmJson({
+        agent,
+        label,
+        score: 6.8,
+        confidence: 77,
+        stance: "mixed",
+        key_insight: objection,
+        top_objections: [objection, objection, objection],
+        strengths: [
+          "The brief includes a narrow wedge around summaries, action items, and workspace sync.",
+          "Five pilot teams already use the workflow weekly, which is better than a pure concept stage.",
+        ],
+        summary: objection,
+      });
+
     const invokeLLM = vi.fn().mockImplementation(async (params: { messages: Array<{ content: unknown }> }) => {
       const systemMessage = params.messages[0]?.content;
       const systemText = typeof systemMessage === "string" ? systemMessage : JSON.stringify(systemMessage);
@@ -134,6 +151,34 @@ describe("committee live mode", () => {
       if (systemText.includes("Technical Agent") || systemText.includes("الوكيل التقني")) {
         return technicalResponse;
       }
+      if (systemText.includes("Financial Agent") || systemText.includes("الوكيل المالي")) {
+        return genericRoleResponse(
+          "financial",
+          "Financial Agent",
+          "The brief does not yet prove that agency pricing, paid seats, and retention economics will support a durable SaaS business beyond the first pilots.",
+        );
+      }
+      if (systemText.includes("Legal Agent") || systemText.includes("الوكيل القانوني")) {
+        return genericRoleResponse(
+          "legal",
+          "Legal Agent",
+          "Handling meeting transcripts and client follow-up drafts introduces privacy and consent obligations that the brief does not yet explain clearly enough.",
+        );
+      }
+      if (systemText.includes("Operations Agent") || systemText.includes("الوكيل التشغيلي")) {
+        return genericRoleResponse(
+          "operator",
+          "Operations Agent",
+          "The workflow promises cleaner follow-up after meetings, but the brief does not yet show who owns onboarding, support, and change management inside each agency.",
+        );
+      }
+      if (systemText.includes("Marketing Agent") || systemText.includes("الوكيل التسويقي")) {
+        return genericRoleResponse(
+          "marketing",
+          "Marketing Agent",
+          "The founder-led sales story is credible early, but the brief does not yet show a repeatable message and channel that can scale past direct founder outreach.",
+        );
+      }
 
       throw new Error(`Unexpected prompt in test mock: ${systemText}`);
     });
@@ -148,7 +193,7 @@ describe("committee live mode", () => {
 
     expect(result.mode).toBe("live");
     expect(invokeLLM.mock.calls.length).toBeGreaterThanOrEqual(4);
-    expect(result.reviews).toHaveLength(3);
+    expect(result.reviews).toHaveLength(agentOrder.length);
 
     const allObjections = result.reviews.flatMap(review => review.top_objections).join(" ");
     const normalizedObjections = allObjections.toLowerCase();

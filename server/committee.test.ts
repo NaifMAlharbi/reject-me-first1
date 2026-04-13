@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { agentOrder } from "@shared/rejectMeFirst";
 import { buildComparisonRows, demoCase, startReview, submitRebuttal } from "./committee";
 
 
@@ -20,8 +21,8 @@ describe("committee.startReview", () => {
     expect(result.language).toBe("ar");
     expect(result.direction).toBe("rtl");
     expect(result.mode).toBe("mock");
-    expect(result.reviews).toHaveLength(3);
-    expect(result.reviews.map(review => review.agent)).toEqual(["investor", "customer", "technical"]);
+    expect(result.reviews).toHaveLength(agentOrder.length);
+    expect(result.reviews.map(review => review.agent)).toEqual(agentOrder);
     expect(result.reviews.find(review => review.agent === "technical")?.label).toBe("الوكيل التقني");
   });
 
@@ -43,9 +44,9 @@ describe("committee.startReview", () => {
 describe("committee.submitRebuttal", () => {
   it("keeps structured rebuttals linked to their matching objections and agents", async () => {
     const firstRound = await startReview(demoCase.input);
-    const investorObjection = firstRound.reviews[0]!.top_objections[0]!;
-    const customerObjection = firstRound.reviews[1]!.top_objections[0]!;
-    const technicalObjection = firstRound.reviews[2]!.top_objections[0]!;
+    const investorObjection = firstRound.reviews.find(review => review.agent === "investor")!.top_objections[0]!;
+    const customerObjection = firstRound.reviews.find(review => review.agent === "customer")!.top_objections[0]!;
+    const technicalObjection = firstRound.reviews.find(review => review.agent === "technical")!.top_objections[0]!;
 
     const result = await submitRebuttal({
       language: firstRound.language,
@@ -67,9 +68,9 @@ describe("committee.submitRebuttal", () => {
       { agent: "customer", objection: customerObjection, response: "The first buyers are agencies that run many client meetings." },
       { agent: "technical", objection: technicalObjection, response: "The MVP only covers summaries, action items, and workspace sync." },
     ]);
-    expect(result.second_round).toHaveLength(3);
-    expect(result.comparison).toHaveLength(3);
-    expect(result.final_verdict.actionable_tips).toHaveLength(3);
+    expect(result.second_round).toHaveLength(agentOrder.length);
+    expect(result.comparison).toHaveLength(agentOrder.length);
+    expect(result.final_verdict.actionable_tips.length).toBeGreaterThan(0);
   });
 
   it("improves at least one score when rebuttal quality is strong in mock mode", async () => {
@@ -111,7 +112,7 @@ describe("committee.buildComparisonRows", () => {
 
     const rows = buildComparisonRows(firstRound.reviews, secondRound);
 
-    expect(rows.map(row => row.agent)).toEqual(["investor", "customer", "technical"]);
+    expect(rows.map(row => row.agent)).toEqual(agentOrder);
     expect(rows[0]?.score_before).toBe(firstRound.reviews[0]?.score);
     expect(rows[0]?.score_after).toBe(secondRound[0]?.updated_score);
     expect(rows.every(row => row.improved)).toBe(true);

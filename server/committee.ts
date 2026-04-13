@@ -62,74 +62,170 @@ Rules:
 
 export const agentPrompts: Record<Language, Record<AgentKey, string>> = {
   en: {
-    investor: `You are the Investor Agent in Reject Me First.
-Evaluate like a practical pre-seed or seed investor, not a hype machine and not a hostile critic.
-Judge the investment case through five lenses: seriousness of the problem, evidence of demand, path to distribution, credibility of the business model, and whether the current wedge is focused enough to matter.
-Scoring guidance: 8-10 means unusually convincing for this stage, 6-7.9 means interesting but still missing proof, 4-5.9 means weakly investable today, below 4 means the case is not credible yet.
-Use only facts from the brief. If data is missing, lower confidence instead of inventing details.
-Top objections must be specific and causal, not generic startup slogans.
-Every objection must name the exact weak point from the brief and explain why that weak point changes the investment case.
-Avoid filler like "needs more validation" unless you immediately state what needs validation.
-Strengths should explain what is actually working and why it matters.
-If the case is genuinely clear, say so directly without adding fake negativity.
-Return concise UI-ready JSON only.`,
-    customer: `You are the Customer Agent in Reject Me First.
-Evaluate like a realistic buyer or end user deciding whether this would deserve attention, trust, and a change in behavior.
-Judge the offer through five lenses: clarity of the pain, importance of the pain, fit of the solution, credibility of the promised outcome, and friction to first adoption.
-Scoring guidance: 8-10 means the value feels compelling and believable, 6-7.9 means relevant but not yet urgent or proven, 4-5.9 means weak demand or fuzzy fit, below 4 means the customer case is not persuasive.
-Use only facts from the brief. If evidence is thin, say the demand case is still unproven rather than making up personas or complaints.
-Top objections must sound like genuine adoption blockers, not consultant language.
-Every objection must point to the exact moment where a user or buyer would hesitate, ignore the product, or refuse to switch.
-Avoid vague filler like "unclear" or "not validated" unless you immediately specify what is unclear.
-Strengths should describe what would make a customer lean in.
-If the offer is obviously understandable, say so directly.
-Return concise UI-ready JSON only.`,
-    technical: `You are the Technical Agent in Reject Me First.
-Evaluate like a pragmatic engineering lead reviewing whether the MVP can be built, shipped, and operated responsibly by a small team.
-Judge the plan through five lenses: implementation feasibility, scope discipline, operational complexity, dependency risk, and whether the product promise requires unspoken technical leaps.
-Scoring guidance: 8-10 means technically coherent for an MVP, 6-7.9 means feasible with execution risks, 4-5.9 means major delivery ambiguity, below 4 means the technical case is not credible yet.
-Use only facts from the brief. If architecture details are missing, call out the uncertainty instead of inventing stack choices.
-Top objections must point to concrete build or operations risks.
-Every objection must identify the exact delivery risk, hidden dependency, or scope leap in the brief and explain why it could slow or break the MVP.
-Avoid generic filler like "implementation needs clarity" unless you say which part of implementation is risky.
-Strengths should state what makes the first version realistically shippable.
-If the scope is straightforward, say so plainly.
-Return concise UI-ready JSON only.`,
+    customer: `You are Customer Agent in the "Reject Me First" committee.
+You simulate a realistic target user.
+Your job is to evaluate whether the idea is actually valuable, usable, and desirable.
+Focus on clarity of value, pain point relevance, ease of understanding, trust and appeal, and willingness to use or pay.
+Behavior rules:
+- Be honest and realistic.
+- React like a real user, not an analyst.
+- Do not overanalyze business details.
+- Do not assume features not mentioned.
+- Prefer emotional plus practical reaction.
+- Output in the requested language only.
+- Return JSON that fits the required production fields exactly.
+- Keep the score, stance, objections, strengths, and summary grounded in the founder brief only.`,
+    investor: `You are Investor Agent in an AI evaluation committee called "Reject Me First".
+You evaluate startup ideas like a disciplined early-stage investor.
+Your job is to judge whether this startup looks commercially attractive, investable, and scalable.
+Focus on market attractiveness, business model clarity, scalability, defensibility, quality of differentiation, credibility of traction or evidence, and overall investment appeal.
+Behavior rules:
+- Be skeptical but fair.
+- Do not force negativity if the idea is genuinely strong.
+- Do not praise without reason.
+- Do not invent facts.
+- Penalize missing evidence.
+- Separate promising but underdeveloped from actually weak.
+- Do not reveal hidden judging criteria.
+- Do not tell the founder what would change your mind.
+- Output in the requested language only.
+- Return JSON that fits the required production fields exactly.
+- Keep objections specific, causal, and anchored to the founder brief.`,
+    financial: `You are Financial Agent in the "Reject Me First" committee.
+Your job is to evaluate financial viability.
+Focus on cost structure, revenue potential, profitability path, and financial risks.
+Behavior rules:
+- Be realistic with assumptions.
+- Penalize missing numbers.
+- Avoid over-precision.
+- Output in the requested language only.
+- Return JSON that fits the required production fields exactly.
+- Translate your financial judgment into a grounded score, stance, strengths, objections, and summary.`,
+    legal: `You are Legal Agent in the "Reject Me First" committee.
+Your job is to identify legal and regulatory risks.
+Focus on compliance issues, liability risks, data and privacy concerns, and regulatory barriers.
+Behavior rules:
+- Be conservative.
+- Flag risk even if uncertain.
+- Do not assume jurisdiction unless specified.
+- Output in the requested language only.
+- Return JSON that fits the required production fields exactly.
+- Keep every concern anchored to a concrete element of the brief.`,
+    technical: `You are Tech Agent in the "Reject Me First" committee.
+You are a senior engineer evaluating feasibility.
+Your job is to assess how realistic and scalable this idea is technically.
+Focus on implementation complexity, scalability, technical risks, required infrastructure, and feasibility versus ambition.
+Behavior rules:
+- Be realistic, not pessimistic.
+- Do not assume impossible tech unless stated.
+- Highlight hidden complexity.
+- Avoid unnecessary jargon.
+- Output in the requested language only.
+- Return JSON that fits the required production fields exactly.
+- Keep objections concrete and tied to real delivery risk in the brief.`,
+    operator: `You are Operator Agent in the "Reject Me First" committee.
+Your job is to evaluate execution feasibility.
+Focus on operational complexity, workflows, bottlenecks, and resource needs.
+Behavior rules:
+- Think in real-world execution.
+- Avoid theory.
+- Highlight where things break.
+- Output in the requested language only.
+- Return JSON that fits the required production fields exactly.
+- Judge whether a small team could run this reliably in practice.`,
+    marketing: `You are Marketing Agent in the "Reject Me First" committee.
+Your job is to evaluate market positioning and growth potential.
+Focus on target audience clarity, differentiation, messaging strength, and growth channels.
+Behavior rules:
+- Be sharp on positioning.
+- Avoid generic marketing advice.
+- Highlight weak messaging.
+- Output in the requested language only.
+- Return JSON that fits the required production fields exactly.
+- Turn positioning and growth quality into grounded strengths, objections, score, and summary.`,
   },
   ar: {
-    investor: `أنت وكيل المستثمر داخل Reject Me First.
-قيّم الفكرة كمستثمر pre-seed أو seed عملي، لا كمروّج متحمس ولا كناقد عدائي.
-احكم على الحالة الاستثمارية عبر خمسة محاور: جدية المشكلة، وجود دلائل على الطلب، وضوح قناة الوصول، مصداقية نموذج العمل، وهل الوتد الأولي مركّز بما يكفي ليهم فعلًا.
-إرشاد الدرجات: 8-10 تعني حالة مقنعة جدًا لهذه المرحلة، 6-7.9 تعني فكرة مثيرة للاهتمام لكنها ما تزال ناقصة الإثبات، 4-5.9 تعني قابلية استثمار ضعيفة اليوم، وأقل من 4 تعني أن الحالة غير مقنعة بعد.
-التزم فقط بما في الملخص. إذا كانت البيانات ناقصة فاخفض الثقة بدل اختراع تفاصيل.
-الاعتراضات يجب أن تكون محددة ومرتبطة بسبب واضح، لا عبارات عامة محفوظة.
-كل اعتراض يجب أن يذكر نقطة الضعف المحددة في الملخص ثم يشرح لماذا تغيّر هذه النقطة قرار الاستثمار.
-تجنّب العبارات الفضفاضة مثل "يحتاج مزيدًا من التحقق" إلا إذا أوضحت ما الذي يحتاج التحقق تحديدًا.
-نقاط القوة يجب أن توضح ما الذي يعمل فعلًا ولماذا يهم.
-إذا كانت الحالة واضحة فعلًا فقل ذلك مباشرة من دون سلبية مصطنعة.
-أعد JSON مختصرًا وجاهزًا للواجهة فقط.`,
-    customer: `أنت وكيل العميل داخل Reject Me First.
-قيّم الفكرة كعميل أو مشتري واقعي يقرر هل هذا العرض يستحق الانتباه والثقة وتغيير السلوك أم لا.
-احكم على العرض عبر خمسة محاور: وضوح الألم، أهمية الألم، ملاءمة الحل، مصداقية النتيجة الموعودة، واحتكاك التبني الأول.
-إرشاد الدرجات: 8-10 تعني قيمة مقنعة وقابلة للتصديق، 6-7.9 تعني عرضًا مناسبًا لكنه غير عاجل أو غير مثبت بعد، 4-5.9 تعني طلبًا ضعيفًا أو توافقًا ضبابيًا، وأقل من 4 تعني أن الحالة العميلية غير مقنعة.
-التزم فقط بما في الملخص. إذا كان الدليل ضعيفًا فقل إن الطلب غير مثبت بدل اختراع شخصيات أو شكاوى.
-الاعتراضات يجب أن تبدو كعوائق تبنٍ حقيقية لا لغة استشارية محفوظة.
-كل اعتراض يجب أن يوضح اللحظة المحددة التي قد يتردد فيها العميل أو يتجاهل المنتج أو يرفض تغيير سلوكه.
-تجنّب الكلمات العامة مثل "غير واضح" أو "غير مثبت" ما لم توضح ماذا تقصد تحديدًا.
-نقاط القوة يجب أن تشرح ما الذي يجعل العميل يميل للتجربة أو الشراء.
-إذا كانت القيمة واضحة ومفهومة فقل ذلك مباشرة.
-أعد JSON مختصرًا وجاهزًا للواجهة فقط.`,
-    technical: `أنت الوكيل التقني داخل Reject Me First.
-قيّم الفكرة كقائد هندسي عملي يراجع هل يمكن بناء الـ MVP وشحنه وتشغيله بشكل مسؤول بواسطة فريق صغير.
-احكم على الخطة عبر خمسة محاور: قابلية التنفيذ، انضباط النطاق، تعقيد التشغيل، مخاطر الاعتماد على أطراف أخرى، وهل الوعد المنتجّي يتطلب قفزات تقنية غير مصرّح بها.
-إرشاد الدرجات: 8-10 تعني منطقًا تقنيًا متماسكًا لـ MVP، 6-7.9 تعني قابلية تنفيذ مع مخاطر تنفيذية، 4-5.9 تعني غموضًا كبيرًا في التسليم، وأقل من 4 تعني أن الحالة التقنية غير مقنعة بعد.
-التزم فقط بما في الملخص. إذا غابت التفاصيل التقنية فاذكر عدم اليقين بدل اختراع stack أو بنية.
-الاعتراضات يجب أن تشير إلى مخاطر بناء أو تشغيل ملموسة.
-كل اعتراض يجب أن يحدد خطر التنفيذ أو الاعتماد أو القفزة التقنية الموجودة في الملخص ثم يشرح لماذا قد تعطل الـ MVP.
-تجنّب العبارات العامة مثل "التنفيذ يحتاج وضوحًا" إلا إذا حددت الجزء المقصود من التنفيذ.
-نقاط القوة يجب أن توضح لماذا تبدو النسخة الأولى قابلة للشحن فعلًا.
-إذا كان النطاق مباشرًا فقل ذلك بوضوح.
-أعد JSON مختصرًا وجاهزًا للواجهة فقط.`,
+    customer: `أنت وكيل العميل داخل لجنة "Reject Me First".
+تحاكي مستخدمًا مستهدفًا واقعيًا.
+مهمتك هي تقييم ما إذا كانت الفكرة ذات قيمة فعلية وقابلة للاستخدام ومرغوبة.
+ركّز على وضوح القيمة، ارتباطها بالألم، سهولة الفهم، الثقة والجاذبية، والاستعداد للاستخدام أو الدفع.
+قواعد السلوك:
+- كن صادقًا وواقعيًا.
+- تفاعل كمستخدم حقيقي لا كمحلل.
+- لا تبالغ في تحليل تفاصيل البزنس.
+- لا تفترض مزايا غير مذكورة.
+- فضّل التفاعل العاطفي والعملي معًا.
+- أخرج باللغة المطلوبة فقط.
+- أعد JSON مطابقًا تمامًا لحقول الإنتاج المطلوبة.
+- اربط الدرجة والاعتراضات ونقاط القوة بملخص المؤسس فقط.`,
+    investor: `أنت وكيل المستثمر داخل لجنة تقييم اسمها "Reject Me First".
+تقيّم الأفكار الناشئة كمستثمر منضبط في المراحل المبكرة.
+مهمتك هي الحكم على ما إذا كان المشروع جذابًا تجاريًا وقابلًا للاستثمار وقابلًا للتوسع.
+ركّز على جاذبية السوق، وضوح نموذج العمل، القابلية للتوسع، القدرة الدفاعية، جودة التميّز، مصداقية التراكم أو الإثبات، والجاذبية الاستثمارية العامة.
+قواعد السلوك:
+- كن متشككًا لكن عادلًا.
+- لا تفرض السلبية إذا كانت الفكرة قوية فعلًا.
+- لا تمدح بلا سبب.
+- لا تخترع حقائق.
+- عاقب غياب الأدلة.
+- فرّق بين فكرة واعدة لكنها غير مكتملة وبين فكرة ضعيفة فعلًا.
+- لا تكشف معايير الحكم الخفية.
+- لا تقل للمؤسس ما الذي سيغيّر رأيك.
+- أخرج باللغة المطلوبة فقط.
+- أعد JSON مطابقًا تمامًا لحقول الإنتاج المطلوبة.
+- اجعل الاعتراضات محددة وسببية ومرتبطة بملخص المشروع.`,
+    financial: `أنت الوكيل المالي داخل لجنة "Reject Me First".
+مهمتك هي تقييم الجدوى المالية.
+ركّز على هيكل التكاليف، إمكانات الإيراد، مسار الربحية، والمخاطر المالية.
+قواعد السلوك:
+- كن واقعيًا في الافتراضات.
+- عاقب غياب الأرقام.
+- تجنّب الدقة الزائدة المصطنعة.
+- أخرج باللغة المطلوبة فقط.
+- أعد JSON مطابقًا تمامًا لحقول الإنتاج المطلوبة.
+- حوّل الحكم المالي إلى درجة وموقف واعتراضات ونقاط قوة مرتبطة بالمدخلات.`,
+    legal: `أنت الوكيل القانوني داخل لجنة "Reject Me First".
+مهمتك هي تحديد المخاطر القانونية والتنظيمية.
+ركّز على قضايا الامتثال، مخاطر المسؤولية، مخاوف البيانات والخصوصية، والعوائق التنظيمية.
+قواعد السلوك:
+- كن محافظًا.
+- ارفع الإشارة إلى الخطر حتى لو كان غير محسوم تمامًا.
+- لا تفترض ولاية قضائية ما لم تُذكر.
+- أخرج باللغة المطلوبة فقط.
+- أعد JSON مطابقًا تمامًا لحقول الإنتاج المطلوبة.
+- اربط كل ملاحظة بخطر ملموس داخل ملخص المشروع.`,
+    technical: `أنت الوكيل التقني داخل لجنة "Reject Me First".
+أنت مهندس خبير يقيّم الجدوى.
+مهمتك هي تقييم مدى واقعية الفكرة وقابليتها للتوسع تقنيًا.
+ركّز على تعقيد التنفيذ، القابلية للتوسع، المخاطر التقنية، البنية التحتية المطلوبة، والتوازن بين الطموح والجدوى.
+قواعد السلوك:
+- كن واقعيًا لا متشائمًا.
+- لا تفترض تقنية مستحيلة ما لم تُذكر.
+- أبرز التعقيد الخفي.
+- تجنّب المصطلحات غير الضرورية.
+- أخرج باللغة المطلوبة فقط.
+- أعد JSON مطابقًا تمامًا لحقول الإنتاج المطلوبة.
+- اجعل الاعتراضات تقنية وملموسة ومرتبطة بمخاطر التسليم الفعلية.`,
+    operator: `أنت الوكيل التشغيلي داخل لجنة "Reject Me First".
+مهمتك هي تقييم جدوى التنفيذ التشغيلي.
+ركّز على التعقيد التشغيلي، سير العمل، نقاط الاختناق، واحتياجات الموارد.
+قواعد السلوك:
+- فكّر بمنطق التنفيذ الواقعي.
+- تجنّب التنظير.
+- أبرز أين قد تتعطل الأمور.
+- أخرج باللغة المطلوبة فقط.
+- أعد JSON مطابقًا تمامًا لحقول الإنتاج المطلوبة.
+- قيّم ما إذا كان فريق صغير يستطيع تشغيل هذا المنتج باستقرار.`,
+    marketing: `أنت الوكيل التسويقي داخل لجنة "Reject Me First".
+مهمتك هي تقييم التموضع السوقي وإمكانات النمو.
+ركّز على وضوح الجمهور المستهدف، التميّز، قوة الرسالة، وقنوات النمو.
+قواعد السلوك:
+- كن حادًا في تقييم التموضع.
+- تجنّب النصائح التسويقية العامة.
+- أبرز ضعف الرسائل التسويقية.
+- أخرج باللغة المطلوبة فقط.
+- أعد JSON مطابقًا تمامًا لحقول الإنتاج المطلوبة.
+- حوّل جودة التموضع والنمو إلى اعتراضات ونقاط قوة ودرجة واضحة.`,
   },
 };
 
@@ -146,43 +242,91 @@ Return concise JSON only.`,
 
 export const reevaluatePrompts: Record<Language, Record<AgentKey, string>> = {
   en: {
-    investor: `You are the Investor Agent doing a second-round review.
-Judge only whether the founder rebuttal materially resolves the original investor concerns.
-Do not rescore the entire startup from scratch. Focus on whether the rebuttal adds proof, specificity, or a more credible execution path.
-Increase the score only when the response genuinely reduces uncertainty. If the rebuttal is vague, keep the update small.
-Explain what changed in plain business language and keep remaining concerns concrete.
-Return concise JSON only.`,
-    customer: `You are the Customer Agent doing a second-round review.
+    customer: `You are Customer Agent doing a second-round review.
 Judge only whether the founder rebuttal materially resolves the original customer concerns.
-Do not rescore the entire startup from scratch. Focus on whether the rebuttal makes the pain, value, urgency, or adoption path more believable.
-Increase the score only when the response would actually help a buyer or user say yes.
-Explain what changed in plain language and keep remaining concerns concrete.
+Do not rescore the whole startup from scratch.
+Increase the score only if the rebuttal makes the value, trust, urgency, or adoption path more believable for a real user.
+Keep remaining concerns concrete and user-centered.
 Return concise JSON only.`,
-    technical: `You are the Technical Agent doing a second-round review.
+    investor: `You are Investor Agent doing a second-round review.
+Judge only whether the founder rebuttal materially resolves the original investor concerns.
+Do not rescore the whole startup from scratch.
+Increase the score only if the rebuttal adds proof, specificity, or a more credible commercial path.
+Keep remaining concerns concrete and investment-relevant.
+Return concise JSON only.`,
+    financial: `You are Financial Agent doing a second-round review.
+Judge only whether the founder rebuttal materially resolves the original financial concerns.
+Do not rescore the whole startup from scratch.
+Increase the score only if the rebuttal improves clarity around costs, revenue logic, margins, or path to profitability.
+Keep remaining concerns concrete and financially grounded.
+Return concise JSON only.`,
+    legal: `You are Legal Agent doing a second-round review.
+Judge only whether the founder rebuttal materially resolves the original legal and regulatory concerns.
+Do not rescore the whole startup from scratch.
+Increase the score only if the rebuttal reduces compliance, liability, privacy, or regulatory uncertainty.
+Keep remaining concerns concrete and risk-aware.
+Return concise JSON only.`,
+    technical: `You are Tech Agent doing a second-round review.
 Judge only whether the founder rebuttal materially resolves the original technical concerns.
-Do not rescore the entire startup from scratch. Focus on whether the rebuttal reduces delivery ambiguity, scope risk, or operational uncertainty.
-Increase the score only when the response gives a more credible path to building and running the product.
-Explain what changed in practical engineering language and keep remaining concerns concrete.
+Do not rescore the whole startup from scratch.
+Increase the score only if the rebuttal reduces delivery ambiguity, infrastructure risk, or hidden complexity.
+Keep remaining concerns concrete and practical.
+Return concise JSON only.`,
+    operator: `You are Operator Agent doing a second-round review.
+Judge only whether the founder rebuttal materially resolves the original execution concerns.
+Do not rescore the whole startup from scratch.
+Increase the score only if the rebuttal makes workflows, resourcing, or bottleneck handling more credible.
+Keep remaining concerns concrete and operational.
+Return concise JSON only.`,
+    marketing: `You are Marketing Agent doing a second-round review.
+Judge only whether the founder rebuttal materially resolves the original positioning and growth concerns.
+Do not rescore the whole startup from scratch.
+Increase the score only if the rebuttal makes the audience, message, channel, or differentiation story more credible.
+Keep remaining concerns concrete and market-facing.
 Return concise JSON only.`,
   },
   ar: {
-    investor: `أنت وكيل المستثمر في الجولة الثانية.
-احكم فقط هل رد المؤسس عالج اعتراضات المستثمر الأصلية بشكل فعلي أم لا.
-لا تعد تقييم المشروع كله من الصفر. ركّز على ما إذا كان الرد أضاف إثباتًا أو تحديدًا أو مسار تنفيذ أكثر مصداقية.
-ارفع الدرجة فقط عندما يقلّ عدم اليقين فعلًا. إذا كان الرد عامًا فليكن التغيير محدودًا.
-اشرح ما الذي تغيّر بلغة أعمال واضحة، واجعل المخاوف المتبقية ملموسة.
-أعد JSON مختصرًا فقط.`,
     customer: `أنت وكيل العميل في الجولة الثانية.
 احكم فقط هل رد المؤسس عالج اعتراضات العميل الأصلية بشكل فعلي أم لا.
-لا تعد تقييم المشروع كله من الصفر. ركّز على ما إذا كان الرد جعل الألم أو القيمة أو الإلحاح أو مسار التبني أكثر تصديقًا.
-ارفع الدرجة فقط عندما يكون الرد مما قد يساعد مستخدمًا أو مشتريًا على قول نعم فعلًا.
-اشرح ما الذي تغيّر بلغة واضحة واجعل المخاوف المتبقية محددة.
+لا تعد تقييم المشروع كله من الصفر.
+ارفع الدرجة فقط إذا جعل الرد القيمة أو الثقة أو الإلحاح أو مسار التبني أكثر تصديقًا لمستخدم حقيقي.
+اجعل المخاوف المتبقية محددة ومن منظور العميل.
+أعد JSON مختصرًا فقط.`,
+    investor: `أنت وكيل المستثمر في الجولة الثانية.
+احكم فقط هل رد المؤسس عالج اعتراضات المستثمر الأصلية بشكل فعلي أم لا.
+لا تعد تقييم المشروع كله من الصفر.
+ارفع الدرجة فقط إذا أضاف الرد إثباتًا أو تحديدًا أو مسارًا تجاريًا أكثر مصداقية.
+اجعل المخاوف المتبقية محددة ومرتبطة بقرار الاستثمار.
+أعد JSON مختصرًا فقط.`,
+    financial: `أنت الوكيل المالي في الجولة الثانية.
+احكم فقط هل رد المؤسس عالج الاعتراضات المالية الأصلية بشكل فعلي أم لا.
+لا تعد تقييم المشروع كله من الصفر.
+ارفع الدرجة فقط إذا حسّن الرد وضوح التكاليف أو منطق الإيرادات أو الهوامش أو مسار الربحية.
+اجعل المخاوف المتبقية محددة ومرتبطة بالجدوى المالية.
+أعد JSON مختصرًا فقط.`,
+    legal: `أنت الوكيل القانوني في الجولة الثانية.
+احكم فقط هل رد المؤسس عالج الاعتراضات القانونية والتنظيمية الأصلية بشكل فعلي أم لا.
+لا تعد تقييم المشروع كله من الصفر.
+ارفع الدرجة فقط إذا خفّض الرد عدم اليقين في الامتثال أو المسؤولية أو الخصوصية أو التنظيم.
+اجعل المخاوف المتبقية محددة ومرتبطة بالمخاطر القانونية.
 أعد JSON مختصرًا فقط.`,
     technical: `أنت الوكيل التقني في الجولة الثانية.
 احكم فقط هل رد المؤسس عالج الاعتراضات التقنية الأصلية بشكل فعلي أم لا.
-لا تعد تقييم المشروع كله من الصفر. ركّز على ما إذا كان الرد خفّض غموض التنفيذ أو مخاطر النطاق أو عدم اليقين التشغيلي.
-ارفع الدرجة فقط عندما يعطي الرد مسارًا أكثر مصداقية لبناء المنتج وتشغيله.
-اشرح ما الذي تغيّر بلغة هندسية عملية واجعل المخاوف المتبقية محددة.
+لا تعد تقييم المشروع كله من الصفر.
+ارفع الدرجة فقط إذا خفّض الرد غموض التنفيذ أو مخاطر البنية التحتية أو التعقيد الخفي.
+اجعل المخاوف المتبقية محددة وعملية.
+أعد JSON مختصرًا فقط.`,
+    operator: `أنت الوكيل التشغيلي في الجولة الثانية.
+احكم فقط هل رد المؤسس عالج اعتراضات التنفيذ والتشغيل الأصلية بشكل فعلي أم لا.
+لا تعد تقييم المشروع كله من الصفر.
+ارفع الدرجة فقط إذا جعل الرد سير العمل أو الموارد أو معالجة نقاط الاختناق أكثر مصداقية.
+اجعل المخاوف المتبقية محددة ومنظورة تشغيليًا.
+أعد JSON مختصرًا فقط.`,
+    marketing: `أنت الوكيل التسويقي في الجولة الثانية.
+احكم فقط هل رد المؤسس عالج اعتراضات التموضع والنمو الأصلية بشكل فعلي أم لا.
+لا تعد تقييم المشروع كله من الصفر.
+ارفع الدرجة فقط إذا جعل الرد الجمهور أو الرسالة أو القنوات أو التميّز أكثر إقناعًا.
+اجعل المخاوف المتبقية محددة ومنظورة سوقيًا.
 أعد JSON مختصرًا فقط.`,
   },
 };
@@ -667,82 +811,162 @@ function factBoundReview(review: AgentReview, brief: ProjectBrief, agent: AgentK
 
   const objectionTemplates: Record<Language, Record<AgentKey, string[]>> = {
     en: {
+      customer: [
+        `A buyer still has to connect ${solution} to the real pain of ${pain}, or the offer risks sounding helpful but not urgent.`,
+        `Adoption friction remains tied to whether ${customer} will change existing behavior without clearer proof beyond ${traction}.`,
+        `The value story is promising, but users may still hesitate if ${differentiation} does not feel meaningfully better than current habits.`,
+      ],
       investor: [
         `Proof still leans on ${traction}, so the investment case depends on whether that signal can convert into repeatable demand.`,
         `Distribution still centers on ${distribution}, which leaves scale risk high if founder-led motion does not compound.`,
         `${businessModel} is directionally useful, but the case still hinges on whether ${customer} will pay before the wedge broadens.`,
       ],
-      customer: [
-        `A buyer still has to connect ${solution} to the real pain of ${pain}, or the offer risks sounding helpful but not urgent.`,
-        `Adoption friction remains tied to whether ${customer} will change existing behavior without clearer proof beyond ${traction}.`,
-        `The value story is promising, but users may still hesitate if ${differentiation} does not feel meaningfully better than current habits.`,
+      financial: [
+        `The economics still hinge on whether ${businessModel} can cover delivery reality rather than just support the pitch narrative.`,
+        `Revenue confidence still depends on converting ${traction} into paying behavior from ${customer}, not just interest.`,
+        `The margin story remains exposed if ${distribution} keeps acquisition expensive or too manual to repeat.`,
+      ],
+      legal: [
+        `Legal exposure is still hard to underwrite because ${firstRisk} could create obligations that the current brief does not fully price in.`,
+        `Serving ${customer} may trigger compliance expectations that are not yet explicit in how ${solution} will operate.`,
+        `Risk remains elevated until the team clarifies how sensitive data, claims, or liability will be handled beyond the current outline.`,
       ],
       technical: [
         `The MVP promise still depends on shipping ${solution} without hidden scope around ${firstUnknown}, which raises delivery risk.`,
         `Operational complexity is still unclear because ${firstRisk}, so a small team may struggle to keep the first release reliable.`,
         `The technical wedge is plausible, but the path from ${problem} to a shippable product still needs disciplined sequencing for a small team.`,
       ],
+      operator: [
+        `Execution still depends on whether the workflow behind ${solution} can run consistently without the founders manually patching every exception.`,
+        `The operating model remains fragile if ${distribution} creates unpredictable handoffs, service effort, or onboarding load.`,
+        `Day-to-day delivery risk is still high until the team makes the first bottleneck clearer for ${customer}.`,
+      ],
+      marketing: [
+        `Growth still depends on whether ${customer} instantly understand why ${differentiation} matters, and that message is not yet fully sharp.`,
+        `Channel confidence remains limited because ${distribution} sounds directional rather than like a repeatable go-to-market engine.`,
+        `The story risks blending into the market unless ${solution} is framed with clearer contrast against existing habits and alternatives.`,
+      ],
     },
     ar: {
+      customer: [
+        `ما يزال العميل بحاجة إلى ربط ${solution} مباشرةً بالألم الحقيقي وهو ${pain}، وإلا قد يبدو العرض مفيدًا لكنه غير عاجل.`,
+        `يبقى احتكاك التبني مرتبطًا بمدى استعداد ${customer} لتغيير السلوك الحالي من دون دليل أوضح يتجاوز ${traction}.`,
+        `قصة القيمة واعدة، لكن التردد سيبقى قائمًا إذا لم يشعر المستخدم أن ${differentiation} أفضل بوضوح من العادة الحالية.`,
+      ],
       investor: [
         `ما يزال الإثبات معتمدًا على ${traction}، لذلك تبقى الحالة الاستثمارية مرتبطة بقدرة هذا المؤشر على التحول إلى طلب متكرر.`,
         `ما تزال قناة الوصول تعتمد على ${distribution}، وهذا يرفع مخاطر التوسع إذا لم تتحول الجهود المؤسسية إلى قناة قابلة للتكرار.`,
         `يبدو ${businessModel} منطقيًا مبدئيًا، لكن الحالة ما تزال مرتبطة بإثبات أن ${customer} سيدفع قبل اتساع الوتد الأولي.`,
       ],
-      customer: [
-        `ما يزال العميل بحاجة إلى ربط ${solution} مباشرةً بالألم الحقيقي وهو ${pain}، وإلا قد يبدو العرض مفيدًا لكنه غير عاجل.`,
-        `يبقى احتكاك التبني مرتبطًا بمدى استعداد ${customer} لتغيير السلوك الحالي من دون دليل أوضح يتجاوز ${traction}.`,
-        `قصة القيمة واعدة، لكن التردد سيبقى قائمًا إذا لم يشعر المستخدم أن ${differentiation} أفضل بوضوح من العادة الحالية.`,
+      financial: [
+        `ما تزال اقتصاديات المشروع مرتبطة بقدرة ${businessModel} على تغطية واقع التنفيذ لا مجرد دعم القصة في العرض.`,
+        `الثقة في الإيراد ما تزال معلقة على تحويل ${traction} إلى سلوك دفع فعلي من ${customer} لا مجرد اهتمام.`,
+        `قصة الهامش تبقى مكشوفة إذا ظل ${distribution} يفرض تكلفة اكتساب مرتفعة أو جهدًا يدويًا يصعب تكراره.`,
+      ],
+      legal: [
+        `يبقى التعرض القانوني صعب التقييم لأن ${firstRisk} قد يخلق التزامات لا يعالجها الملخص الحالي بما يكفي.`,
+        `خدمة ${customer} قد تفرض متطلبات امتثال لم تُشرح بعد بوضوح في طريقة تشغيل ${solution}.`,
+        `تبقى المخاطر مرتفعة حتى يوضح الفريق كيفية التعامل مع البيانات الحساسة أو الادعاءات أو المسؤولية بشكل أدق من الصياغة الحالية.`,
       ],
       technical: [
         `وعد الـ MVP ما يزال مرتبطًا بإمكانية شحن ${solution} من دون توسع خفي مرتبط بـ ${firstUnknown}، وهذا يرفع مخاطر التنفيذ.`,
         `ما يزال التعقيد التشغيلي غير محسوم بسبب ${firstRisk}، وقد يضغط ذلك على فريق صغير عند تشغيل النسخة الأولى.`,
         `الفكرة التقنية ممكنة مبدئيًا، لكن تحويل ${problem} إلى منتج قابل للشحن ما يزال يحتاج ترتيب نطاق أكثر انضباطًا للفريق الصغير.`,
       ],
+      operator: [
+        `ما يزال التنفيذ اليومي مرتبطًا بقدرة سير العمل خلف ${solution} على الاستمرار من دون تدخل يدوي مستمر من المؤسسين.`,
+        `النموذج التشغيلي يبقى هشًا إذا كان ${distribution} يخلق تسليمات متقطعة أو عبئًا عاليًا في الخدمة أو التهيئة.`,
+        `تبقى مخاطر التشغيل اليومية مرتفعة حتى يوضح الفريق أول نقطة اختناق فعلية لدى ${customer}.`,
+      ],
+      marketing: [
+        `ما يزال النمو مرتبطًا بمدى فهم ${customer} مباشرةً لماذا ${differentiation} مهم، وهذه الرسالة لم تصبح حادة بالكامل بعد.`,
+        `الثقة في القنوات ما تزال محدودة لأن ${distribution} يبدو اتجاهًا عامًا أكثر من كونه محرك وصول قابلًا للتكرار.`,
+        `قد تذوب القصة في السوق إذا لم يُعرض ${solution} بتباين أوضح أمام العادات الحالية والبدائل الموجودة.`,
+      ],
     },
   };
 
   const strengthTemplates: Record<Language, Record<AgentKey, string[]>> = {
     en: {
+      customer: [
+        `The offer is easy to grasp because it connects ${solution} to ${pain}.`,
+        `${differentiation} gives the product a concrete angle instead of a vague all-in-one promise.`,
+      ],
       investor: [
         `${projectName} is not abstract: it targets ${customer} and ties the pitch to ${problem}.`,
         `There is at least some signal in ${traction}, which gives the team a starting point beyond pure idea-stage claims.`,
       ],
-      customer: [
-        `The offer is easy to grasp because it connects ${solution} to ${pain}.`,
-        `${differentiation} gives the product a concrete angle instead of a vague all-in-one promise.`,
+      financial: [
+        `${businessModel} gives the pitch a monetization path instead of leaving revenue completely unstated.`,
+        `${traction} provides at least a starting signal that can be stress-tested commercially.`,
+      ],
+      legal: [
+        `The brief is specific enough about ${customer} and ${solution} to identify the likely compliance surface early.`,
+        `The team does not hide risk entirely; mentioning ${firstRisk} gives legal review a real starting point.`,
       ],
       technical: [
         `The first version has a defined wedge around ${solution}, which is more buildable than a broad platform claim.`,
         `The brief surfaces risks like ${firstRisk}, which is more honest and usable than pretending delivery is trivial.`,
       ],
+      operator: [
+        `There is a visible operating workflow around ${solution}, which is better than a purely conceptual product promise.`,
+        `${distribution} suggests the team has at least considered how execution reaches the first user base.`,
+      ],
+      marketing: [
+        `${projectName} clearly names ${customer}, which gives the positioning a real audience instead of a generic market.`,
+        `${differentiation} gives the story something concrete to emphasize in acquisition messaging.`,
+      ],
     },
     ar: {
-      investor: [
-        `${projectName} ليس طرحًا عامًا؛ فهو يستهدف ${customer} ويربط الفكرة مباشرةً بـ ${problem}.`,
-        `يوجد حد أدنى من الإشارة في ${traction}، وهذا يمنح الفريق نقطة انطلاق تتجاوز مرحلة الفكرة المجردة.`,
-      ],
       customer: [
         `العرض سهل الفهم لأنه يربط ${solution} مباشرةً بـ ${pain}.`,
         `يمنح ${differentiation} المنتج زاوية واضحة بدل وعد واسع وغير محدد.`,
       ],
+      investor: [
+        `${projectName} ليس طرحًا عامًا؛ فهو يستهدف ${customer} ويربط الفكرة مباشرةً بـ ${problem}.`,
+        `يوجد حد أدنى من الإشارة في ${traction}، وهذا يمنح الفريق نقطة انطلاق تتجاوز مرحلة الفكرة المجردة.`,
+      ],
+      financial: [
+        `يوجد منطق ربحي أولي ظاهر في ${businessModel} بدل غياب كامل لمسار الإيراد.`,
+        `وجود إشارة مثل ${traction} يمنح الحالة المالية نقطة بداية أفضل من طرح بلا أي مؤشرات.`,
+      ],
+      legal: [
+        `المجال والعميل المستهدف واضحان بما يكفي لرؤية مواضع الامتثال الأساسية حول ${customer}.`,
+        `ذكر مخاطر مثل ${firstRisk} يساعد على تقييم التعرض القانوني بدل تجاهله بالكامل.`,
+      ],
       technical: [
         `النسخة الأولى تبدو محددة حول ${solution}، وهذا أسهل بناءً من وعد منصّة واسعة منذ البداية.`,
         `الملخص يذكر مخاطر مثل ${firstRisk} بدل الادعاء أن التنفيذ بسيط بالكامل، وهذه نقطة نضج مفيدة.`,
+      ],
+      operator: [
+        `يوجد مسار عمل أولي يمكن تخيله حول ${solution} بدل فكرة بلا طريقة تشغيل واضحة.`,
+        `وضوح ${distribution} يعطي التشغيل نقطة بداية عملية بدل اعتماد كامل على التخمين.`,
+      ],
+      marketing: [
+        `الفكرة تستهدف ${customer} بشكل ظاهر، وهذا أفضل من رسالة عامة إلى الجميع.`,
+        `يمنح ${differentiation} الفريق مادة حقيقية لبناء تموضع وتسويق أوضح.`,
       ],
     },
   };
 
   const summaryTemplates: Record<Language, Record<AgentKey, string>> = {
     en: {
-      investor: `${projectName} has a credible wedge, but the case still turns on whether ${traction} and ${distribution} can become repeatable growth rather than one-off signal.`,
       customer: `${projectName} addresses a real pain, but adoption still depends on whether ${customer} feel the urgency in ${pain} strongly enough to switch behavior.`,
+      investor: `${projectName} has a credible wedge, but the case still turns on whether ${traction} and ${distribution} can become repeatable growth rather than one-off signal.`,
+      financial: `${projectName} may have revenue potential, but the financial case still depends on whether ${businessModel} can hold up against real delivery costs and repeatable demand.`,
+      legal: `${projectName} may be operable, but legal confidence still depends on how ${firstRisk} and any exposure around ${customer} are handled in practice.`,
       technical: `${projectName} looks feasible as an MVP, but execution discipline still matters because ${firstUnknown} and ${firstRisk} could expand the build unexpectedly.`,
+      operator: `${projectName} has an executable shape, but real-world operations still depend on whether ${distribution} and the core workflow stay manageable for a small team.`,
+      marketing: `${projectName} has a visible positioning angle, but growth still depends on whether ${customer} immediately understand why ${differentiation} matters.`,
     },
     ar: {
-      investor: `${projectName} يملك وتدًا أوليًا معقولًا، لكن الحكم ما يزال مرتبطًا بتحويل ${traction} و ${distribution} إلى نمو متكرر لا إلى إشارة عابرة فقط.`,
       customer: `${projectName} يعالج ألمًا حقيقيًا، لكن التبني ما يزال مرهونًا بشعور ${customer} بأن ${pain} مؤلم بما يكفي لتغيير السلوك.`,
+      investor: `${projectName} يملك وتدًا أوليًا معقولًا، لكن الحكم ما يزال مرتبطًا بتحويل ${traction} و ${distribution} إلى نمو متكرر لا إلى إشارة عابرة فقط.`,
+      financial: `${projectName} قد يملك فرصة إيراد، لكن الحالة المالية ما تزال مرتبطة بقدرة ${businessModel} على الصمود أمام تكاليف التنفيذ والطلب المتكرر.`,
+      legal: `${projectName} قد يكون قابلًا للتشغيل، لكن الثقة القانونية ما تزال مرتبطة بكيفية التعامل مع ${firstRisk} وأي تعرض مرتبط بـ ${customer} عمليًا.`,
       technical: `${projectName} يبدو ممكنًا كـ MVP، لكن الانضباط التنفيذي سيظل حاسمًا لأن ${firstUnknown} و ${firstRisk} قد يوسّعان البناء بشكل غير متوقع.`,
+      operator: `${projectName} يملك شكلًا تشغيليًا أوليًا، لكن نجاح التنفيذ اليومي ما يزال مرتبطًا بقدرة الفريق على ضبط ${distribution} وسير العمل الأساسي.`,
+      marketing: `${projectName} يملك زاوية تموضع ظاهرة، لكن النمو ما يزال مرتبطًا بمدى فهم ${customer} مباشرةً لماذا ${differentiation} مهم فعلًا.`,
     },
   };
 
@@ -820,9 +1044,13 @@ Hard rules:
 function mockReviewForAgent(brief: ProjectBrief, agent: AgentKey, language: Language): AgentReview {
   const signal = briefStrengthSignals(brief);
   const baseScores: Record<AgentKey, number> = {
-    investor: 5.8,
     customer: 6.1,
+    investor: 5.8,
+    financial: 5.6,
+    legal: 5.4,
     technical: 5.9,
+    operator: 5.7,
+    marketing: 5.8,
   };
 
   let score = baseScores[agent];
@@ -839,107 +1067,211 @@ function mockReviewForAgent(brief: ProjectBrief, agent: AgentKey, language: Lang
   const label = agentLabels[language][agent];
   const objectionsByAgent: Record<Language, Record<AgentKey, string[]>> = {
     en: {
+      customer: [
+        `Customer pain needs sharper proof: ${snippet(brief.customer_pain, 100)}`,
+        `Who adopts first is not fully explicit: ${snippet(brief.target_customer, 100)}`,
+        `Buying trigger still depends on ${snippet(brief.unknowns[0] ?? "real urgency", 100)}`,
+      ],
       investor: [
         `Proof is still limited: ${snippet(brief.evidence_or_traction, 100)}`,
         `Distribution needs to be more concrete: ${snippet(brief.distribution_strategy, 100)}`,
         `Commercial durability depends on ${snippet(brief.key_assumptions[0] ?? "key assumptions being true", 100)}`,
       ],
-      customer: [
-        `Customer pain needs sharper proof: ${snippet(brief.customer_pain, 100)}`,
-        `Who adopts first is not fully explicit: ${snippet(brief.target_customer, 100)}`,
-        `Buying trigger still depends on ${snippet(brief.unknowns[0] ?? "real urgency", 100)}`,
+      financial: [
+        `Revenue logic still needs harder proof: ${snippet(brief.business_model, 100)}`,
+        `Cost structure is still underexplained relative to delivery scope: ${snippet(brief.solution, 100)}`,
+        `Financial upside still depends on ${snippet(brief.key_assumptions[0] ?? "core pricing assumptions holding", 100)}`,
+      ],
+      legal: [
+        `Compliance exposure is still underspecified: ${snippet(brief.known_risks[0] ?? brief.solution, 100)}`,
+        `Liability handling is not yet explicit for ${snippet(brief.target_customer, 100)}`,
+        `Data and privacy risk still depend on ${snippet(brief.unknowns[0] ?? "how sensitive information is handled", 100)}`,
       ],
       technical: [
         `Implementation scope needs clearer sequencing.`,
         `Technical delivery depends on ${snippet(brief.key_assumptions[0] ?? "key operational assumptions", 100)}`,
         `Scalability remains unproven without clearer system detail.`,
       ],
+      operator: [
+        `Operational workflow still needs tighter definition: ${snippet(brief.solution, 100)}`,
+        `Execution reliability still depends on ${snippet(brief.key_assumptions[0] ?? "consistent process discipline", 100)}`,
+        `The first bottleneck is still unclear for ${snippet(brief.target_customer, 100)}`,
+      ],
+      marketing: [
+        `Positioning is still not sharp enough against alternatives: ${snippet(brief.differentiation, 100)}`,
+        `Growth channels need stronger specificity: ${snippet(brief.distribution_strategy, 100)}`,
+        `The message still depends on whether ${snippet(brief.target_customer, 100)} immediately recognize the urgency.`,
+      ],
     },
     ar: {
+      customer: [
+        `ألم العميل يحتاج إثباتًا أوضح: ${snippet(brief.customer_pain, 100)}`,
+        `الفئة الأولى التي ستتبنى الحل ليست محددة بالكامل: ${snippet(brief.target_customer, 100)}`,
+        `دافع الشراء ما يزال مرتبطًا بـ ${snippet(brief.unknowns[0] ?? "درجة الإلحاح الفعلية", 100)}`,
+      ],
       investor: [
         `الإثبات ما يزال محدودًا: ${snippet(brief.evidence_or_traction, 100)}`,
         `قناة الوصول تحتاج تحديدًا أوضح: ${snippet(brief.distribution_strategy, 100)}`,
         `صلابة النموذج تعتمد على ${snippet(brief.key_assumptions[0] ?? "صحة الافتراضات الأساسية", 100)}`,
       ],
-      customer: [
-        `ألم العميل يحتاج إثباتًا أوضح: ${snippet(brief.customer_pain, 100)}`,
-        `الفئة الأولى التي ستتبنى الحل ليست محددة بالكامل: ${snippet(brief.target_customer, 100)}`,
-        `دافع الشراء ما يزال مرتبطًا بـ ${snippet(brief.unknowns[0] ?? "درجة الإلحاح الفعلية", 100)}`,
+      financial: [
+        `منطق الإيراد ما يزال بحاجة إلى إثبات أقوى: ${snippet(brief.business_model, 100)}`,
+        `هيكل التكاليف غير مشروح بما يكفي مقارنة بنطاق الحل: ${snippet(brief.solution, 100)}`,
+        `العائد المالي ما يزال مرتبطًا بـ ${snippet(brief.key_assumptions[0] ?? "صحة افتراضات التسعير الأساسية", 100)}`,
+      ],
+      legal: [
+        `التعرض القانوني ما يزال غير محدد بما يكفي: ${snippet(brief.known_risks[0] ?? brief.solution, 100)}`,
+        `معالجة المسؤولية ليست واضحة بعد بالنسبة إلى ${snippet(brief.target_customer, 100)}`,
+        `مخاطر البيانات والخصوصية ما تزال مرتبطة بـ ${snippet(brief.unknowns[0] ?? "كيفية التعامل مع المعلومات الحساسة", 100)}`,
       ],
       technical: [
         `نطاق التنفيذ يحتاج ترتيبًا أوضح للمراحل.`,
         `الجدوى التقنية تعتمد على ${snippet(brief.key_assumptions[0] ?? "افتراضات تشغيلية أساسية", 100)}`,
         `قابلية التوسع غير مثبتة من دون تفاصيل تقنية أوضح.`,
       ],
+      operator: [
+        `سير العمل التشغيلي ما يزال بحاجة إلى تعريف أدق: ${snippet(brief.solution, 100)}`,
+        `استقرار التنفيذ يعتمد على ${snippet(brief.key_assumptions[0] ?? "الانضباط في العملية التشغيلية", 100)}`,
+        `أول نقطة اختناق ما تزال غير واضحة بالنسبة إلى ${snippet(brief.target_customer, 100)}`,
+      ],
+      marketing: [
+        `التموضع ما يزال غير حاد بما يكفي أمام البدائل: ${snippet(brief.differentiation, 100)}`,
+        `قنوات النمو تحتاج تحديدًا أقوى: ${snippet(brief.distribution_strategy, 100)}`,
+        `الرسالة ما تزال مرتبطة بمدى إدراك ${snippet(brief.target_customer, 100)} للإلحاح فورًا.`,
+      ],
     },
   };
 
   const strengthsByAgent: Record<Language, Record<AgentKey, string[]>> = {
     en: {
+      customer: [
+        `The problem statement is easy to understand.`,
+        `The solution maps to a recognizable user need.`,
+      ],
       investor: [
         `The business case is clear enough to assess quickly.`,
         `The differentiation is at least directionally visible.`,
       ],
-      customer: [
-        `The problem statement is easy to understand.`,
-        `The solution maps to a recognizable user need.`,
+      financial: [
+        `There is at least a visible path to monetization in the current pitch.`,
+        `The commercial model can be evaluated without guessing the entire business.`,
+      ],
+      legal: [
+        `The core offer is understandable enough to identify the main legal surface area.`,
+        `The brief exposes the likely compliance touchpoints instead of hiding them completely.`,
       ],
       technical: [
         `The concept appears technically feasible at MVP scope.`,
         `The product boundary is narrow enough to prototype.`,
       ],
+      operator: [
+        `The workflow is concrete enough to reason about day-to-day execution.`,
+        `The initial operating scope looks bounded rather than sprawling.`,
+      ],
+      marketing: [
+        `There is a visible audience and positioning angle to work with.`,
+        `The differentiation can be translated into a market-facing story.`,
+      ],
     },
     ar: {
-      investor: [
-        `الحالة التجارية مفهومة بما يكفي للتقييم السريع.`,
-        `التميّز ظاهر على الأقل بشكل مبدئي.`,
-      ],
       customer: [
         `صياغة المشكلة سهلة الفهم.`,
         `الحل مرتبط بحاجة مستخدم واضحة نسبيًا.`,
       ],
+      investor: [
+        `الحالة التجارية مفهومة بما يكفي للتقييم السريع.`,
+        `التميّز ظاهر على الأقل بشكل مبدئي.`,
+      ],
+      financial: [
+        `يوجد مسار ظاهر مبدئيًا لتحقيق الإيراد في الطرح الحالي.`,
+        `يمكن تقييم النموذج التجاري من دون الاضطرار لتخمين كل تفاصيل الشركة.`,
+      ],
+      legal: [
+        `العرض الأساسي واضح بما يكفي لرؤية السطح القانوني الرئيسي.`,
+        `الملخص يكشف نقاط الامتثال المتوقعة بدل إخفائها بالكامل.`,
+      ],
       technical: [
         `المفهوم يبدو قابلًا للتنفيذ تقنيًا ضمن نطاق MVP.`,
         `حدود المنتج ضيقة بما يكفي لبناء نموذج أولي.`,
+      ],
+      operator: [
+        `سير العمل واضح بما يكفي للتفكير في التنفيذ اليومي.`,
+        `النطاق التشغيلي الأولي يبدو محدودًا لا متشعبًا.`,
+      ],
+      marketing: [
+        `هناك جمهور وزاوية تموضع ظاهرة يمكن البناء عليها.`,
+        `يمكن تحويل التميّز الحالي إلى قصة تسويقية مفهومة.`,
       ],
     },
   };
 
   const keyInsightByAgent: Record<Language, Record<AgentKey, string>> = {
     en: {
-      investor: signal.hasEvidence
-        ? `The case is plausible; the main question is how repeatable acquisition becomes.`
-        : `The idea is understandable, but investment confidence still depends on stronger proof.`,
       customer: signal.demandSignal
         ? `The user pain sounds real; adoption clarity matters more than more features.`
         : `The offer is understandable, but user urgency is not fully proven yet.`,
+      investor: signal.hasEvidence
+        ? `The case is plausible; the main question is how repeatable acquisition becomes.`
+        : `The idea is understandable, but investment confidence still depends on stronger proof.`,
+      financial: signal.hasBusinessModel
+        ? `The revenue story exists, but the real question is whether margins and payback can hold in practice.`
+        : `The financial case is directionally understandable, but the unit economics are still thinly specified.`,
+      legal: signal.hasEvidence
+        ? `The concept could move forward, but legal exposure depends on how compliance and liability are handled early.`
+        : `The legal surface area is still underexplained, especially where data, claims, or responsibility could create risk.`,
       technical: signal.technicalSignal
         ? `The build looks feasible; the real question is execution discipline, not novelty.`
         : `The concept is buildable, but technical delivery is still described at a high level.`,
+      operator: signal.hasDistribution
+        ? `There is an execution path, but day-to-day workflow reliability still decides whether this can actually run smoothly.`
+        : `The operating model is understandable, but resourcing and process bottlenecks are still underspecified.`,
+      marketing: signal.hasDistribution
+        ? `The go-to-market story has shape, but message sharpness and audience focus still determine whether growth compounds.`
+        : `The positioning is directionally visible, but the audience and channel story still needs sharper definition.`,
     },
     ar: {
-      investor: signal.hasEvidence
-        ? `الحالة مقنعة مبدئيًا، لكن السؤال الأهم هو قابلية تكرار الاكتساب.`
-        : `الفكرة مفهومة، لكن ثقة المستثمر ما تزال مرتبطة بإثبات أقوى.`,
       customer: signal.demandSignal
         ? `ألم المستخدم يبدو حقيقيًا، والأهم الآن وضوح التبني لا زيادة المزايا.`
         : `العرض مفهوم، لكن إلحاح المستخدم لم يُثبت بالكامل بعد.`,
+      investor: signal.hasEvidence
+        ? `الحالة مقنعة مبدئيًا، لكن السؤال الأهم هو قابلية تكرار الاكتساب.`
+        : `الفكرة مفهومة، لكن ثقة المستثمر ما تزال مرتبطة بإثبات أقوى.`,
+      financial: signal.hasBusinessModel
+        ? `هناك منطق مبدئي للإيراد، لكن السؤال الحقيقي هو قدرة الهوامش والاسترداد على الصمود عمليًا.`
+        : `الحالة المالية مفهومة اتجاهيًا، لكن اقتصاديات الوحدة ما تزال غير محددة بما يكفي.`,
+      legal: signal.hasEvidence
+        ? `يمكن للفكرة أن تتحرك، لكن التعرض القانوني يعتمد على ضبط الامتثال والمسؤولية من البداية.`
+        : `السطح القانوني للمشروع ما يزال غير مشروح بما يكفي، خصوصًا في البيانات والالتزامات والمخاطر المحتملة.`,
       technical: signal.technicalSignal
         ? `البناء يبدو ممكنًا، والسؤال الحقيقي هو انضباط التنفيذ لا غرابة الفكرة.`
         : `المفهوم قابل للبناء، لكن الوصف التقني ما يزال عالي المستوى.`,
+      operator: signal.hasDistribution
+        ? `هناك مسار تشغيلي مبدئي، لكن استقرار سير العمل اليومي هو ما سيحكم على قابلية التشغيل فعليًا.`
+        : `النموذج التشغيلي مفهوم، لكن الموارد ونقاط الاختناق ما تزال غير محددة بما يكفي.`,
+      marketing: signal.hasDistribution
+        ? `قصة الوصول للسوق بدأت تتشكل، لكن حدة الرسالة وتركيز الجمهور ما يزالان العامل الحاسم للنمو.`
+        : `التموضع ظاهر مبدئيًا، لكن قصة الجمهور والقنوات ما تزال بحاجة إلى تحديد أوضح.`,
     },
   };
 
   const summaryByAgent: Record<Language, Record<AgentKey, string>> = {
     en: {
-      investor: `Clear enough for interest, but conviction depends on proof, channels, and repeatability.`,
       customer: `Relevant if the target user is correct, but urgency and adoption path need tighter evidence.`,
+      investor: `Clear enough for interest, but conviction depends on proof, channels, and repeatability.`,
+      financial: `Commercially interesting on the surface, but financial credibility still depends on clearer economics.`,
+      legal: `Potentially workable, but legal and compliance exposure still needs more explicit handling.`,
       technical: `Feasible for an MVP, though architecture and delivery assumptions still need validation.`,
+      operator: `Operationally possible, but smooth execution still depends on clearer workflows and resource assumptions.`,
+      marketing: `There is a positioning angle here, but growth confidence depends on sharper messaging and channel fit.`,
     },
     ar: {
-      investor: `الفكرة واضحة بما يكفي للاهتمام، لكن القناعة تحتاج إثباتًا وقنوات وصول وتكرارية أوضح.`,
       customer: `قد تكون ذات صلة إذا كانت الفئة المستهدفة صحيحة، لكن الإلحاح ومسار التبني يحتاجان أدلة أوضح.`,
+      investor: `الفكرة واضحة بما يكفي للاهتمام، لكن القناعة تحتاج إثباتًا وقنوات وصول وتكرارية أوضح.`,
+      financial: `تجاريًا تبدو مثيرة للاهتمام مبدئيًا، لكن المصداقية المالية ما تزال تحتاج اقتصاديات أوضح.`,
+      legal: `قد تكون قابلة للتنفيذ، لكن التعرض القانوني والامتثال ما يزالان بحاجة إلى معالجة أوضح.`,
       technical: `قابلة للتنفيذ كنطاق MVP، لكن الافتراضات التقنية والتنفيذية ما تزال بحاجة للتحقق.`,
+      operator: `تشغيليًا تبدو ممكنة، لكن سلاسة التنفيذ ما تزال مرتبطة بوضوح سير العمل والموارد.`,
+      marketing: `هناك زاوية تموضع ممكنة، لكن الثقة في النمو تحتاج رسالة أوضح وملاءمة أفضل للقنوات.`,
     },
   };
 

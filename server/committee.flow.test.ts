@@ -291,28 +291,28 @@ describe("committee input quality safeguards", () => {
 
 describe("committee prompt quality", () => {
   it("keeps first-round prompts grounded, role-specific, and non-canned", () => {
-    expect(agentPrompts.en.investor).toContain("Top objections must be specific and causal");
-    expect(agentPrompts.en.investor).toContain("exact weak point from the brief");
-    expect(agentPrompts.en.customer).toContain("genuine adoption blockers");
-    expect(agentPrompts.en.customer).toContain("exact moment where a user or buyer would hesitate");
-    expect(agentPrompts.en.technical).toContain("concrete build or operations risks");
-    expect(agentPrompts.en.technical).toContain("exact delivery risk, hidden dependency, or scope leap");
+    expect(agentPrompts.en.investor).toContain("commercially attractive, investable, and scalable");
+    expect(agentPrompts.en.investor).toContain("Keep objections specific, causal, and anchored to the founder brief");
+    expect(agentPrompts.en.customer).toContain("actually valuable, usable, and desirable");
+    expect(agentPrompts.en.customer).toContain("grounded in the founder brief only");
+    expect(agentPrompts.en.technical).toContain("how realistic and scalable this idea is technically");
+    expect(agentPrompts.en.technical).toContain("Keep objections concrete and tied to real delivery risk in the brief");
 
-    expect(agentPrompts.ar.investor).toContain("لا عبارات عامة محفوظة");
-    expect(agentPrompts.ar.investor).toContain("نقطة الضعف المحددة في الملخص");
-    expect(agentPrompts.ar.customer).toContain("عوائق تبنٍ حقيقية");
-    expect(agentPrompts.ar.customer).toContain("اللحظة المحددة التي قد يتردد فيها العميل");
-    expect(agentPrompts.ar.technical).toContain("مخاطر بناء أو تشغيل ملموسة");
-    expect(agentPrompts.ar.technical).toContain("خطر التنفيذ أو الاعتماد أو القفزة التقنية");
+    expect(agentPrompts.ar.investor).toContain("جذابًا تجاريًا وقابلًا للاستثمار وقابلًا للتوسع");
+    expect(agentPrompts.ar.investor).toContain("اجعل الاعتراضات محددة وسببية ومرتبطة بملخص المشروع");
+    expect(agentPrompts.ar.customer).toContain("ذات قيمة فعلية وقابلة للاستخدام ومرغوبة");
+    expect(agentPrompts.ar.customer).toContain("اربط الدرجة والاعتراضات ونقاط القوة بملخص المؤسس فقط");
+    expect(agentPrompts.ar.technical).toContain("مدى واقعية الفكرة وقابليتها للتوسع تقنيًا");
+    expect(agentPrompts.ar.technical).toContain("اجعل الاعتراضات تقنية وملموسة ومرتبطة بمخاطر التسليم الفعلية");
   });
 
   it("keeps second-round prompts focused on whether rebuttals actually reduce uncertainty", () => {
-    expect(reevaluatePrompts.en.investor).toContain("Do not rescore the entire startup from scratch");
-    expect(reevaluatePrompts.en.customer).toContain("would actually help a buyer or user say yes");
+    expect(reevaluatePrompts.en.investor).toContain("Do not rescore the whole startup from scratch");
+    expect(reevaluatePrompts.en.customer).toContain("makes the value, trust, urgency, or adoption path more believable for a real user");
     expect(reevaluatePrompts.en.technical).toContain("reduces delivery ambiguity");
 
     expect(reevaluatePrompts.ar.investor).toContain("لا تعد تقييم المشروع كله من الصفر");
-    expect(reevaluatePrompts.ar.customer).toContain("يساعد مستخدمًا أو مشتريًا على قول نعم");
-    expect(reevaluatePrompts.ar.technical).toContain("خفّض غموض التنفيذ");
+    expect(reevaluatePrompts.ar.customer).toContain("جعل الرد القيمة أو الثقة أو الإلحاح أو مسار التبني أكثر تصديقًا لمستخدم حقيقي");
+    expect(reevaluatePrompts.ar.technical).toContain("خفّض الرد غموض التنفيذ أو مخاطر البنية التحتية أو التعقيد الخفي");
   });
 });

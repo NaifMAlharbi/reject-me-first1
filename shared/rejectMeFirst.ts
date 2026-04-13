@@ -7,22 +7,21 @@ export const directionSchema = z.enum(["ltr", "rtl"]);
 export type Direction = z.infer<typeof directionSchema>;
 
 export const marketTypeSchema = z.enum(["B2B", "B2C", "B2G", "unknown"]);
-export const stanceSchema = z.enum([
-  "strong",
-  "promising",
-  "unsure",
-  "skeptical",
-  "weak",
-]);
+export const stanceSchema = z.enum(["strong", "promising", "unsure", "skeptical", "weak"]);
 export const rebuttalQualitySchema = z.enum(["weak", "partial", "strong"]);
-export const verdictSchema = z.enum([
-  "strong",
-  "promising",
-  "needs_work",
-  "risky",
-  "weak",
-]);
-export const agentKeySchema = z.enum(["investor", "customer", "technical"]);
+export const verdictSchema = z.enum(["strong", "promising", "needs_work", "risky", "weak"]);
+
+export const agentKeys = [
+  "customer",
+  "investor",
+  "financial",
+  "legal",
+  "technical",
+  "operator",
+  "marketing",
+] as const;
+
+export const agentKeySchema = z.enum(agentKeys);
 
 export type AgentKey = z.infer<typeof agentKeySchema>;
 export type Stance = z.infer<typeof stanceSchema>;
@@ -87,12 +86,14 @@ export const agentReviewSchema = z.object({
 });
 export type AgentReview = z.infer<typeof agentReviewSchema>;
 
+export const agentOrder: AgentKey[] = [...agentKeys];
+
 export const firstReviewSchema = z.object({
   language: languageSchema,
   direction: directionSchema,
   mode: z.enum(["live", "mock"]),
   projectBrief: projectBriefSchema,
-  reviews: z.array(agentReviewSchema).length(3),
+  reviews: z.array(agentReviewSchema).length(agentOrder.length),
 });
 export type FirstReview = z.infer<typeof firstReviewSchema>;
 
@@ -107,16 +108,21 @@ export const structuredRebuttalGroupSchema = z.object({
   objection: z.string().trim().min(1).max(180),
   response: z.string().trim().min(1).max(300),
 });
+export type StructuredRebuttalGroup = z.infer<typeof structuredRebuttalGroupSchema>;
+
+const structuredRebuttalShape = {
+  customer: z.array(structuredRebuttalGroupSchema).default([]),
+  investor: z.array(structuredRebuttalGroupSchema).default([]),
+  financial: z.array(structuredRebuttalGroupSchema).default([]),
+  legal: z.array(structuredRebuttalGroupSchema).default([]),
+  technical: z.array(structuredRebuttalGroupSchema).default([]),
+  operator: z.array(structuredRebuttalGroupSchema).default([]),
+  marketing: z.array(structuredRebuttalGroupSchema).default([]),
+};
 
 export const rebuttalInputSchema = z.object({
   freeText: z.string().trim().max(4000).optional().default(""),
-  structured: z
-    .object({
-      investor: z.array(structuredRebuttalGroupSchema).default([]),
-      customer: z.array(structuredRebuttalGroupSchema).default([]),
-      technical: z.array(structuredRebuttalGroupSchema).default([]),
-    })
-    .optional(),
+  structured: z.object(structuredRebuttalShape).optional(),
 });
 export type RebuttalInput = z.infer<typeof rebuttalInputSchema>;
 
@@ -163,7 +169,7 @@ export const reevaluateInputSchema = z.object({
   direction: directionSchema,
   mode: z.enum(["live", "mock"]),
   projectBrief: projectBriefSchema,
-  reviews: z.array(agentReviewSchema).length(3),
+  reviews: z.array(agentReviewSchema).length(agentOrder.length),
   rebuttal: rebuttalInputSchema,
 });
 export type ReevaluateInput = z.infer<typeof reevaluateInputSchema>;
@@ -173,8 +179,8 @@ export const reevaluateResultSchema = z.object({
   direction: directionSchema,
   mode: z.enum(["live", "mock"]),
   linked_rebuttal: z.array(linkedRebuttalItemSchema),
-  second_round: z.array(reevaluationSchema).length(3),
-  comparison: z.array(comparisonRowSchema).length(3),
+  second_round: z.array(reevaluationSchema).length(agentOrder.length),
+  comparison: z.array(comparisonRowSchema).length(agentOrder.length),
   final_verdict: finalVerdictSchema,
 });
 export type ReevaluateResult = z.infer<typeof reevaluateResultSchema>;
@@ -188,14 +194,22 @@ export type DemoCase = z.infer<typeof demoCaseSchema>;
 
 export const agentLabels: Record<Language, Record<AgentKey, string>> = {
   en: {
-    investor: "Investor Agent",
     customer: "Customer Agent",
-    technical: "Technical Agent",
+    investor: "Investor Agent",
+    financial: "Financial Agent",
+    legal: "Legal Agent",
+    technical: "Tech Agent",
+    operator: "Operator Agent",
+    marketing: "Marketing Agent",
   },
   ar: {
-    investor: "وكيل المستثمر",
     customer: "وكيل العميل",
+    investor: "وكيل المستثمر",
+    financial: "الوكيل المالي",
+    legal: "الوكيل القانوني",
     technical: "الوكيل التقني",
+    operator: "الوكيل التشغيلي",
+    marketing: "الوكيل التسويقي",
   },
 };
 
@@ -246,8 +260,6 @@ export const rebuttalQualityLabels: Record<Language, Record<RebuttalQuality, str
   },
 };
 
-export const agentOrder: AgentKey[] = ["investor", "customer", "technical"];
-
 export const defaultStructuredInput: StructuredFounderInput = {
   projectName: "",
   idea: "",
@@ -257,8 +269,12 @@ export const defaultStructuredInput: StructuredFounderInput = {
   sections: [],
 };
 
-export const defaultStructuredRebuttal = {
-  investor: [],
+export const defaultStructuredRebuttal: Record<AgentKey, StructuredRebuttalGroup[]> = {
   customer: [],
+  investor: [],
+  financial: [],
+  legal: [],
   technical: [],
+  operator: [],
+  marketing: [],
 };
