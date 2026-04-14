@@ -39,6 +39,17 @@ describe("committee.startReview", () => {
       expect(review.strengths.length).toBeLessThanOrEqual(2);
     }
   });
+
+  it("runs only the user-selected evaluators while preserving committee order", async () => {
+    const result = await startReview({
+      ...demoCase.input,
+      selectedAgents: ["technical", "customer"],
+    });
+
+    expect(result.reviews).toHaveLength(2);
+    expect(result.reviews.map(review => review.agent)).toEqual(["customer", "technical"]);
+    expect(result.reviews.every(review => ["customer", "technical"].includes(review.agent))).toBe(true);
+  });
 });
 
 describe("committee.submitRebuttal", () => {

@@ -13,6 +13,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { committeeStepRoutes, scoreDeltaText, scoreText } from "@/lib/reject-me-first";
 import {
   agentLabels,
+  agentOrder,
   rebuttalQualityLabels,
   stanceLabels,
   verdictLabels,
@@ -398,6 +399,62 @@ export function InputPage() {
                 <Button variant={flow.inputMode === "structured" ? "default" : "outline"} onClick={() => flow.setInputMode("structured")}>
                   {flow.text.structured}
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="gap-4 border-border/70 bg-background/70 py-4 shadow-none">
+            <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <CardTitle>{flow.preferredLanguage === "ar" ? "اختيار المقيّمين" : "Choose evaluators"}</CardTitle>
+                <CardDescription>
+                  {flow.preferredLanguage === "ar"
+                    ? "اختر أي مجموعة تريد تشغيلها: مقيّم واحد، اثنان، أو اللجنة كاملة. يجب اختيار مقيّم واحد على الأقل."
+                    : "Pick any evaluator subset you want to run: one evaluator, two, or the full committee. At least one evaluator is required."}
+                </CardDescription>
+              </div>
+              <Button variant="outline" onClick={flow.selectAllAgents} disabled={flow.selectedAgents.length === agentOrder.length}>
+                {flow.preferredLanguage === "ar" ? "اختيار الكل" : "Select all"}
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {agentOrder.map(agent => {
+                  const selected = flow.selectedAgents.includes(agent);
+                  const AgentIcon = agentIcons[agent];
+                  return (
+                    <button
+                      key={agent}
+                      type="button"
+                      onClick={() => flow.toggleSelectedAgent(agent)}
+                      className={`flex items-start gap-3 rounded-2xl border px-4 py-4 text-left transition ${
+                        selected
+                          ? "border-primary bg-primary/8 text-foreground shadow-sm"
+                          : "border-border bg-background hover:border-primary/30 hover:bg-card"
+                      }`}
+                      aria-pressed={selected}
+                    >
+                      <div className={`mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl ${selected ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"}`}>
+                        <AgentIcon className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold">{agentLabels[flow.preferredLanguage][agent]}</span>
+                          {selected ? <CheckCircle2 className="h-4 w-4 text-primary" /> : null}
+                        </div>
+                        <p className="mt-1 text-xs leading-6 text-muted-foreground">
+                          {flow.preferredLanguage === "ar"
+                            ? selected
+                              ? "سيشارك هذا المقيّم في الجولة الحالية."
+                              : "اضغط لإضافة هذا المقيّم إلى الجولة."
+                            : selected
+                              ? "This evaluator will run in the current round."
+                              : "Tap to include this evaluator in the round."}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>

@@ -4,6 +4,7 @@ import {
   agentKeySchema,
   agentLabels,
   agentOrder,
+  normalizeSelectedAgents,
   agentReviewSchema,
   comparisonRowSchema,
   directionSchema,
@@ -1329,6 +1330,7 @@ export async function startReview(input: StartReviewInput): Promise<FirstReview>
   }
   const direction = getDirection(language);
   const mode = getLiveMode(parsed.useMock);
+  const selectedAgents = normalizeSelectedAgents(parsed.selectedAgents);
 
   let projectBrief: ProjectBrief;
   if (parsed.useMock) {
@@ -1342,7 +1344,7 @@ export async function startReview(input: StartReviewInput): Promise<FirstReview>
   }
 
   const reviews = await Promise.all(
-    agentOrder.map(async agent => {
+    selectedAgents.map(async agent => {
       if (parsed.useMock) return mockReviewForAgent(projectBrief, agent, language);
       try {
         return await generateAgentReviewWithLLM(projectBrief, agent, language);
@@ -1647,6 +1649,7 @@ const demoCases: Record<Language, {
       transcriptText: "",
       pdfText: "",
       extraFragments: [],
+      selectedAgents: [...agentOrder],
       useMock: true,
       structured: {
         projectName: "BriefBridge",
@@ -1674,6 +1677,7 @@ const demoCases: Record<Language, {
       transcriptText: "",
       pdfText: "",
       extraFragments: [],
+      selectedAgents: [...agentOrder],
       useMock: true,
       structured: {
         projectName: "بريف بريدج",

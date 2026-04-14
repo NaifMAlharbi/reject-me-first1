@@ -50,6 +50,7 @@ export const startReviewInputSchema = z.object({
   transcriptText: z.string().trim().max(6000).optional().default(""),
   pdfText: z.string().trim().max(12000).optional().default(""),
   extraFragments: z.array(z.string().trim().max(2000)).default([]),
+  selectedAgents: z.array(agentKeySchema).min(1).max(agentKeys.length).optional().default([...agentKeys]),
   useMock: z.boolean().default(false),
 });
 export type StartReviewInput = z.infer<typeof startReviewInputSchema>;
@@ -88,12 +89,19 @@ export type AgentReview = z.infer<typeof agentReviewSchema>;
 
 export const agentOrder: AgentKey[] = [...agentKeys];
 
+export function normalizeSelectedAgents(input?: AgentKey[] | null): AgentKey[] {
+  const requested = Array.isArray(input) ? input : agentOrder;
+  const unique = new Set<AgentKey>(requested);
+  const ordered = agentOrder.filter(agent => unique.has(agent));
+  return ordered.length > 0 ? ordered : [...agentOrder];
+}
+
 export const firstReviewSchema = z.object({
   language: languageSchema,
   direction: directionSchema,
   mode: z.enum(["live", "mock"]),
   projectBrief: projectBriefSchema,
-  reviews: z.array(agentReviewSchema).length(agentOrder.length),
+  reviews: z.array(agentReviewSchema).min(1).max(agentOrder.length),
 });
 export type FirstReview = z.infer<typeof firstReviewSchema>;
 
@@ -169,7 +177,7 @@ export const reevaluateInputSchema = z.object({
   direction: directionSchema,
   mode: z.enum(["live", "mock"]),
   projectBrief: projectBriefSchema,
-  reviews: z.array(agentReviewSchema).length(agentOrder.length),
+  reviews: z.array(agentReviewSchema).min(1).max(agentOrder.length),
   rebuttal: rebuttalInputSchema,
 });
 export type ReevaluateInput = z.infer<typeof reevaluateInputSchema>;
@@ -179,8 +187,8 @@ export const reevaluateResultSchema = z.object({
   direction: directionSchema,
   mode: z.enum(["live", "mock"]),
   linked_rebuttal: z.array(linkedRebuttalItemSchema),
-  second_round: z.array(reevaluationSchema).length(agentOrder.length),
-  comparison: z.array(comparisonRowSchema).length(agentOrder.length),
+  second_round: z.array(reevaluationSchema).min(1).max(agentOrder.length),
+  comparison: z.array(comparisonRowSchema).min(1).max(agentOrder.length),
   final_verdict: finalVerdictSchema,
 });
 export type ReevaluateResult = z.infer<typeof reevaluateResultSchema>;

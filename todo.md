@@ -54,3 +54,4 @@
 - [x] Improve live objection generation so committee feedback is specific to the founder input and does not read like weak placeholder text or fallback output
 - [x] Update the existing committee agent prompts to match the user-provided role definitions and tone more closely
 - [x] Integrate any newly requested committee agents from the provided prompt file without breaking the current flow, schema compatibility, or UI
+- [x] Let the user choose which evaluators to run before analysis, including any subset from a single evaluator up to the full committee

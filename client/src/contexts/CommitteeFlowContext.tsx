@@ -22,8 +22,10 @@ import {
   type RebuttalMode,
 } from "@/lib/reject-me-first";
 import {
+  agentOrder,
   defaultStructuredInput,
   defaultStructuredRebuttal,
+  normalizeSelectedAgents,
   type AgentKey,
   type FirstReview,
   type Language,
@@ -53,6 +55,7 @@ type DraftState = {
   rebuttalMode: RebuttalMode;
   preferredLanguage: Language;
   useMock: boolean;
+  selectedAgents: AgentKey[];
   freeText: string;
   transcriptText: string;
   structured: StructuredFounderInput;
@@ -75,6 +78,8 @@ type CommitteeFlowContextValue = DraftState & {
   setRebuttalMode: (mode: RebuttalMode) => void;
   setPreferredLanguage: (language: Language) => void;
   setUseMock: (value: boolean) => void;
+  toggleSelectedAgent: (agent: AgentKey) => void;
+  selectAllAgents: () => void;
   setFreeText: (value: string) => void;
   setTranscriptText: (value: string) => void;
   updateStructured: (field: keyof StructuredFounderInput, value: string) => void;
@@ -120,6 +125,7 @@ export function restoreDraftState(parsed?: Partial<DraftState> | null): DraftSta
       additionalInfo: sanitizeStructuredFieldValue("additionalInfo", parsed.structured?.additionalInfo ?? defaultStructuredInput.additionalInfo),
       sections: Array.isArray(parsed.structured?.sections) ? parsed.structured.sections : [],
     },
+    selectedAgents: normalizeSelectedAgents(parsed.selectedAgents),
     structuredRebuttal: createStructuredRebuttalDraft(parsed.structuredRebuttal as Partial<Record<AgentKey, unknown>> | null),
   };
 }
@@ -212,6 +218,31 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
 
   const setUseMock = useCallback((value: boolean) => {
     setDraft(current => ({ ...current, useMock: value }));
+  }, []);
+
+  const toggleSelectedAgent = useCallback((agent: AgentKey) => {
+    setDraft(current => {
+      const hasAgent = current.selectedAgents.includes(agent);
+      if (hasAgent && current.selectedAgents.length === 1) {
+        return current;
+      }
+
+      const nextAgents = hasAgent
+        ? current.selectedAgents.filter(item => item !== agent)
+        : [...current.selectedAgents, agent];
+
+      return {
+        ...current,
+        selectedAgents: normalizeSelectedAgents(nextAgents),
+      };
+    });
+  }, []);
+
+  const selectAllAgents = useCallback(() => {
+    setDraft(current => ({
+      ...current,
+      selectedAgents: [...agentOrder],
+    }));
   }, []);
 
   const setFreeText = useCallback((value: string) => {
@@ -312,6 +343,7 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
       structured: draft.structured,
       transcriptText: draft.transcriptText,
       extraFragments: [],
+      selectedAgents: normalizeSelectedAgents(draft.selectedAgents),
       useMock: draft.useMock,
     };
   }, [draft]);
@@ -388,6 +420,7 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
       freeText: "",
       transcriptText: "",
       structured: result.data.input.structured ?? demoInput(),
+      selectedAgents: normalizeSelectedAgents(result.data.input.selectedAgents),
       structuredRebuttal: (() => {
         const structured =
           result.data.rebuttal && "structured" in result.data.rebuttal
@@ -446,6 +479,8 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
     setRebuttalMode,
     setPreferredLanguage,
     setUseMock,
+    toggleSelectedAgent,
+    selectAllAgents,
     setFreeText,
     setTranscriptText,
     updateStructured,
