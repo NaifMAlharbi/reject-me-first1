@@ -129,7 +129,7 @@ export function LandingPage() {
         <div className="absolute -bottom-1/4 -right-1/4 h-1/2 w-1/2 rounded-full bg-primary/5 blur-[120px]" />
       </div>
 
-      <header className="relative w-full bg-gradient-to-r from-violet-500/15 via-fuchsia-500/10 to-pink-500/15 border-b border-border/40 backdrop-blur-xl">
+      <header className="relative w-full bg-background/40 border-b border-border/40 backdrop-blur-md z-50">
         <div className="container flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
             <img src="/Terget_Logo.jpg" alt="Logo" className="h-10 w-10 rounded-xl object-cover shadow-sm" />
