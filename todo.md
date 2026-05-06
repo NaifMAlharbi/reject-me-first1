@@ -1,0 +1,57 @@
+# Project TODO
+
+- [x] Replace Competitor Agent with Technical Agent across prompts, schemas, labels, UI copy, and mock/demo data
+- [x] Build bilingual language system with Arabic and English UI copy, RTL/LTR layout switching, and output-language matching
+- [x] Create free-text founder input flow with auto-formatting into a clean structured Project Brief
+- [x] Create structured founder input flow with name, idea, problem, solution, additional info, and dynamic sections merged into the same Project Brief
+- [x] Support voice transcript and pasted PDF text ingestion as founder source material within the Project Brief flow
+- [x] Implement concise structured Project Brief extraction using grounded JSON-only output with unknown fields preserved when input is incomplete
+- [x] Implement three first-round committee evaluators in parallel: Investor Agent, Customer Agent, and Technical Agent
+- [x] Enforce realistic, logical, concise evaluation behavior that avoids invented problems, forced objections, and over-analysis
+- [x] Use short UI-ready JSON responses with decimal scores from 0 to 10 and confidence percentages
+- [x] Implement free-text rebuttal flow that auto-structures responses when needed
+- [x] Implement structured rebuttal flow grouped by Investor, Customer, and Technical objections with linked responses
+- [x] Implement second-round re-evaluation for all three agents with score deltas, stance changes, rebuttal quality, and remaining concerns
+- [x] Implement final Judge verdict summarizing strongest point, biggest risk, improvements after rebuttal, remaining weaknesses, and actionable next steps
+- [x] Build clean editorial committee UI with agent cards, collapse/expand interactions, highlighted key insight, and before-vs-after comparison views
+- [x] Add mock/demo mode with realistic sample brief, committee outputs, rebuttal, and final verdict
+- [x] Keep the MVP simple with no authentication requirement in the user flow and no database dependency for committee results
+- [x] Implement modular backend orchestration with typed schemas and server-side LLM calls
+- [x] Add frontend state management and tRPC integration for the full review lifecycle
+- [x] Write Vitest coverage for committee formatting and rebuttal comparison logic
+- [x] Run project validation, fix issues, and prepare the final deliverable checkpoint
+- [x] Convert the committee experience from a long single-page layout into a clear multi-page flow
+- [x] Add final report download/export for the user after the judge verdict
+- [x] Verify whether the current live committee setup needs an external OpenAI API key or can continue with the built-in server LLM helper
+- [x] Explain the app mode clearly in the UI so users understand what it means
+- [x] Change the default theme to light mode while keeping an explicit dark-mode toggle
+- [x] Improve extremely short-input handling so trivial inputs like a single letter do not produce misleading strong scores
+- [x] Switch committee evaluation to use GPT via the provided OpenAI API key and validate the integration safely
+- [x] Redesign the interface with clearer colors, stronger visual hierarchy, and more polished interactions across the full flow
+- [x] Make the experience feel like distinct page changes rather than long downward scrolling
+- [x] Ensure both light mode and dark mode are available in the visible UI
+- [x] Improve the presentation style of customer responses so they read more clearly and feel more credible
+- [x] Remove the confusing inline demo toggle from the real submission form and separate demo entry from actual project submission
+- [x] Lower the first-page hero layout so it is not visually pushed too high on the screen
+- [x] Add a persistent top bar from the first page onward with language selection and light/dark mode controls
+- [x] Add a clear, always-available way to return to the home page from the flow pages
+- [x] Fix duplicated field restoration so returning to a previously completed section preserves the saved project data without re-inserting repeated content
+- [x] Remove the PDF input section from the founder submission page and related flow copy
+- [x] Remove the project summary page and start committee analysis immediately after the user submits the project input
+- [x] Remove the redundant top status and helper cards from the committee flow screens to keep the interface cleaner and more practical
+- [x] Reset all founder-input fields automatically when the user starts evaluating a different idea so old content does not persist in sections
+- [x] Reduce crowding in the review-result cards so responses have clearer spacing and are easier to read
+- [x] Remove the unnecessary explanatory sentence above the review cards about the display being improved
+- [x] Improve evaluator output quality so each agent gives more specific, analytical, and clearly differentiated assessments instead of repetitive generic phrasing
+- [x] Fix the /flow/input submission bug where overly long project names trigger a server validation error instead of being constrained or handled clearly in the UI
+- [x] Fix demo mode so it preserves the currently selected UI/output language instead of switching to English when the user starts in Arabic
+- [x] Restore reliable live LLM committee evaluation so the app returns meaningful real analysis instead of empty or missing model output
+- [x] Increase review text area spacing and card content room so committee responses are larger and easier to read
+- [x] Unify the visual style of the investor, customer, and technical agent cards so one card does not use a mismatched yellow treatment by itself
+- [x] Switch committee evaluation to the internal built-in LLM path and remove the active dependency on OpenAI-specific routing for live analysis
+- [x] Tighten low-quality input handling so meaningless entries like 'ggggg' are rejected or clearly marked as insufficient instead of receiving a misleadingly positive evaluation
+- [x] Widen and rebalance the committee review card layout so strengths and objections are readable and no longer appear cramped in narrow columns
+- [x] Improve live objection generation so committee feedback is specific to the founder input and does not read like weak placeholder text or fallback output
+- [x] Update the existing committee agent prompts to match the user-provided role definitions and tone more closely
+- [x] Integrate any newly requested committee agents from the provided prompt file without breaking the current flow, schema compatibility, or UI
+- [x] Let the user choose which evaluators to run before analysis, including any subset from a single evaluator up to the full committee
