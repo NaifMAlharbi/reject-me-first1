@@ -44,17 +44,29 @@ export function CommitteeFlowShell({
 
   return (
     <div className="min-h-screen text-foreground">
-      <div className="container max-w-5xl py-6 md:py-10">
-        {secondaryAction && (
-          <button
-            type="button"
-            onClick={secondaryAction.onClick}
-            className="mb-6 inline-flex items-center gap-1.5 text-sm text-primary transition-colors hover:text-primary/80"
-          >
-            <BackIcon className="h-4 w-4" />
-            {secondaryAction.label}
+      <header className="relative w-full bg-gradient-to-r from-violet-500/15 via-fuchsia-500/10 to-pink-500/15 border-b border-border/40 backdrop-blur-xl">
+        <div className="container max-w-5xl flex items-center justify-between py-4">
+          <button onClick={() => onNavigate("/")} className="flex items-center gap-3 transition-opacity hover:opacity-80">
+            <img src="/Terget_Logo.jpg" alt="Logo" className="h-10 w-10 rounded-xl object-cover shadow-sm" />
+            <span className="text-primary text-lg font-bold tracking-tight hidden sm:inline-block">Reject Me First</span>
           </button>
-        )}
+          
+          <div className="flex items-center gap-4">
+            {secondaryAction && (
+              <button
+                type="button"
+                onClick={secondaryAction.onClick}
+                className="inline-flex items-center gap-1.5 rounded-full bg-background/50 backdrop-blur-sm border border-border/50 px-4 py-1.5 text-sm font-semibold text-primary transition-all duration-300 hover:bg-background/80 hover:text-primary/80 shadow-sm"
+              >
+                <BackIcon className="h-4 w-4" />
+                {secondaryAction.label}
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <div className="container max-w-5xl py-6 md:py-10">
 
         <div className="mb-8">
           <h1 className="text-2xl font-bold tracking-tight text-primary md:text-3xl">{title}</h1>

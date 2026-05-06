@@ -371,6 +371,17 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
   const startCommittee = useCallback(async () => {
     setReviewError(null);
 
+    if (draft.inputMode === "structured" && draft.structured.idea.trim().length < 50) {
+      const msg = draft.preferredLanguage === "ar" ? "وصف الفكرة قصير جداً لتكون فكرة واقعية. يرجى كتابة 50 حرفاً على الأقل." : "The idea description is too short to be realistic. Please write at least 50 characters.";
+      setReviewError(msg);
+      throw new Error(msg);
+    }
+    if (draft.inputMode === "free" && draft.freeText.trim().length < 50) {
+      const msg = draft.preferredLanguage === "ar" ? "النص قصير جداً لتكون فكرة واقعية. يرجى كتابة 50 حرفاً على الأقل." : "The text is too short to be realistic. Please write at least 50 characters.";
+      setReviewError(msg);
+      throw new Error(msg);
+    }
+
     try {
       const result = await committeeStart.mutateAsync(buildStartInput());
       setDraft(current => ({
@@ -385,7 +396,7 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
       setReviewError(message);
       throw error;
     }
-  }, [buildStartInput, committeeStart]);
+  }, [buildStartInput, committeeStart, draft.inputMode, draft.structured.idea, draft.freeText, draft.preferredLanguage]);
 
   const submitCommitteeRebuttal = useCallback(async () => {
     const input = buildReevaluationInput();

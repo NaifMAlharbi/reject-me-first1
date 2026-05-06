@@ -129,22 +129,24 @@ export function LandingPage() {
         <div className="absolute -bottom-1/4 -right-1/4 h-1/2 w-1/2 rounded-full bg-primary/5 blur-[120px]" />
       </div>
 
-      <header className="container relative z-10 flex items-center justify-between py-6">
-        <div className="flex items-center gap-3">
-          <img src="/Terget_Logo.jpg" alt="Logo" className="h-10 w-10 rounded-xl object-cover shadow-sm" />
-          <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-lg font-bold text-transparent tracking-tight hidden sm:inline-block">Reject Me First</span>
-        </div>
-        <div className="flex items-center gap-4">
-          {switchable && toggleTheme && (
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9 rounded-full bg-background/50 backdrop-blur-sm border border-border/50 shadow-sm text-muted-foreground hover:text-foreground">
-              {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-            </Button>
-          )}
-          <div className="inline-flex items-center rounded-full border border-border/50 bg-background/50 backdrop-blur-sm p-1 shadow-sm">
-            <button type="button" onClick={() => flow.setPreferredLanguage("en")}
-              className={cn("rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-300", flow.preferredLanguage === "en" ? "bg-primary text-primary-foreground shadow-md" : "text-muted-foreground hover:text-foreground")}>EN</button>
-            <button type="button" onClick={() => flow.setPreferredLanguage("ar")}
-              className={cn("rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-300", flow.preferredLanguage === "ar" ? "bg-primary text-primary-foreground shadow-md" : "text-muted-foreground hover:text-foreground")}>AR</button>
+      <header className="relative w-full bg-gradient-to-r from-violet-500/15 via-fuchsia-500/10 to-pink-500/15 border-b border-border/40 backdrop-blur-xl">
+        <div className="container flex items-center justify-between py-4">
+          <div className="flex items-center gap-3">
+            <img src="/Terget_Logo.jpg" alt="Logo" className="h-10 w-10 rounded-xl object-cover shadow-sm" />
+            <span className="text-primary text-lg font-bold tracking-tight hidden sm:inline-block">Reject Me First</span>
+          </div>
+          <div className="flex items-center gap-4">
+            {switchable && toggleTheme && (
+              <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9 rounded-full bg-background/50 backdrop-blur-sm border border-border/50 shadow-sm text-muted-foreground hover:text-foreground hover:bg-background/80 transition-all">
+                {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+              </Button>
+            )}
+            <div className="inline-flex items-center rounded-full border border-border/50 bg-background/50 backdrop-blur-sm p-1 shadow-sm">
+              <button type="button" onClick={() => flow.setPreferredLanguage("en")}
+                className={cn("rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-300", flow.preferredLanguage === "en" ? "bg-primary text-primary-foreground shadow-md" : "text-muted-foreground hover:text-foreground")}>EN</button>
+              <button type="button" onClick={() => flow.setPreferredLanguage("ar")}
+                className={cn("rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-300", flow.preferredLanguage === "ar" ? "bg-primary text-primary-foreground shadow-md" : "text-muted-foreground hover:text-foreground")}>AR</button>
+            </div>
           </div>
         </div>
       </header>
@@ -168,7 +170,7 @@ export function LandingPage() {
           <div className="grid gap-5 md:grid-cols-2">
             <button
               type="button"
-              onClick={() => { flow.setUseMock(false); navigate("/flow/input"); }}
+              onClick={() => { flow.resetAll(); flow.setUseMock(false); navigate("/flow/input"); }}
               className="group relative overflow-hidden rounded-2xl border border-border/50 bg-background/60 p-6 text-start backdrop-blur-md transition-all hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-1"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
@@ -183,7 +185,7 @@ export function LandingPage() {
             </button>
             <button
               type="button"
-              onClick={() => void flow.loadDemo().then(() => navigate("/flow/review"))}
+              onClick={() => void flow.loadDemo().then(() => navigate("/flow/input"))}
               className="group relative overflow-hidden rounded-2xl border border-border/50 bg-background/60 p-6 text-start backdrop-blur-md transition-all hover:border-secondary/50 hover:shadow-2xl hover:shadow-secondary/20 hover:-translate-y-1"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
@@ -231,7 +233,8 @@ export function InputPage() {
         eyebrow={flow.text.projectInput} title={flow.text.projectInput} description={flow.text.pageIntroBrief}
         steps={[...pageSteps]} currentStep="input" onNavigate={goTo}
         primaryAction={{ label: flow.text.startCommittee, onClick: async () => { await flow.startCommittee(); goTo("/flow/review"); }, loading: flow.reviewPending }}
-        tertiaryAction={{ label: isAr ? "مشروع جديد" : "New Project", onClick: () => { flow.resetAll(); goTo("/"); } }}
+        secondaryAction={{ label: isAr ? "رجوع للرئيسية" : "Back to Home", onClick: () => goTo("/") }}
+        tertiaryAction={{ label: isAr ? "مسح البيانات" : "Reset Data", onClick: () => { flow.resetAll(); goTo("/"); } }}
         statusSlot={statusSlot}
       >
         <div className="space-y-6">
