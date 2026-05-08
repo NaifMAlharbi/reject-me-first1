@@ -2498,7 +2498,7 @@ Focus ONLY on: Is the positioning compelling? What marketing mistakes killed sim
     const parsed = parseJsonContent<AgentReview>(result.content);
     const normalized = normalizeAgentReview(parsed);
     const review = safeParseWithNormalization(agentReviewSchema, {
-      ...normalized,
+      ...(normalized as Record<string, unknown>),
       agent,
       label: agentLabels[language][agent],
     });
