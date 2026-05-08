@@ -52,6 +52,7 @@ export const startReviewInputSchema = z.object({
   extraFragments: z.array(z.string().trim().max(2000)).default([]),
   selectedAgents: z.array(agentKeySchema).min(1).max(agentKeys.length).optional().default([...agentKeys]),
   useMock: z.boolean().default(false),
+  enableDeepCommunication: z.boolean().default(false),
 });
 export type StartReviewInput = z.infer<typeof startReviewInputSchema>;
 
@@ -179,6 +180,7 @@ export const reevaluateInputSchema = z.object({
   projectBrief: projectBriefSchema,
   reviews: z.array(agentReviewSchema).min(1).max(agentOrder.length),
   rebuttal: rebuttalInputSchema,
+  enableDeepCommunication: z.boolean().default(false),
 });
 export type ReevaluateInput = z.infer<typeof reevaluateInputSchema>;
 

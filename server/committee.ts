@@ -2026,13 +2026,20 @@ async function generateReevaluationWithLLM(
   linkedItems: LinkedRebuttalItem[],
   brief: ProjectBrief,
   language: Language,
+  committeeSummary?: string,
 ) {
+  const committeeContext = committeeSummary
+    ? language === "ar"
+      ? `\n\nملخص ملاحظات باقي أعضاء اللجنة (للاطلاع فقط — لا تكرر نقاطهم، لكن يمكنك الإشارة لها إذا أثرت على تقييمك):\n${committeeSummary}`
+      : `\n\nSummary of other committee members' findings (for your awareness — do NOT repeat their points, but you may reference them if they affect your assessment):\n${committeeSummary}`
+    : "";
+
   const parsed = await callStructuredModel<Reevaluation>({
     system: reevaluatePrompts[language][review.agent],
     user:
       language === "ar"
-        ? `الـ Project Brief:\n${JSON.stringify(brief, null, 2)}\nالمراجعة الأولى:\n${JSON.stringify(review, null, 2)}\nالردود المرتبطة:\n${JSON.stringify(linkedItems, null, 2)}\nأعد الحقول فقط: agent, label, updated_score, score_delta, updated_stance, rebuttal_quality, key_insight, what_changed, remaining_concerns`
-        : `Project brief:\n${JSON.stringify(brief, null, 2)}\nFirst review:\n${JSON.stringify(review, null, 2)}\nLinked rebuttal:\n${JSON.stringify(linkedItems, null, 2)}\nReturn only these fields: agent, label, updated_score, score_delta, updated_stance, rebuttal_quality, key_insight, what_changed, remaining_concerns`,
+        ? `الـ Project Brief:\n${JSON.stringify(brief, null, 2)}\nالمراجعة الأولى:\n${JSON.stringify(review, null, 2)}\nالردود المرتبطة:\n${JSON.stringify(linkedItems, null, 2)}${committeeContext}\nأعد الحقول فقط: agent, label, updated_score, score_delta, updated_stance, rebuttal_quality, key_insight, what_changed, remaining_concerns`
+        : `Project brief:\n${JSON.stringify(brief, null, 2)}\nFirst review:\n${JSON.stringify(review, null, 2)}\nLinked rebuttal:\n${JSON.stringify(linkedItems, null, 2)}${committeeContext}\nReturn only these fields: agent, label, updated_score, score_delta, updated_stance, rebuttal_quality, key_insight, what_changed, remaining_concerns`,
   });
 
   return safeParseWithNormalization(reevaluationSchema, {
@@ -2147,6 +2154,19 @@ export async function submitRebuttal(input: ReevaluateInput): Promise<Reevaluate
     parsed.mode === "mock",
   );
 
+  const committeeSummary = parsed.enableDeepCommunication
+    ? parsed.reviews.map(r => {
+        const topObjection = r.objections?.[0] ?? (parsed.language === "ar" ? "لا يوجد" : "None");
+        return parsed.language === "ar"
+          ? `• ${r.label} (${r.score}/10): ${r.strength} | أهم اعتراض: ${topObjection}`
+          : `• ${r.label} (${r.score}/10): ${r.strength} | Top concern: ${topObjection}`;
+      }).join("\n")
+    : undefined;
+
+  if (parsed.enableDeepCommunication) {
+    console.log(`[Committee] Sharing cross-agent summary (${parsed.reviews.length} agents) for rebuttal round`);
+  }
+
   const secondRound = await Promise.all(
     parsed.reviews.map(async review => {
       const relevantItems = linkedRebuttal.filter(item => item.agent === review.agent);
@@ -2154,7 +2174,7 @@ export async function submitRebuttal(input: ReevaluateInput): Promise<Reevaluate
         return mockReevaluationForAgent(review, relevantItems, parsed.language);
       }
 
-      return await generateReevaluationWithLLM(review, relevantItems, parsed.projectBrief, parsed.language);
+      return await generateReevaluationWithLLM(review, relevantItems, parsed.projectBrief, parsed.language, committeeSummary);
     }),
   );
 
@@ -2587,12 +2607,96 @@ export async function agenticStartReview(
       }
     }
 
+    let finalReviews = reviews;
+
+    if (parsed.enableDeepCommunication) {
+      // Step 3: Cross-agent refinement — agents see each other's findings and adjust
+      const committeeSummary = reviews.map(r => {
+        const topObjection = r.objections?.[0] ?? (language === "ar" ? "لا يوجد" : "None");
+        return language === "ar"
+          ? `• ${r.label} (${r.score}/10): ${r.strength} | أهم اعتراض: ${topObjection}`
+          : `• ${r.label} (${r.score}/10): ${r.strength} | Top concern: ${topObjection}`;
+      }).join("\n");
+
+      console.log(`[Committee] Cross-agent refinement: sharing findings among ${reviews.length} agents...`);
+
+      finalReviews = await Promise.all(
+      reviews.map(async (review) => {
+        try {
+          const otherAgentsSummary = reviews
+            .filter(r => r.agent !== review.agent)
+            .map(r => {
+              const topObj = r.objections?.[0] ?? (language === "ar" ? "لا يوجد" : "None");
+              return language === "ar"
+                ? `• ${r.label} (${r.score}/10): ${r.strength} | اعتراض: ${topObj}`
+                : `• ${r.label} (${r.score}/10): ${r.strength} | Concern: ${topObj}`;
+            }).join("\n");
+
+          const refinementPrompt = language === "ar"
+            ? `أنت ${review.label}. أعطيت تقييمك الأولي (${review.score}/10). الآن اطلع على ملاحظات باقي أعضاء اللجنة:
+
+${otherAgentsSummary}
+
+بناءً على هذه المعلومات الجديدة من زملائك، هل تريد تعديل تقييمك؟
+- إذا لقية ملاحظة من وكيل آخر تأثر على تخصصك، عدّل درجتك أو اعتراضاتك
+- لا تكرر اعتراضات الوكلاء الآخرين — ركّز على تخصصك فقط
+- إذا ما فيه شي يأثر، خلّ تقييمك كما هو
+
+أعد JSON بنفس الصيغة: {"score":NUMBER,"stance":"...","strength":"...","objections":["..."],"confidence":NUMBER}`
+            : `You are the ${review.label}. You gave an initial score of ${review.score}/10. Now review the other committee members' findings:
+
+${otherAgentsSummary}
+
+Based on these new insights from your colleagues, would you adjust your evaluation?
+- If another agent's finding impacts YOUR domain, adjust your score or objections
+- Do NOT repeat other agents' objections — stay in YOUR lane
+- If nothing changes your view, keep your evaluation as-is
+
+Return JSON with same format: {"score":NUMBER,"stance":"...","strength":"...","objections":["..."],"confidence":NUMBER}`;
+
+          const response = await invokeLLM({
+            messages: [
+              { role: "system", content: agentPrompts[language][review.agent] },
+              { role: "user", content: refinementPrompt },
+            ],
+            temperature: 0.2,
+            max_tokens: 600,
+            response_format: { type: "json_object" },
+          });
+
+          const content = response.choices[0]?.message?.content;
+          if (!content) return review;
+
+          const refined = JSON.parse(content) as Partial<AgentReview>;
+          const newScore = typeof refined.score === "number" ? Math.min(10, Math.max(1, Number(refined.score.toFixed(1)))) : review.score;
+          const delta = Number((newScore - review.score).toFixed(1));
+
+          if (delta !== 0) {
+            console.log(`[Committee] ${review.agent}: adjusted ${review.score} → ${newScore} (${delta > 0 ? "+" : ""}${delta}) after cross-agent review`);
+          }
+
+          return {
+            ...review,
+            score: newScore,
+            stance: refined.stance ?? review.stance,
+            strength: refined.strength ?? review.strength,
+            objections: refined.objections?.length ? refined.objections.slice(0, 3) : review.objections,
+            confidence: typeof refined.confidence === "number" ? refined.confidence : review.confidence,
+          } as AgentReview;
+        } catch (error) {
+          console.error(`[Committee] Refinement failed for ${review.agent}, keeping original:`, error instanceof Error ? error.message : String(error));
+          return review;
+        }
+      }),
+    );
+    }
+
     return agenticFirstReviewSchema.parse({
       language,
       direction,
       mode,
       projectBrief,
-      reviews,
+      reviews: finalReviews,
       research,
       answeredQuestions,
       agenticMode: true,

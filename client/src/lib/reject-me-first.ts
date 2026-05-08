@@ -517,6 +517,7 @@ export function initialDraft() {
     rebuttalMode: "free" as RebuttalMode,
     preferredLanguage: "en" as Language,
     useMock: false,
+    enableDeepCommunication: false,
     selectedAgents: [...agentOrder],
     freeText: "",
     transcriptText: "",

@@ -57,6 +57,7 @@ type DraftState = {
   rebuttalMode: RebuttalMode;
   preferredLanguage: Language;
   useMock: boolean;
+  enableDeepCommunication: boolean;
   selectedAgents: AgentKey[];
   freeText: string;
   transcriptText: string;
@@ -84,6 +85,7 @@ type CommitteeFlowContextValue = DraftState & {
   setRebuttalMode: (mode: RebuttalMode) => void;
   setPreferredLanguage: (language: Language) => void;
   setUseMock: (value: boolean) => void;
+  setEnableDeepCommunication: (value: boolean) => void;
   toggleSelectedAgent: (agent: AgentKey) => void;
   selectAllAgents: () => void;
   setFreeText: (value: string) => void;
@@ -237,6 +239,10 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
     setDraft(current => ({ ...current, useMock: value }));
   }, []);
 
+  const setEnableDeepCommunication = useCallback((value: boolean) => {
+    setDraft(current => ({ ...current, enableDeepCommunication: value }));
+  }, []);
+
   const toggleSelectedAgent = useCallback((agent: AgentKey) => {
     setDraft(current => {
       const hasAgent = current.selectedAgents.includes(agent);
@@ -364,6 +370,7 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
       extraFragments: [],
       selectedAgents: normalizeSelectedAgents(draft.selectedAgents),
       useMock: draft.useMock,
+      enableDeepCommunication: draft.enableDeepCommunication,
     };
   }, [draft]);
 
@@ -382,8 +389,9 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
       projectBrief: draft.firstRound.projectBrief,
       reviews: draft.firstRound.reviews,
       rebuttal,
+      enableDeepCommunication: draft.enableDeepCommunication,
     };
-  }, [draft.firstRound, draft.freeRebuttal, draft.rebuttalMode, draft.structuredRebuttal]);
+  }, [draft.firstRound, draft.freeRebuttal, draft.rebuttalMode, draft.structuredRebuttal, draft.enableDeepCommunication]);
 
   const startCommittee = useCallback(async () => {
     setReviewError(null);
@@ -578,6 +586,7 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
     setRebuttalMode,
     setPreferredLanguage,
     setUseMock,
+    setEnableDeepCommunication,
     toggleSelectedAgent,
     selectAllAgents,
     setFreeText,

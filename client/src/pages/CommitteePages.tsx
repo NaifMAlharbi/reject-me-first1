@@ -269,6 +269,24 @@ export function InputPage() {
             </div>
           </div>
 
+          <div className="rounded-xl border border-border bg-card p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold">{isAr ? "تواصل عميق بين الوكلاء" : "Deep Cross-Agent Communication"}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {isAr 
+                  ? "يسمح للوكلاء بمناقشة الفكرة والردود مع بعضهم في الجولة الأولى وجولة الدفاع (يأخذ وقت أطول)." 
+                  : "Agents will share insights and adjust during both the initial review and the rebuttal rounds (takes longer)."}
+              </p>
+            </div>
+            <Button
+              variant={flow.enableDeepCommunication ? "default" : "outline"}
+              size="sm"
+              onClick={() => flow.setEnableDeepCommunication(!flow.enableDeepCommunication)}
+            >
+              {flow.enableDeepCommunication ? (isAr ? "مفعّل" : "Enabled") : (isAr ? "معطّل" : "Disabled")}
+            </Button>
+          </div>
+
           {flow.inputMode === "free" ? (
             <div>
               <label className="mb-1.5 block text-sm font-medium">{flow.text.founderNarrative}</label>
