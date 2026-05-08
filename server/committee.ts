@@ -1,11 +1,16 @@
 import { ENV } from "./_core/env";
 import { invokeLLM } from "./_core/llm";
+import { runAgentWithTools, generateAgentQuestion } from "./tools/agent-loop";
+import { isSearchAvailable } from "./tools/search";
 import {
   agentKeySchema,
   agentLabels,
   agentOrder,
   normalizeSelectedAgents,
   agentReviewSchema,
+  agentQuestionSchema,
+  agentResearchSchema,
+  agenticFirstReviewSchema,
   comparisonRowSchema,
   directionSchema,
   finalVerdictSchema,
@@ -21,7 +26,11 @@ import {
   stanceSchema,
   structuredFounderInputSchema,
   type AgentKey,
+  type AgentQuestion,
+  type AgentResearch,
   type AgentReview,
+  type AgenticFirstReview,
+  type AnsweredQuestion,
   type ComparisonRow,
   type FinalVerdict,
   type FirstReview,
@@ -2234,3 +2243,378 @@ export function getDemoCase(language: Language) {
 }
 
 export const demoCase = getDemoCase("en");
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// AGENTIC FEATURES — Web Research + Dynamic Questions
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+/**
+ * Format a project brief as a readable text block for agents.
+ */
+export function formatBriefForAgents(brief: ProjectBrief, language: Language): string {
+  const lines = [
+    language === "ar" ? `اسم المشروع: ${brief.project_name}` : `Project name: ${brief.project_name}`,
+    language === "ar" ? `الملخص: ${brief.one_line_summary}` : `Summary: ${brief.one_line_summary}`,
+    language === "ar" ? `المشكلة: ${brief.problem}` : `Problem: ${brief.problem}`,
+    language === "ar" ? `الحل: ${brief.solution}` : `Solution: ${brief.solution}`,
+    language === "ar" ? `العميل المستهدف: ${brief.target_customer}` : `Target customer: ${brief.target_customer}`,
+    language === "ar" ? `الألم: ${brief.customer_pain}` : `Customer pain: ${brief.customer_pain}`,
+    language === "ar" ? `نموذج العمل: ${brief.business_model}` : `Business model: ${brief.business_model}`,
+    language === "ar" ? `نوع السوق: ${brief.market_type}` : `Market type: ${brief.market_type}`,
+    language === "ar" ? `القطاع: ${brief.industry}` : `Industry: ${brief.industry}`,
+    language === "ar" ? `التميّز: ${brief.differentiation}` : `Differentiation: ${brief.differentiation}`,
+    language === "ar" ? `قناة الوصول: ${brief.distribution_strategy}` : `Distribution: ${brief.distribution_strategy}`,
+    language === "ar" ? `الإثبات: ${brief.evidence_or_traction}` : `Evidence/Traction: ${brief.evidence_or_traction}`,
+    language === "ar"
+      ? `المخاطر: ${brief.known_risks.join(" | ")}`
+      : `Known risks: ${brief.known_risks.join(" | ")}`,
+  ];
+  return lines.join("\n");
+}
+
+/**
+ * AGENTIC FEATURE #1: Dynamic Follow-up Questions
+ *
+ * Each agent reads the project brief and autonomously decides what
+ * critical information is missing from THEIR perspective.
+ *
+ * This is agentic because:
+ * - The agent OBSERVES the brief
+ * - THINKS about what's missing
+ * - ACTS by generating a targeted question
+ * - The loop continues when the founder answers
+ */
+export async function generateQuestions(
+  brief: ProjectBrief,
+  language: Language,
+  selectedAgents: AgentKey[],
+): Promise<AgentQuestion[]> {
+  const agents = normalizeSelectedAgents(selectedAgents);
+  const briefText = formatBriefForAgents(brief, language);
+
+  const results = await Promise.allSettled(
+    agents.map(async (agent) => {
+      const result = await generateAgentQuestion({
+        agentPrompt: agentPrompts[language][agent],
+        briefText,
+        language,
+        agentLabel: agentLabels[language][agent],
+      });
+
+      if (!result) return null;
+
+      return agentQuestionSchema.parse({
+        agent,
+        label: agentLabels[language][agent],
+        question: result.question,
+        reason: result.reason,
+      });
+    }),
+  );
+
+  const questions: AgentQuestion[] = [];
+  for (const result of results) {
+    if (result.status === "fulfilled" && result.value) {
+      questions.push(result.value);
+    }
+  }
+
+  console.log(`[Agentic] Generated ${questions.length} questions from ${agents.length} agents`);
+  return questions;
+}
+
+/**
+ * AGENTIC FEATURE #2: Research-Enhanced Evaluation
+ *
+ * Each agent uses web search tools to gather real market data before
+ * writing their evaluation. This is the core agent loop:
+ *
+ * Agent reads brief → decides what to research → searches the web →
+ * reads results → writes evaluation grounded in real data
+ *
+ * This is agentic because:
+ * - The agent AUTONOMOUSLY decides what to search
+ * - It CALLS TOOLS (web search) based on reasoning
+ * - It OBSERVES search results and adapts its evaluation
+ * - The full observe→think→act→observe loop runs
+ */
+async function generateAgentReviewWithResearch(
+  brief: ProjectBrief,
+  agent: AgentKey,
+  language: Language,
+  answeredQuestions: AnsweredQuestion[],
+): Promise<{ review: AgentReview; research: AgentResearch }> {
+  // Build the enhanced prompt with answered questions
+  const agentQuestionAnswers = answeredQuestions.filter((q) => q.agent === agent && q.answer?.trim());
+  const qaSection =
+    agentQuestionAnswers.length > 0
+      ? agentQuestionAnswers
+          .map(
+            (qa) =>
+              language === "ar"
+                ? `سؤالك: ${qa.question}\nإجابة المؤسس: ${qa.answer}`
+                : `Your question: ${qa.question}\nFounder's answer: ${qa.answer}`,
+          )
+          .join("\n\n")
+      : "";
+
+  // Domain-specific research instructions that force differentiation
+  // Each agent searches different sources to avoid repetition
+  const domainSearchFocus: Record<string, { en: string; ar: string }> = {
+    customer: {
+      en: `\n\nYou have a web search tool. You are the CUSTOMER perspective. You MUST make these searches:
+1. Search for real user reviews or complaints about similar products: Reddit, forums, app store reviews
+2. Search site:failory.com for startups in this industry that failed due to "no market need" — learn what users actually rejected
+
+Do NOT comment on business model, pricing, or distribution — other agents handle those.
+Focus ONLY on: Would a REAL person use this daily? What do actual users say about alternatives? What similar products were rejected by users and why?`,
+      ar: `\n\nلديك أداة بحث. أنت تمثل وجهة نظر العميل. يجب أن تسوي هذي البحوث:
+1. ابحث عن آراء مستخدمين حقيقيين عن منتجات مشابهة (Reddit، متاجر التطبيقات)
+2. ابحث في site:failory.com عن مشاريع في هذا القطاع فشلت بسبب "عدم حاجة السوق"
+
+لا تعلق على نموذج العمل أو التسعير أو التوزيع. ركّز فقط على: هل شخص حقيقي بيستخدم هذا يومياً؟ ليش مشاريع مشابهة انرفضت من المستخدمين؟`,
+    },
+    investor: {
+      en: `\n\nYou have a web search tool. You are the INVESTOR perspective. You MUST make these searches:
+1. Search for TAM/market size data and growth rates for this industry
+2. Search site:startups.rip for similar startups — check if they were acquired, died, or pivoted. Learn from their trajectory.
+3. If relevant to Saudi/MENA market, also search: Saudi Arabia [industry] market statistics OR site:monshaat.gov.sa [industry]
+
+Do NOT repeat technical or customer concerns — other agents cover those.
+Focus ONLY on: Is this venture-scale? What happened to similar startups? What's the investment thesis?`,
+      ar: `\n\nلديك أداة بحث. أنت تمثل وجهة نظر المستثمر. يجب أن تسوي هذي البحوث:
+1. ابحث عن حجم السوق TAM ومعدلات النمو
+2. ابحث في site:startups.rip عن مشاريع مشابهة — هل استُحوذ عليها أو ماتت؟
+3. إذا كان المشروع يستهدف السعودية، ابحث عن: إحصائيات السوق السعودي [القطاع] OR site:monshaat.gov.sa [القطاع]
+
+لا تكرر مخاوف تقنية أو رأي العميل. ركّز فقط على: هل هذه فرصة استثمارية ضخمة؟ ايش صار لمشاريع مشابهة؟`,
+    },
+    financial: {
+      en: `\n\nYou have a web search tool. You are the FINANCIAL perspective. You MUST make these searches:
+1. Search for pricing models, unit economics, and revenue benchmarks of competitors in this space
+2. Search site:failory.com for startups in this industry that failed due to "bad business model" or "lack of funds"
+3. If relevant to Saudi/MENA, search: Saudi Arabia [industry] consumer spending OR "الهيئة العامة للإحصاء" [industry] statistics
+
+Do NOT comment on market size (investor's job) or user experience (customer's job).
+Focus ONLY on: Do the unit economics work? What pricing killed similar startups? What are realistic CAC/LTV benchmarks?`,
+      ar: `\n\nلديك أداة بحث. أنت تمثل وجهة نظر المالية. يجب أن تسوي هذي البحوث:
+1. ابحث عن نماذج تسعير واقتصاديات الوحدة للمنافسين
+2. ابحث في site:failory.com عن مشاريع فشلت بسبب "نموذج عمل سيء" أو "نقص التمويل"
+3. إذا كان يستهدف السعودية، ابحث عن: إنفاق المستهلك السعودي [القطاع] OR إحصائيات "الهيئة العامة للإحصاء"
+
+لا تعلق على حجم السوق أو تجربة المستخدم. ركّز فقط على: هل الأرقام منطقية؟ ايش التسعير اللي قتل مشاريع مشابهة؟`,
+    },
+    legal: {
+      en: `\n\nYou have a web search tool. You are the LEGAL perspective. You MUST make these searches:
+1. Search for specific regulations, laws, and compliance requirements for this industry
+2. Search site:failory.com for startups that failed due to "legal challenges" in this sector
+3. If relevant to Saudi Arabia, ALWAYS search: Saudi Arabia [industry] regulations OR site:mc.gov.sa [industry] OR "نظام حماية البيانات الشخصية" PDPL
+
+Do NOT comment on market size, pricing, or user experience — other agents handle those.
+Focus ONLY on: What specific laws apply? What legal issues killed similar startups? What Saudi/local regulations must be followed?`,
+      ar: `\n\nلديك أداة بحث. أنت تمثل وجهة نظر القانون. يجب أن تسوي هذي البحوث:
+1. ابحث عن لوائح وقوانين محددة في هذا القطاع
+2. ابحث في site:failory.com عن مشاريع فشلت بسبب "تحديات قانونية"
+3. إذا كان يستهدف السعودية، ابحث دائماً عن: أنظمة [القطاع] السعودية OR site:mc.gov.sa OR "نظام حماية البيانات الشخصية" PDPL
+
+لا تعلق على حجم السوق أو التسعير. ركّز فقط على: ما القوانين المحددة؟ ايش المشاكل القانونية اللي قتلت مشاريع مشابهة؟`,
+    },
+    technical: {
+      en: `\n\nYou have a web search tool. You are the TECHNICAL perspective. You MUST make these searches:
+1. Search for technical architecture, APIs, ML models, or open-source tools used by similar products
+2. Search site:startups.rip for technically similar startups — what tech stack did they use? What technical challenges caused them to fail or pivot?
+
+Do NOT comment on market opportunity, pricing, or legal concerns — other agents cover those.
+Focus ONLY on: Can this be built with current tech? What specific tools/models exist? What technical pitfalls killed similar startups?`,
+      ar: `\n\nلديك أداة بحث. أنت تمثل وجهة نظر التقنية. يجب أن تسوي هذي البحوث:
+1. ابحث عن البنية التقنية والـ APIs ونماذج AI المستخدمة في منتجات مشابهة
+2. ابحث في site:startups.rip عن مشاريع تقنية مشابهة — ايش التقنيات اللي استخدموها؟ ايش التحديات التقنية اللي سببت فشلهم؟
+
+لا تعلق على فرصة السوق أو التسعير أو المخاوف القانونية. ركّز فقط على: هل يمكن بناؤه؟ ايش الأدوات الموجودة؟ ايش المشاكل التقنية اللي قتلت مشاريع مشابهة؟`,
+    },
+    operator: {
+      en: `\n\nYou have a web search tool. You are the OPERATIONS perspective. You MUST make these searches:
+1. Search for how similar companies handle daily operations, customer support, and scaling challenges
+2. Search site:failory.com for startups that failed due to "bad management" or operational issues in this industry
+3. If relevant to Saudi Arabia, search: Saudi Arabia [industry] business operations challenges OR site:monshaat.gov.sa startup operations
+
+Do NOT comment on market size, legal risks, or technical feasibility — other agents handle those.
+Focus ONLY on: Can they deliver this daily? What operational problems killed similar startups? What specific bottlenecks will they face?`,
+      ar: `\n\nلديك أداة بحث. أنت تمثل وجهة نظر التشغيل. يجب أن تسوي هذي البحوث:
+1. ابحث عن كيف شركات مشابهة تدير عملياتها اليومية والدعم الفني
+2. ابحث في site:failory.com عن مشاريع فشلت بسبب "إدارة سيئة" أو مشاكل تشغيلية
+3. إذا كان يستهدف السعودية، ابحث عن: تحديات تشغيل [القطاع] في السعودية OR site:monshaat.gov.sa
+
+لا تعلق على حجم السوق أو المخاطر القانونية. ركّز فقط على: هل يقدرون يشغلونه يومياً؟ ايش المشاكل التشغيلية اللي قتلت مشاريع مشابهة؟`,
+    },
+    marketing: {
+      en: `\n\nYou have a web search tool. You are the MARKETING perspective. You MUST make these searches:
+1. Search for how competitors position themselves (websites, app store listings, social media presence)
+2. Search site:failory.com for startups that failed due to "bad marketing" or customer acquisition problems
+3. If relevant to Saudi/MENA, search: Saudi Arabia [industry] customer acquisition channels OR digital marketing Saudi Arabia trends
+
+Do NOT comment on financial viability, legal risks, or technical complexity — other agents handle those.
+Focus ONLY on: Is the positioning compelling? What marketing mistakes killed similar startups? Can they realistically reach their target customers?`,
+      ar: `\n\nلديك أداة بحث. أنت تمثل وجهة نظر التسويق. يجب أن تسوي هذي البحوث:
+1. ابحث عن كيف يضع المنافسون أنفسهم في السوق (مواقعهم، متاجر التطبيقات)
+2. ابحث في site:failory.com عن مشاريع فشلت بسبب "تسويق سيء" أو مشاكل في اكتساب العملاء
+3. إذا كان يستهدف السعودية، ابحث عن: قنوات اكتساب العملاء في السعودية [القطاع] OR اتجاهات التسويق الرقمي السعودية
+
+لا تعلق على الجدوى المالية أو المخاطر القانونية. ركّز فقط على: هل يقدرون يوصلون لعملائهم؟ ايش أخطاء التسويق اللي قتلت مشاريع مشابهة؟`,
+    },
+  };
+
+  const researchInstruction = domainSearchFocus[agent]?.[language] ??
+    (language === "ar"
+      ? `\n\nلديك أداة بحث على الإنترنت. استخدمها للتحقق من حقائق السوق أو المنافسين أو اللوائح المتعلقة بهذا المشروع. ابحث عن 1-2 شيء محدد يساعد تقييمك.`
+      : `\n\nYou have a web search tool. Use it to verify market facts, competitors, or regulations relevant to this startup. Search for 1-2 specific things that will strengthen your evaluation with real data.`);
+
+  const userPrompt = [
+    buildAgentReviewPrompt(brief, agent, language),
+    qaSection
+      ? language === "ar"
+        ? `\n\nإجابات المؤسس على أسئلتك:\n${qaSection}`
+        : `\n\nFounder's answers to your questions:\n${qaSection}`
+      : "",
+    researchInstruction,
+  ]
+    .filter(Boolean)
+    .join("");
+
+  try {
+    // Run the agent loop — the agent can search the web autonomously
+    const result = await runAgentWithTools({
+      system: agentPrompts[language][agent] + (language === "ar"
+        ? "\n\nمهم جداً: ركّز فقط على مجال خبرتك. لا تكرر نقاط من تخصص وكلاء آخرين. بعد البحث، أعد تقييمك النهائي كـ JSON فقط."
+        : "\n\nCRITICAL: Focus ONLY on YOUR domain expertise. Do NOT repeat objections that belong to other agents' specialties. Your objections must be unique to your perspective. After researching, return your final evaluation as JSON only."),
+      user: userPrompt,
+      maxToolCalls: 3,
+      temperature: 0.3,
+      maxTokens: 2000,
+      responseFormat: { type: "json_object" },
+    });
+
+    // Parse the review from the agent's final response
+    const parsed = parseJsonContent<AgentReview>(result.content);
+    const normalized = normalizeAgentReview(parsed);
+    const review = safeParseWithNormalization(agentReviewSchema, {
+      ...normalized,
+      agent,
+      label: agentLabels[language][agent],
+    });
+
+    // Build research metadata
+    const research = agentResearchSchema.parse({
+      agent,
+      searches: result.searches,
+      findings: [], // Findings are embedded in the review text
+    });
+
+    console.log(`[Agentic] ${agent}: ${result.toolCallsUsed} searches, score=${review.score}`);
+    return { review, research };
+  } catch (error) {
+    console.error(`[Agentic] Research evaluation failed for ${agent}, falling back to standard:`,
+      error instanceof Error ? error.message : String(error));
+
+    // Fallback: run without tools if the agent loop fails
+    const review = await generateAgentReviewWithLLM(brief, agent, language);
+    return {
+      review,
+      research: agentResearchSchema.parse({ agent, searches: [], findings: [] }),
+    };
+  }
+}
+
+/**
+ * AGENTIC START REVIEW
+ *
+ * The full agentic pipeline:
+ * 1. Extract project brief (same as before)
+ * 2. Each agent researches the web + uses answered questions
+ * 3. Agents write evaluations grounded in real data
+ * 4. Returns enriched results with research metadata
+ */
+export async function agenticStartReview(
+  input: StartReviewInput,
+  answeredQuestions: AnsweredQuestion[] = [],
+): Promise<AgenticFirstReview> {
+  const parsed = startReviewInputSchema.parse(input);
+  const language = inferLanguage(parsed);
+  const qualityIssue = getInputQualityIssue(parsed, language);
+  if (qualityIssue) {
+    throw new Error(qualityIssue);
+  }
+  const direction = getDirection(language);
+  const mode = getLiveMode(parsed.useMock);
+  const selectedAgents = normalizeSelectedAgents(parsed.selectedAgents);
+  const searchAvailable = isSearchAvailable();
+
+  // Step 1: Generate project brief
+  let projectBrief: ProjectBrief;
+  if (parsed.useMock) {
+    projectBrief = fallbackBrief(parsed, language);
+  } else {
+    projectBrief = await generateBriefWithLLM(parsed, language);
+  }
+
+  // Step 2: Run agents with research (if search is available and not mock)
+  const useAgentic = !parsed.useMock && searchAvailable;
+
+  if (useAgentic) {
+    console.log(`[Agentic] Running research-enhanced evaluation with ${selectedAgents.length} agents...`);
+
+    const results = await Promise.allSettled(
+      selectedAgents.map((agent) =>
+        generateAgentReviewWithResearch(projectBrief, agent, language, answeredQuestions),
+      ),
+    );
+
+    const reviews: AgentReview[] = [];
+    const research: AgentResearch[] = [];
+
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i];
+      const agent = selectedAgents[i];
+
+      if (result.status === "fulfilled") {
+        reviews.push(result.value.review);
+        research.push(result.value.research);
+      } else {
+        // Fallback to mock for failed agents
+        console.error(`[Agentic] Agent ${agent} failed, using mock:`, result.reason);
+        reviews.push(mockReviewForAgent(projectBrief, agent, language));
+        research.push(agentResearchSchema.parse({ agent, searches: [], findings: [] }));
+      }
+    }
+
+    return agenticFirstReviewSchema.parse({
+      language,
+      direction,
+      mode,
+      projectBrief,
+      reviews,
+      research,
+      answeredQuestions,
+      agenticMode: true,
+    });
+  }
+
+  // Non-agentic fallback (mock mode or no search API key)
+  const reviews = await Promise.all(
+    selectedAgents.map(async (agent) => {
+      if (parsed.useMock) return mockReviewForAgent(projectBrief, agent, language);
+      return await generateAgentReviewWithLLM(projectBrief, agent, language);
+    }),
+  );
+
+  return agenticFirstReviewSchema.parse({
+    language,
+    direction,
+    mode,
+    projectBrief,
+    reviews,
+    research: [],
+    answeredQuestions: [],
+    agenticMode: false,
+  });
+}

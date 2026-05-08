@@ -124,6 +124,19 @@ export const copy = {
     verdictStatus: "Final verdict ready",
     savedDraft: "Your current work is preserved only inside this active flow until you reset or return home.",
     reportFileName: "reject-me-first-report",
+    // Agentic features
+    questionsTitle: "The Committee Has Questions",
+    questionsSubtitle: "Before evaluating, the agents identified gaps in your brief. Answer their questions to get a more accurate and data-driven review.",
+    questionsSkip: "Skip & evaluate without answers",
+    questionsSubmit: "Submit answers & run evaluation",
+    questionsLoading: "Agents are analyzing your brief...",
+    questionsEmpty: "The agents have enough information. Proceeding to evaluation.",
+    agentAsks: "asks",
+    agentReason: "Why this matters",
+    yourAnswer: "Your answer (optional)",
+    agenticBadge: "🔍 Research-enhanced",
+    agenticTooltip: "Agents searched the web for real market data to ground their evaluations.",
+    searchesUsed: "web searches used",
   },
   ar: {
     appName: "Reject Me First",
@@ -217,6 +230,19 @@ export const copy = {
     verdictStatus: "الحكم النهائي جاهز",
     savedDraft: "يتم حفظ العمل فقط داخل هذا المسار الحالي إلى أن تعيد الضبط أو ترجع للرئيسية.",
     reportFileName: "reject-me-first-report-ar",
+    // Agentic features
+    questionsTitle: "اللجنة لديها أسئلة",
+    questionsSubtitle: "قبل التقييم، حدد الوكلاء ثغرات في ملخصك. أجب على أسئلتهم للحصول على مراجعة أدق ومبنية على بيانات حقيقية.",
+    questionsSkip: "تخطّ وقيّم بدون إجابات",
+    questionsSubmit: "أرسل الإجابات وابدأ التقييم",
+    questionsLoading: "الوكلاء يحللون ملخصك...",
+    questionsEmpty: "الوكلاء لديهم معلومات كافية. جارٍ الانتقال للتقييم.",
+    agentAsks: "يسأل",
+    agentReason: "لماذا هذا مهم",
+    yourAnswer: "إجابتك (اختياري)",
+    agenticBadge: "🔍 مُعزَّز بالبحث",
+    agenticTooltip: "الوكلاء بحثوا في الإنترنت عن بيانات سوق حقيقية لتعزيز تقييماتهم.",
+    searchesUsed: "عمليات بحث مستخدمة",
   },
 } as const;
 
@@ -501,6 +527,10 @@ export function initialDraft() {
     freeRebuttal: "",
     firstRound: null as FirstReview | null,
     rebuttalResult: null as ReevaluateResult | null,
+    // Agentic state
+    agentQuestions: [] as { agent: string; label: string; question: string; reason: string }[],
+    answeredQuestions: [] as { agent: string; question: string; answer: string }[],
+    questionsGenerated: false,
   };
 }
 

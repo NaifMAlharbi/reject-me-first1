@@ -27,6 +27,8 @@ import {
   defaultStructuredRebuttal,
   normalizeSelectedAgents,
   type AgentKey,
+  type AgentQuestion,
+  type AnsweredQuestion,
   type FirstReview,
   type Language,
   type ReevaluateInput,
@@ -63,6 +65,10 @@ type DraftState = {
   freeRebuttal: string;
   firstRound: FirstReview | null;
   rebuttalResult: ReevaluateResult | null;
+  // Agentic state
+  agentQuestions: AgentQuestion[];
+  answeredQuestions: AnsweredQuestion[];
+  questionsGenerated: boolean;
 };
 
 type CommitteeFlowContextValue = DraftState & {
@@ -97,6 +103,13 @@ type CommitteeFlowContextValue = DraftState & {
   downloadReport: () => void;
   buildReevaluationInput: () => ReevaluateInput | null;
   linkedResponseMap: Record<AgentKey, { objection: string; response: string }[]>;
+  // Agentic methods
+  generateAgentQuestions: () => Promise<void>;
+  updateAnswer: (agent: AgentKey, question: string, answer: string) => void;
+  startAgenticCommittee: () => Promise<FirstReview>;
+  questionsPending: boolean;
+  questionsError: string | null;
+  agenticReviewPending: boolean;
 };
 
 const CommitteeFlowContext = createContext<CommitteeFlowContextValue | null>(null);
@@ -186,8 +199,12 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [rebuttalError, setRebuttalError] = useState<string | null>(null);
 
+  const [questionsError, setQuestionsError] = useState<string | null>(null);
+
   const committeeStart = trpc.committee.startReview.useMutation();
   const committeeRebuttal = trpc.committee.submitRebuttal.useMutation();
+  const questionsMutation = trpc.committee.generateQuestions.useMutation();
+  const agenticReviewMutation = trpc.committee.agenticStartReview.useMutation();
   const demoQuery = trpc.committee.demo.useQuery(draft.preferredLanguage, { enabled: false });
 
   const direction = draft.preferredLanguage === "ar" ? "rtl" : "ltr";
@@ -398,6 +415,75 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
     }
   }, [buildStartInput, committeeStart, draft.inputMode, draft.structured.idea, draft.freeText, draft.preferredLanguage]);
 
+  // ─── Agentic callbacks ────────────────────────────────────────
+
+  const generateAgentQuestions = useCallback(async () => {
+    setQuestionsError(null);
+    try {
+      // First, we need a brief — run the extraction
+      const startInput = buildStartInput();
+      const briefResult = await committeeStart.mutateAsync(startInput);
+
+      // Now generate questions using the extracted brief
+      const result = await questionsMutation.mutateAsync({
+        language: briefResult.language,
+        projectBrief: briefResult.projectBrief,
+        selectedAgents: normalizeSelectedAgents(draft.selectedAgents),
+      });
+
+      setDraft(current => ({
+        ...current,
+        preferredLanguage: briefResult.language,
+        firstRound: briefResult, // Save the brief extraction result
+        agentQuestions: result.questions,
+        questionsGenerated: true,
+        answeredQuestions: result.questions.map(q => ({
+          agent: q.agent,
+          question: q.question,
+          answer: "",
+        })),
+      }));
+    } catch (error) {
+      const message = toMessage(error, "Failed to generate questions.", draft.preferredLanguage);
+      setQuestionsError(message);
+      throw error;
+    }
+  }, [buildStartInput, committeeStart, questionsMutation, draft.selectedAgents, draft.preferredLanguage]);
+
+  const updateAnswer = useCallback((agent: AgentKey, question: string, answer: string) => {
+    setDraft(current => ({
+      ...current,
+      answeredQuestions: current.answeredQuestions.map(aq =>
+        aq.agent === agent && aq.question === question
+          ? { ...aq, answer }
+          : aq,
+      ),
+    }));
+  }, []);
+
+  const startAgenticCommittee = useCallback(async () => {
+    setReviewError(null);
+    try {
+      const startInput = buildStartInput();
+      const result = await agenticReviewMutation.mutateAsync({
+        ...startInput,
+        answeredQuestions: draft.answeredQuestions.filter(aq => aq.answer?.trim()),
+      });
+
+      setDraft(current => ({
+        ...current,
+        preferredLanguage: result.language,
+        firstRound: result,
+        rebuttalResult: null,
+      }));
+      return result;
+    } catch (error) {
+      const message = toMessage(error, "Failed to run agentic review.", draft.preferredLanguage);
+      setReviewError(message);
+      throw error;
+    }
+  }, [buildStartInput, agenticReviewMutation, draft.answeredQuestions, draft.preferredLanguage]);
+
   const submitCommitteeRebuttal = useCallback(async () => {
     const input = buildReevaluationInput();
     if (!input) {
@@ -511,6 +597,13 @@ export function CommitteeFlowProvider({ children }: { children: ReactNode }) {
     downloadReport,
     buildReevaluationInput,
     linkedResponseMap,
+    // Agentic
+    generateAgentQuestions,
+    updateAnswer,
+    startAgenticCommittee,
+    questionsPending: questionsMutation.isPending || committeeStart.isPending,
+    questionsError,
+    agenticReviewPending: agenticReviewMutation.isPending,
   };
 
   return <CommitteeFlowContext.Provider value={value}>{children}</CommitteeFlowContext.Provider>;

@@ -11,10 +11,10 @@ import {
 } from "@shared/rejectMeFirst";
 import {
   AlertTriangle, ArrowRight, BriefcaseBusiness, CheckCircle2, ChevronRight, Cpu,
-  FileDown, FlaskConical, Gavel, Lightbulb, Moon, ShieldCheck, Sparkles, Sun, Target, Users,
+  FileDown, FlaskConical, Gavel, Lightbulb, Loader2, Moon, Search, ShieldCheck, Sparkles, Sun, Target, Users,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 
 const agentIcons: Record<AgentKey, typeof BriefcaseBusiness> = {
@@ -88,7 +88,7 @@ function ScoreCircle({ score, size = "lg" }: { score: number; size?: "sm" | "lg"
   );
 }
 
-function useFlowPage(currentStep: "input" | "review" | "rebuttal" | "verdict") {
+function useFlowPage(currentStep: "input" | "questions" | "review" | "rebuttal" | "verdict") {
   const flow = useCommitteeFlow();
   const [, navigate] = useLocation();
   const pageSteps = committeeStepRoutes[flow.preferredLanguage];
@@ -232,7 +232,7 @@ export function InputPage() {
         direction={flow.direction} language={flow.preferredLanguage}
         eyebrow={flow.text.projectInput} title={flow.text.projectInput} description={flow.text.pageIntroBrief}
         steps={[...pageSteps]} currentStep="input" onNavigate={goTo}
-        primaryAction={{ label: flow.text.startCommittee, onClick: async () => { await flow.startCommittee(); goTo("/flow/review"); }, loading: flow.reviewPending }}
+        primaryAction={{ label: flow.text.startCommittee, onClick: async () => { await flow.startAgenticCommittee(); goTo("/flow/review"); }, loading: flow.agenticReviewPending || flow.reviewPending }}
         secondaryAction={{ label: isAr ? "رجوع للرئيسية" : "Back to Home", onClick: () => goTo("/") }}
         tertiaryAction={{ label: isAr ? "مسح البيانات" : "Reset Data", onClick: () => { flow.resetAll(); goTo("/"); } }}
         statusSlot={statusSlot}
@@ -281,6 +281,136 @@ export function InputPage() {
               <div><label className="mb-1.5 block text-sm font-medium">{flow.text.problem}</label><textarea className={inputCls(true)} value={flow.structured.problem} onChange={e => flow.updateStructured("problem", e.target.value)} /></div>
               <div><label className="mb-1.5 block text-sm font-medium">{flow.text.solution}</label><textarea className={inputCls(true)} value={flow.structured.solution} onChange={e => flow.updateStructured("solution", e.target.value)} /></div>
               <div className="md:col-span-2"><label className="mb-1.5 block text-sm font-medium">{flow.text.additionalInfo}</label><textarea className={inputCls(true)} value={flow.structured.additionalInfo} onChange={e => flow.updateStructured("additionalInfo", e.target.value)} /></div>
+            </div>
+          )}
+        </div>
+      </CommitteeFlowShell>
+    </div>
+  );
+}
+
+/* ─── QUESTIONS (Agentic) ─── */
+export function QuestionsPage() {
+  const { flow, goTo, goBack, pageSteps, statusSlot } = useFlowPage("questions");
+  const isAr = flow.preferredLanguage === "ar";
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmitAndRun = async () => {
+    setSubmitting(true);
+    try {
+      await flow.startAgenticCommittee();
+      goTo("/flow/review");
+    } catch {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSkip = async () => {
+    setSubmitting(true);
+    try {
+      await flow.startCommittee();
+      goTo("/flow/review");
+    } catch {
+      setSubmitting(false);
+    }
+  };
+
+  const hasQuestions = flow.agentQuestions.length > 0;
+
+  return (
+    <div dir={flow.direction}>
+      <CommitteeFlowShell
+        direction={flow.direction} language={flow.preferredLanguage}
+        eyebrow={flow.text.questionsTitle} title={flow.text.questionsTitle} description={flow.text.questionsSubtitle}
+        steps={[...pageSteps]} currentStep="questions" onNavigate={goTo}
+        primaryAction={{
+          label: hasQuestions ? flow.text.questionsSubmit : (isAr ? "بدء التقييم" : "Start evaluation"),
+          onClick: hasQuestions ? handleSubmitAndRun : handleSkip,
+          loading: submitting || flow.agenticReviewPending,
+        }}
+        secondaryAction={{ label: flow.text.questionsSkip, onClick: handleSkip, disabled: submitting }}
+        tertiaryAction={{ label: flow.text.back, onClick: goBack }}
+        statusSlot={statusSlot}
+      >
+        <div className="space-y-5">
+          {flow.questionsError && (
+            <div className="flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-300">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /><span>{flow.questionsError}</span>
+            </div>
+          )}
+
+          {flow.reviewError && (
+            <div className="flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /><span>{flow.reviewError}</span>
+            </div>
+          )}
+
+          {/* Agentic badge */}
+          <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
+            <Search className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-primary">{flow.text.agenticBadge}</span>
+            <span className="text-xs text-muted-foreground">— {flow.text.agenticTooltip}</span>
+          </div>
+
+          {!hasQuestions && flow.questionsGenerated ? (
+            <div className="flex flex-col items-center gap-4 py-12">
+              <CheckCircle2 className="h-12 w-12 text-emerald-500" />
+              <p className="text-sm text-muted-foreground">{flow.text.questionsEmpty}</p>
+            </div>
+          ) : !flow.questionsGenerated ? (
+            <div className="flex flex-col items-center gap-4 py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">{flow.text.questionsLoading}</p>
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {flow.agentQuestions.map((q, qi) => {
+                const answered = flow.answeredQuestions.find(
+                  aq => aq.agent === q.agent && aq.question === q.question,
+                );
+                return (
+                  <div
+                    key={`${q.agent}-${qi}`}
+                    className="overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-primary/20"
+                  >
+                    {/* Agent header */}
+                    <div className="flex items-center gap-3 border-b border-border/50 px-5 py-3.5 bg-secondary/30">
+                      <AgentAvatar agent={q.agent as any} size="sm" />
+                      <div className="flex-1">
+                        <span className="text-sm font-semibold">{q.label}</span>
+                        <span className="text-xs text-muted-foreground ml-2">{flow.text.agentAsks}:</span>
+                      </div>
+                    </div>
+
+                    {/* Question */}
+                    <div className="px-5 py-4 space-y-3">
+                      <p className="text-sm font-medium leading-relaxed text-foreground">
+                        "{q.question}"
+                      </p>
+
+                      {q.reason && (
+                        <p className="text-xs text-muted-foreground italic">
+                          <span className="font-medium not-italic">{flow.text.agentReason}:</span> {q.reason}
+                        </p>
+                      )}
+
+                      {/* Answer input */}
+                      <div>
+                        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                          {flow.text.yourAnswer}
+                        </label>
+                        <textarea
+                          className={inputCls(true)}
+                          value={answered?.answer ?? ""}
+                          placeholder={isAr ? "اكتب إجابتك هنا..." : "Type your answer here..."}
+                          onChange={e => flow.updateAnswer(q.agent as any, q.question, e.target.value)}
+                          rows={2}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

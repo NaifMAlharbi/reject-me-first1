@@ -3,8 +3,14 @@ import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
-import { getDemoCase, startReview, submitRebuttal } from "./committee";
-import { languageSchema, reevaluateInputSchema, startReviewInputSchema } from "../shared/rejectMeFirst";
+import { getDemoCase, startReview, submitRebuttal, generateQuestions, agenticStartReview } from "./committee";
+import {
+  agenticReviewInputSchema,
+  generateQuestionsInputSchema,
+  languageSchema,
+  reevaluateInputSchema,
+  startReviewInputSchema,
+} from "../shared/rejectMeFirst";
 
 export const appRouter = router({
   system: systemRouter,
@@ -59,7 +65,43 @@ export const appRouter = router({
         });
       }
     }),
+
+    // ─── Agentic Endpoints ─────────────────────────────────────────
+    /** Agents analyze the brief and generate targeted questions */
+    generateQuestions: publicProcedure
+      .input(generateQuestionsInputSchema)
+      .mutation(async ({ input }) => {
+        try {
+          const questions = await generateQuestions(
+            input.projectBrief,
+            input.language,
+            input.selectedAgents,
+          );
+          return { language: input.language, questions };
+        } catch (error) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: error instanceof Error ? error.message : "Failed to generate questions",
+          });
+        }
+      }),
+
+    /** Full agentic review: agents research the web + use answered questions */
+    agenticStartReview: publicProcedure
+      .input(agenticReviewInputSchema)
+      .mutation(async ({ input }) => {
+        try {
+          const { answeredQuestions, ...reviewInput } = input;
+          return await agenticStartReview(reviewInput, answeredQuestions);
+        } catch (error) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: error instanceof Error ? error.message : "Failed to run agentic review",
+          });
+        }
+      }),
   }),
 });
 
 export type AppRouter = typeof appRouter;
+
