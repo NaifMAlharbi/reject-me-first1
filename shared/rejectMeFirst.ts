@@ -214,7 +214,7 @@ export const agentLabels: Record<Language, Record<AgentKey, string>> = {
   },
   ar: {
     customer: "وكيل العميل",
-    investor: "وكيل المستثمر",
+    investor: "الوكيل المستثمر",
     financial: "الوكيل المالي",
     legal: "الوكيل القانوني",
     technical: "الوكيل التقني",

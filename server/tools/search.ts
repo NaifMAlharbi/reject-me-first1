@@ -39,6 +39,9 @@ export async function searchWeb(
   const maxResults = options?.maxResults ?? 5;
   const searchDepth = options?.searchDepth ?? "basic";
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15_000);
+
   try {
     const response = await fetch("https://api.tavily.com/search", {
       method: "POST",
@@ -51,6 +54,7 @@ export async function searchWeb(
         include_answer: true,
         include_raw_content: false,
       }),
+      signal: controller.signal,
     });
 
     if (!response.ok) {
@@ -87,8 +91,14 @@ export async function searchWeb(
       answer: typeof data.answer === "string" ? data.answer.trim() : undefined,
     };
   } catch (error) {
-    console.error("[Search] Failed:", error instanceof Error ? error.message : String(error));
+    if (error instanceof Error && error.name === "AbortError") {
+      console.error(`[Search] Timed out: "${query}"`);
+    } else {
+      console.error("[Search] Failed:", error instanceof Error ? error.message : String(error));
+    }
     return { query, results: [] };
+  } finally {
+    clearTimeout(timeout);
   }
 }
 

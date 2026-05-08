@@ -216,7 +216,10 @@ ${JSON_FORMAT_INSTRUCTION}`,
 - هل أنصح صديقي فيه، أو أنساه بكرة؟
 
 كن صريح. إذا الفكرة مو واضحة، قل كذا. إذا تبان مفيدة، وضّح ليش بالتحديد.
-أعد JSON صحيح فقط بهذه الحقول: stance, score, confidence, strengths (مصفوفة نصوص، حد أقصى 2), top_objections (مصفوفة نصوص، حد أقصى 3), key_insight (نص قصير), summary (نص قصير).`,
+مهم: جميع القيم النصية يجب أن تكون بالعربية فقط. stance يكون بالإنجليزية حصراً.
+أعد JSON صحيح فقط بهذا الشكل بالضبط:
+{"stance":"strong|promising|unsure|skeptical|weak","score":NUMBER_1_TO_10,"confidence":INTEGER_0_TO_100,"strengths":["نص","نص"],"top_objections":["نص","نص","نص"],"key_insight":"نص قصير أقل من 170 حرف","summary":"نص قصير أقل من 200 حرف"}
+لا تضف شرح خارج JSON. لا تستخدم markdown.`,
 
     investor: `أنت شريك في صندوق استثماري مبكر، شفت مئات المشاريع وتعرف الفرق بين الفرصة الحقيقية والأحلام.
 
@@ -228,7 +231,10 @@ ${JSON_FORMAT_INSTRUCTION}`,
 - وش الميزة التنافسية الحقيقية؟
 
 كن مباشر. إذا ما فيه traction، قلها. إذا الفكرة قوية، اعترف. فرّق بين "مبكر لكن واعد" و"ضعيف أصلًا".
-أعد JSON صحيح فقط بهذه الحقول: stance, score, confidence, strengths, top_objections, key_insight, summary.`,
+مهم: جميع القيم النصية يجب أن تكون بالعربية فقط. stance يكون بالإنجليزية حصراً.
+أعد JSON صحيح فقط بهذا الشكل بالضبط:
+{"stance":"strong|promising|unsure|skeptical|weak","score":NUMBER_1_TO_10,"confidence":INTEGER_0_TO_100,"strengths":["نص","نص"],"top_objections":["نص","نص","نص"],"key_insight":"نص قصير أقل من 170 حرف","summary":"نص قصير أقل من 200 حرف"}
+لا تضف شرح خارج JSON. لا تستخدم markdown.`,
 
     financial: `أنت مستشار مالي متخصص في الشركات الناشئة، خبرة 15 سنة من pre-seed إلى Series B.
 
@@ -240,7 +246,10 @@ ${JSON_FORMAT_INSTRUCTION}`,
 - التسعير واقعي للسوق المستهدف؟
 
 كن عملي مو نظري. إذا ما فيه أرقام، وضّح وش ناقص وليش مهم.
-أعد JSON صحيح فقط بهذه الحقول: stance, score, confidence, strengths, top_objections, key_insight, summary.`,
+مهم: جميع القيم النصية يجب أن تكون بالعربية فقط. stance يكون بالإنجليزية حصراً.
+أعد JSON صحيح فقط بهذا الشكل بالضبط:
+{"stance":"strong|promising|unsure|skeptical|weak","score":NUMBER_1_TO_10,"confidence":INTEGER_0_TO_100,"strengths":["نص","نص"],"top_objections":["نص","نص","نص"],"key_insight":"نص قصير أقل من 170 حرف","summary":"نص قصير أقل من 200 حرف"}
+لا تضف شرح خارج JSON. لا تستخدم markdown.`,
 
     legal: `أنت محامي شركات ناشئة متخصص في المخاطر التنظيمية وخصوصية البيانات والامتثال.
 
@@ -252,7 +261,10 @@ ${JSON_FORMAT_INSTRUCTION}`,
 - وش المخاطر القانونية اللي لازم يعالجها قبل الإطلاق؟
 
 كن محافظ لكن عملي. فرّق بين "لازم يتحل قبل الإطلاق" و"راقبه مع الوقت".
-أعد JSON صحيح فقط بهذه الحقول: stance, score, confidence, strengths, top_objections, key_insight, summary.`,
+مهم: جميع القيم النصية يجب أن تكون بالعربية فقط. stance يكون بالإنجليزية حصراً.
+أعد JSON صحيح فقط بهذا الشكل بالضبط:
+{"stance":"strong|promising|unsure|skeptical|weak","score":NUMBER_1_TO_10,"confidence":INTEGER_0_TO_100,"strengths":["نص","نص"],"top_objections":["نص","نص","نص"],"key_insight":"نص قصير أقل من 170 حرف","summary":"نص قصير أقل من 200 حرف"}
+لا تضف شرح خارج JSON. لا تستخدم markdown.`,
 
     technical: `أنت مهندس برمجيات أول بخبرة 20 سنة في بناء وتوسيع منتجات من MVP إلى ملايين المستخدمين.
 
@@ -264,7 +276,10 @@ ${JSON_FORMAT_INSTRUCTION}`,
 - فيه حلول جاهزة يقدر يستفيد منها؟
 
 كن صادق. أغلب الأفكار ممكنة تقنيًا — السؤال هو تعقيد التنفيذ والوقت.
-أعد JSON صحيح فقط بهذه الحقول: stance, score, confidence, strengths, top_objections, key_insight, summary.`,
+مهم: جميع القيم النصية يجب أن تكون بالعربية فقط. stance يكون بالإنجليزية حصراً.
+أعد JSON صحيح فقط بهذا الشكل بالضبط:
+{"stance":"strong|promising|unsure|skeptical|weak","score":NUMBER_1_TO_10,"confidence":INTEGER_0_TO_100,"strengths":["نص","نص"],"top_objections":["نص","نص","نص"],"key_insight":"نص قصير أقل من 170 حرف","summary":"نص قصير أقل من 200 حرف"}
+لا تضف شرح خارج JSON. لا تستخدم markdown.`,
 
     operator: `أنت مدير عمليات سبق له توسيع 3 شركات ناشئة من صفر إلى 100+ موظف. تعرف وش ينكسر لما الشركات تكبر.
 
@@ -276,7 +291,10 @@ ${JSON_FORMAT_INSTRUCTION}`,
 - وش أول شيء ينكسر لما يجي 10 أضعاف العملاء؟
 
 فكّر عملي. المؤسسين غالبًا يستهينون بتعقيد التشغيل.
-أعد JSON صحيح فقط بهذه الحقول: stance, score, confidence, strengths, top_objections, key_insight, summary.`,
+مهم: جميع القيم النصية يجب أن تكون بالعربية فقط. stance يكون بالإنجليزية حصراً.
+أعد JSON صحيح فقط بهذا الشكل بالضبط:
+{"stance":"strong|promising|unsure|skeptical|weak","score":NUMBER_1_TO_10,"confidence":INTEGER_0_TO_100,"strengths":["نص","نص"],"top_objections":["نص","نص","نص"],"key_insight":"نص قصير أقل من 170 حرف","summary":"نص قصير أقل من 200 حرف"}
+لا تضف شرح خارج JSON. لا تستخدم markdown.`,
 
     marketing: `أنت قائد تسويق نمو سبق له إطلاق وتوسيع منتجات B2B و B2C متعددة بميزانيات حقيقية.
 
@@ -288,7 +306,10 @@ ${JSON_FORMAT_INSTRUCTION}`,
 - كيف تشرح المنتج بجملة وحدة؟ هل الجملة مقنعة؟
 
 كن محدد. "يحتاج تموضع أوضح" ما يفيد — وضّح وش الضعيف وليش.
-أعد JSON صحيح فقط بهذه الحقول: stance, score, confidence, strengths, top_objections, key_insight, summary.`,
+مهم: جميع القيم النصية يجب أن تكون بالعربية فقط. stance يكون بالإنجليزية حصراً.
+أعد JSON صحيح فقط بهذا الشكل بالضبط:
+{"stance":"strong|promising|unsure|skeptical|weak","score":NUMBER_1_TO_10,"confidence":INTEGER_0_TO_100,"strengths":["نص","نص"],"top_objections":["نص","نص","نص"],"key_insight":"نص قصير أقل من 170 حرف","summary":"نص قصير أقل من 200 حرف"}
+لا تضف شرح خارج JSON. لا تستخدم markdown.`,
   },
 };
 
@@ -690,8 +711,27 @@ function normalizeAgentReview(obj: unknown): unknown {
   };
 
   const normalizeConfidence = (value: unknown) => {
-    if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
-    return Math.max(0, Math.min(100, Math.round(value)));
+    if (typeof value === "number" && Number.isFinite(value)) {
+      let num = value;
+      // Handle 0-1 range (decimal probability)
+      if (num > 0 && num <= 1) {
+        num = num * 100;
+      }
+      // Handle 1-10 range (LLM confusing confidence with score scale)
+      else if (num > 1 && num <= 10) {
+        num = num * 10;
+      }
+      return Math.max(0, Math.min(100, Math.round(num)));
+    }
+    if (typeof value === "string") {
+      const parsed = parseInt(value.replace(/[^0-9]/g, ""), 10);
+      if (!isNaN(parsed)) {
+        // Also handle string "7" or "8" on the 1-10 scale
+        if (parsed > 0 && parsed <= 10) return Math.max(0, Math.min(100, parsed * 10));
+        return Math.max(0, Math.min(100, parsed));
+      }
+    }
+    return 85;
   };
 
   // Fix market_type: map any variant to a valid one
@@ -1853,7 +1893,7 @@ async function generateAgentReviewWithLLM(
 }
 
 function getLiveMode(useMock: boolean) {
-  return useMock ? "mock" : "live" as const;
+  return (useMock ? "mock" : "live") as const;
 }
 
 export async function startReview(input: StartReviewInput): Promise<FirstReview> {
@@ -2006,7 +2046,7 @@ function mockReevaluationForAgent(
     agent: review.agent,
     label,
     updated_score: updatedScore,
-    score_delta: clampScore(updatedScore - review.score),
+    score_delta: Number((updatedScore - review.score).toFixed(1)),
     updated_stance: stanceFromScore(updatedScore),
     rebuttal_quality: quality,
     key_insight:
@@ -2156,10 +2196,10 @@ export async function submitRebuttal(input: ReevaluateInput): Promise<Reevaluate
 
   const committeeSummary = parsed.enableDeepCommunication
     ? parsed.reviews.map(r => {
-        const topObjection = r.objections?.[0] ?? (parsed.language === "ar" ? "لا يوجد" : "None");
+        const topObjection = r.top_objections?.[0] ?? (parsed.language === "ar" ? "لا يوجد" : "None");
         return parsed.language === "ar"
-          ? `• ${r.label} (${r.score}/10): ${r.strength} | أهم اعتراض: ${topObjection}`
-          : `• ${r.label} (${r.score}/10): ${r.strength} | Top concern: ${topObjection}`;
+          ? `• ${r.label} (${r.score}/10): ${r.strengths?.[0] ?? ""} | أهم اعتراض: ${topObjection}`
+          : `• ${r.label} (${r.score}/10): ${r.strengths?.[0] ?? ""} | Top concern: ${topObjection}`;
       }).join("\n")
     : undefined;
 
@@ -2612,10 +2652,10 @@ export async function agenticStartReview(
     if (parsed.enableDeepCommunication) {
       // Step 3: Cross-agent refinement — agents see each other's findings and adjust
       const committeeSummary = reviews.map(r => {
-        const topObjection = r.objections?.[0] ?? (language === "ar" ? "لا يوجد" : "None");
+        const topObjection = r.top_objections?.[0] ?? (language === "ar" ? "لا يوجد" : "None");
         return language === "ar"
-          ? `• ${r.label} (${r.score}/10): ${r.strength} | أهم اعتراض: ${topObjection}`
-          : `• ${r.label} (${r.score}/10): ${r.strength} | Top concern: ${topObjection}`;
+          ? `• ${r.label} (${r.score}/10): ${r.strengths?.[0] ?? ""} | أهم اعتراض: ${topObjection}`
+          : `• ${r.label} (${r.score}/10): ${r.strengths?.[0] ?? ""} | Top concern: ${topObjection}`;
       }).join("\n");
 
       console.log(`[Committee] Cross-agent refinement: sharing findings among ${reviews.length} agents...`);
@@ -2626,10 +2666,10 @@ export async function agenticStartReview(
           const otherAgentsSummary = reviews
             .filter(r => r.agent !== review.agent)
             .map(r => {
-              const topObj = r.objections?.[0] ?? (language === "ar" ? "لا يوجد" : "None");
+              const topObj = r.top_objections?.[0] ?? (language === "ar" ? "لا يوجد" : "None");
               return language === "ar"
-                ? `• ${r.label} (${r.score}/10): ${r.strength} | اعتراض: ${topObj}`
-                : `• ${r.label} (${r.score}/10): ${r.strength} | Concern: ${topObj}`;
+                ? `• ${r.label} (${r.score}/10): ${r.strengths?.[0] ?? ""} | اعتراض: ${topObj}`
+                : `• ${r.label} (${r.score}/10): ${r.strengths?.[0] ?? ""} | Concern: ${topObj}`;
             }).join("\n");
 
           const refinementPrompt = language === "ar"
@@ -2642,7 +2682,7 @@ ${otherAgentsSummary}
 - لا تكرر اعتراضات الوكلاء الآخرين — ركّز على تخصصك فقط
 - إذا ما فيه شي يأثر، خلّ تقييمك كما هو
 
-أعد JSON بنفس الصيغة: {"score":NUMBER,"stance":"...","strength":"...","objections":["..."],"confidence":NUMBER}`
+أعد JSON بنفس الصيغة. اكتب جميع النصوص بالعربية فقط، stance بالإنجليزية حصراً: {"score":NUMBER_1_TO_10,"stance":"strong|promising|unsure|skeptical|weak","strengths":["نص","نص"],"top_objections":["نص","نص","نص"],"confidence":INTEGER_0_TO_100}`
             : `You are the ${review.label}. You gave an initial score of ${review.score}/10. Now review the other committee members' findings:
 
 ${otherAgentsSummary}
@@ -2652,7 +2692,7 @@ Based on these new insights from your colleagues, would you adjust your evaluati
 - Do NOT repeat other agents' objections — stay in YOUR lane
 - If nothing changes your view, keep your evaluation as-is
 
-Return JSON with same format: {"score":NUMBER,"stance":"...","strength":"...","objections":["..."],"confidence":NUMBER}`;
+Return JSON with same format: {"score":NUMBER_1_TO_10,"stance":"strong|promising|unsure|skeptical|weak","strengths":["...","..."],"top_objections":["...","...","..."],"confidence":INTEGER_0_TO_100}`;
 
           const response = await invokeLLM({
             messages: [
@@ -2675,14 +2715,18 @@ Return JSON with same format: {"score":NUMBER,"stance":"...","strength":"...","o
             console.log(`[Committee] ${review.agent}: adjusted ${review.score} → ${newScore} (${delta > 0 ? "+" : ""}${delta}) after cross-agent review`);
           }
 
-          return {
+          const validStances = ["strong", "promising", "unsure", "skeptical", "weak"];
+          const newStance = validStances.includes(refined.stance as string) ? refined.stance : review.stance;
+          const newConfidence = typeof refined.confidence === "number" ? Math.round(refined.confidence) : review.confidence;
+
+          return agentReviewSchema.parse({
             ...review,
             score: newScore,
-            stance: refined.stance ?? review.stance,
-            strength: refined.strength ?? review.strength,
-            objections: refined.objections?.length ? refined.objections.slice(0, 3) : review.objections,
-            confidence: typeof refined.confidence === "number" ? refined.confidence : review.confidence,
-          } as AgentReview;
+            stance: newStance,
+            strengths: Array.isArray(refined.strengths) && refined.strengths.length ? refined.strengths.slice(0, 2) : review.strengths,
+            top_objections: Array.isArray(refined.top_objections) && refined.top_objections.length ? refined.top_objections.slice(0, 3) : review.top_objections,
+            confidence: newConfidence,
+          });
         } catch (error) {
           console.error(`[Committee] Refinement failed for ${review.agent}, keeping original:`, error instanceof Error ? error.message : String(error));
           return review;
